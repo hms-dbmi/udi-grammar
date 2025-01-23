@@ -70,7 +70,7 @@ export interface ParsedUDIGrammar {
   dataRepresentation: GoGComponent[] | CustomComponent;
 }
 
-function parseSpecification(spec: UDIGrammar): ParsedUDIGrammar {
+export function parseSpecification(spec: UDIGrammar): ParsedUDIGrammar {
   let { dataSource, dataTransformations, dataRepresentation } = spec;
   if (!Array.isArray(dataSource)) {
     dataSource = [dataSource];
