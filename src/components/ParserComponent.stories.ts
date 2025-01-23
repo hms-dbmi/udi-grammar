@@ -22,8 +22,8 @@ export const Default = {
   args: {
     spec: {
       dataSource: {
-        key: 'donors',
-        source: './data/hubmap-donors-metadata-2024-11-15_20-36-05.tsv',
+        key: 'penguins',
+        source: './data/penguins.csv',
       },
       dataRepresentation: {
         type: 'GoGComponent',
@@ -37,11 +37,11 @@ export const Default = {
   },
 };
 
-export const Test2 = {
-  args: {
-    blarg: 'test 2!',
-  },
-};
+// export const Test2 = {
+//   args: {
+//     blarg: 'test 2!',
+//   },
+// };
 
 // export const Pinned = {
 //   args: {

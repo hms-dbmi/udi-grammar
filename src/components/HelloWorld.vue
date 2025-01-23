@@ -18,7 +18,22 @@ defineProps({
       <a href="https://vuejs.org/" target="_blank" rel="noopener">Vue 3</a>.
     </h3>
   </div>
-  <ParserComponent blarg="testinggggg"></ParserComponent>
+  <ParserComponent
+    :spec="{
+      dataSource: {
+        key: 'penguins',
+        source: './data/penguins.csv',
+      },
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'point',
+        encoding: {
+          x: { source: 'donors', field: 'weight_value' },
+          y: { source: 'donors', field: 'height_value' },
+        },
+      },
+    }"
+  ></ParserComponent>
 </template>
 
 <style scoped>

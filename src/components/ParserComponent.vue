@@ -27,6 +27,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <div>Blargen Flargen</div>
   <div>{{ props.spec }}</div>
 </template>
 
