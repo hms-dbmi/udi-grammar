@@ -20,7 +20,20 @@ export default {
 
 export const Default = {
   args: {
-    blarg: 'test 1',
+    spec: {
+      dataSource: {
+        key: 'donors',
+        source: './data/hubmap-donors-metadata-2024-11-15_20-36-05.tsv',
+      },
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'point',
+        encoding: {
+          x: { source: 'donors', field: 'weight_value' },
+          y: { source: 'donors', field: 'height_value' },
+        },
+      },
+    },
   },
 };
 
