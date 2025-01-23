@@ -14,7 +14,7 @@ export interface DataSourcesState {
 }
 
 export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
-  const dataSources = ref<DataSourcesState[]>({});
+  const dataSources = ref<DataSourcesState>({});
   // let connection = null;
   // let db = null;
   // init().then(async (value: DuckDB) => {
@@ -33,7 +33,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     console.log(dataSources.value);
   }
 
-  function getDataSource(key: string): DataSource | null {
+  function getDataSource(key: string): DataInterface | null {
     if (!(key in dataSources.value)) return null;
     return dataSources.value[key];
   }

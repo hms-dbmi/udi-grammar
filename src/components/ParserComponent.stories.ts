@@ -29,8 +29,8 @@ export const Default = {
         type: 'GoGComponent',
         mark: 'point',
         encoding: {
-          x: { source: 'donors', field: 'weight_value' },
-          y: { source: 'donors', field: 'height_value' },
+          x: { source: 'penguins', field: 'bill_length_mm' },
+          y: { source: 'penguins', field: 'flipper_length_mm' },
         },
       },
     },
