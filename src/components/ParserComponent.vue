@@ -31,6 +31,8 @@ const columnTypes = {
   sex: 'nominal',
   sex_count: 'quantitative',
   mean_mass: 'quantitative',
+  weight_value: 'quantitative',
+  height_value: 'quantitative',
 };
 
 const props = defineProps<ParserProps>();

@@ -38,6 +38,25 @@ export const Default = {
   },
 };
 
+export const ScatterDonors = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'donors',
+        source: './data/donors.csv',
+      },
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'point',
+        encoding: {
+          x: { field: 'weight_value' },
+          y: { field: 'height_value' },
+        },
+      },
+    },
+  },
+};
+
 export const BarChartSexCounts = {
   args: {
     spec: {
@@ -90,6 +109,47 @@ export const BarChartMeanMass = {
         encoding: {
           x: { field: 'sex' },
           y: { field: 'mean_mass' },
+        },
+      },
+    },
+  },
+};
+
+export const BarChartJoinExample = {
+  args: {
+    spec: {
+      dataSource: [
+        {
+          key: 'donors',
+          source: './data/donors.csv',
+        },
+        {
+          key: 'datasets',
+          source: './data/datasets.csv',
+        },
+      ],
+      dataTransformations: [
+        {
+          join: {
+            tables: ['donors', 'datasets'],
+            on: ['hubmap_id', 'donor.hubmap_id'],
+          },
+        },
+        {
+          groupby: 'sex',
+        },
+        {
+          rollup: {
+            datasets_by_sex: { op: 'count' },
+          },
+        },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'sex' },
+          y: { field: 'datasets_by_sex' },
         },
       },
     },
