@@ -37,6 +37,56 @@ export const Default = {
   },
 };
 
+export const example2 = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'penguins',
+        source: './data/penguins.csv',
+      },
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'point',
+        encoding: {
+          x: { source: 'penguins', field: 'flipper_length_mm' },
+          y: { source: 'penguins', field: 'flipper_length_mm' },
+          color: { source: 'penguins', field: 'flipper_length_mm' },
+        },
+      },
+    },
+  },
+};
+
+export const Layering = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'penguins',
+        source: './data/penguins.csv',
+      },
+      dataRepresentation: [
+        {
+          type: 'GoGComponent',
+          mark: 'point',
+          encoding: {
+            x: { source: 'penguins', field: 'bill_length_mm' },
+            y: { source: 'penguins', field: 'flipper_length_mm' },
+          },
+        },
+        {
+          type: 'GoGComponent',
+          mark: 'circle',
+          encoding: {
+            x: { source: 'penguins', field: 'bill_length_mm' },
+            y: { source: 'penguins', field: 'flipper_length_mm' },
+            color: { source: 'penguins', field: 'sex' },
+          },
+        },
+      ],
+    },
+  },
+};
+
 // export const Test2 = {
 //   args: {
 //     blarg: 'test 2!',

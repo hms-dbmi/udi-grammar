@@ -23,14 +23,15 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   //   connection = await db.connect();
   // });
 
+  const loading = ref<boolean>(true);
+
   async function initDataSource(dataSource: DataSource): Promise<void> {
     if (getDataSource(dataSource.key)) return;
-    const dest: ColumnTable = await loadCSV(dataSource.source, {
-      delimiter: '\t',
-    });
+    const dest: ColumnTable = await loadCSV(dataSource.source);
     dataSources.value[dataSource.key] = { source: dataSource, dest };
     // TODO: actually create data interface object
     console.log(dataSources.value);
+    loading.value = false;
   }
 
   function getDataSource(key: string): DataInterface | null {
@@ -38,5 +39,13 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     return dataSources.value[key];
   }
 
-  return { dataSources, initDataSource };
+  function getDataObject(key: string): any {
+    const dataInterface = getDataSource(key);
+    if (dataInterface === null) return null;
+    // TODO, incorporate data transformations
+    // maybe filter to only fields used?
+    return dataInterface.dest.objects();
+  }
+
+  return { dataSources, loading, initDataSource, getDataObject };
 });
