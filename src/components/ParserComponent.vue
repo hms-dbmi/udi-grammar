@@ -29,6 +29,7 @@ const columnTypes = {
   flipper_length_mm: 'quantitative',
   body_mass_g: 'quantitative',
   sex: 'nominal',
+  sex_count: 'quantitative',
 };
 
 const props = defineProps<ParserProps>();
@@ -87,7 +88,10 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   // add data
   // TODO: assume one data source
   const dataInterface = spec.dataSource[0];
-  vegaSpec.data.values = dataSourcesStore.getDataObject(dataInterface.key);
+  vegaSpec.data.values = dataSourcesStore.getDataObject(
+    dataInterface.key,
+    spec.dataTransformations,
+  );
   console.log(vegaSpec);
   // TODO: perform transformations
 

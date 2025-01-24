@@ -40,8 +40,23 @@ defineProps({
         key: 'penguins',
         source: './data/penguins.csv',
       },
+      dataTransformations: [
+        {
+          groupby: 'sex',
+        },
+        {
+          rollup: {
+            sex_count: { op: 'count' },
+          },
+        },
+      ],
       dataRepresentation: {
-        type: 'TableComponent',
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'sex' },
+          y: { field: 'sex_count' },
+        },
       },
     }"
   ></ParserComponent>

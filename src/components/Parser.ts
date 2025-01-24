@@ -9,12 +9,21 @@ export interface DataSource {
   source: string; // url of csv for now
 }
 
-export interface DataTransformation {
-  // join
-  // group
-  // aggregate
-  // select
-  // filter
+export type DataTransformation = GroupBy | RollUp; // TODO: expand transformations
+
+export interface GroupBy {
+  groupby: string;
+}
+
+export interface RollUp {
+  rollup: {
+    [outputName: string]: AggregateFunction;
+  };
+}
+
+export interface AggregateFunction {
+  op: 'count' | 'mean' | 'min' | 'max' | 'median';
+  field?: 'string';
 }
 
 export interface Component {

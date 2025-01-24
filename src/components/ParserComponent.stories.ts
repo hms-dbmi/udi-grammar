@@ -29,33 +29,61 @@ export const Default = {
         type: 'GoGComponent',
         mark: 'point',
         encoding: {
-          x: { source: 'penguins', field: 'bill_length_mm' },
-          y: { source: 'penguins', field: 'flipper_length_mm' },
+          x: { field: 'bill_length_mm' },
+          y: { field: 'flipper_length_mm' },
+          color: { field: 'body_mass_g' },
         },
       },
     },
   },
 };
 
-export const example2 = {
+export const BarChart1 = {
   args: {
     spec: {
       dataSource: {
         key: 'penguins',
         source: './data/penguins.csv',
       },
+      dataTransformations: [
+        {
+          groupby: 'sex',
+        },
+        {
+          rollup: {
+            sex_count: { op: 'count' },
+          },
+        },
+      ],
       dataRepresentation: {
         type: 'GoGComponent',
-        mark: 'point',
+        mark: 'bar',
         encoding: {
-          x: { source: 'penguins', field: 'flipper_length_mm' },
-          y: { source: 'penguins', field: 'flipper_length_mm' },
-          color: { source: 'penguins', field: 'flipper_length_mm' },
+          x: { field: 'sex' },
+          y: { field: 'sex_count' },
         },
       },
     },
   },
 };
+
+// export const Template = {
+//   args: {
+//     spec: {
+//       dataSource: {
+//         key: 'penguins',
+//         source: './data/penguins.csv',
+//       },
+//       dataRepresentation: {
+//         type: 'GoGComponent',
+//         mark: '',
+//         encoding: {
+
+//         }
+//       }
+//     }
+//   }
+// }
 
 export const Layering = {
   args: {
@@ -69,17 +97,17 @@ export const Layering = {
           type: 'GoGComponent',
           mark: 'point',
           encoding: {
-            x: { source: 'penguins', field: 'bill_length_mm' },
-            y: { source: 'penguins', field: 'flipper_length_mm' },
+            x: { field: 'bill_length_mm' },
+            y: { field: 'flipper_length_mm' },
           },
         },
         {
           type: 'GoGComponent',
           mark: 'circle',
           encoding: {
-            x: { source: 'penguins', field: 'bill_length_mm' },
-            y: { source: 'penguins', field: 'flipper_length_mm' },
-            color: { source: 'penguins', field: 'sex' },
+            x: { field: 'bill_length_mm' },
+            y: { field: 'flipper_length_mm' },
+            color: { field: 'sex' },
           },
         },
       ],
