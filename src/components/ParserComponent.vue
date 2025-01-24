@@ -30,6 +30,7 @@ const columnTypes = {
   body_mass_g: 'quantitative',
   sex: 'nominal',
   sex_count: 'quantitative',
+  mean_mass: 'quantitative',
 };
 
 const props = defineProps<ParserProps>();

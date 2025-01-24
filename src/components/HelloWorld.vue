@@ -46,7 +46,7 @@ defineProps({
         },
         {
           rollup: {
-            sex_count: { op: 'count' },
+            mean_mass: { op: 'mean', field: 'body_mass_g' },
           },
         },
       ],
@@ -55,7 +55,7 @@ defineProps({
         mark: 'bar',
         encoding: {
           x: { field: 'sex' },
-          y: { field: 'sex_count' },
+          y: { field: 'mean_mass' },
         },
       },
     }"

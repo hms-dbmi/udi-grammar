@@ -38,7 +38,7 @@ export const Default = {
   },
 };
 
-export const BarChart1 = {
+export const BarChartSexCounts = {
   args: {
     spec: {
       dataSource: {
@@ -61,6 +61,35 @@ export const BarChart1 = {
         encoding: {
           x: { field: 'sex' },
           y: { field: 'sex_count' },
+        },
+      },
+    },
+  },
+};
+
+export const BarChartMeanMass = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'penguins',
+        source: './data/penguins.csv',
+      },
+      dataTransformations: [
+        {
+          groupby: 'sex',
+        },
+        {
+          rollup: {
+            mean_mass: { op: 'mean', field: 'body_mass_g' },
+          },
+        },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'sex' },
+          y: { field: 'mean_mass' },
         },
       },
     },
