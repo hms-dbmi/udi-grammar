@@ -87,6 +87,48 @@ export const Layering = {
   },
 };
 
+export const Table = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'penguins',
+        source: './data/penguins.csv',
+      },
+      dataRepresentation: {
+        type: 'TableComponent',
+      },
+    },
+  },
+};
+
+export const OrganMap = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'penguins',
+        source: './data/penguins.csv',
+      },
+      dataRepresentation: {
+        type: 'OrganMapComponent',
+      },
+    },
+  },
+};
+
+export const FilterPanel = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'penguins',
+        source: './data/penguins.csv',
+      },
+      dataRepresentation: {
+        type: 'FilterPanelComponent',
+      },
+    },
+  },
+};
+
 // export const Test2 = {
 //   args: {
 //     blarg: 'test 2!',

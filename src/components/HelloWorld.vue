@@ -18,7 +18,7 @@ defineProps({
       <a href="https://vuejs.org/" target="_blank" rel="noopener">Vue 3</a>.
     </h3>
   </div>
-  <ParserComponent
+  <!-- <ParserComponent
     :spec="{
       dataSource: {
         key: 'penguins',
@@ -31,6 +31,17 @@ defineProps({
           x: { source: 'penguins', field: 'bill_length_mm' },
           y: { source: 'penguins', field: 'flipper_length_mm' },
         },
+      },
+    }"
+  ></ParserComponent> -->
+  <ParserComponent
+    :spec="{
+      dataSource: {
+        key: 'penguins',
+        source: './data/penguins.csv',
+      },
+      dataRepresentation: {
+        type: 'TableComponent',
       },
     }"
   ></ParserComponent>

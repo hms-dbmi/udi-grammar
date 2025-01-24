@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import VegaLite from './VegaLite.vue';
+import OrganMapComponent from './OrganMapComponent.vue';
+import TableComponent from './TableComponent.vue';
+import FilterPanelComponent from './FilterPanelComponent.vue';
 import {
+  CustomComponent,
   type ParsedUDIGrammar,
   type UDIGrammar,
   parseSpecification,
@@ -33,6 +37,7 @@ const parsedSpec = ref<ParsedUDIGrammar | null>(null);
 
 const isGoGComponent = ref<boolean>(false);
 const vegaLiteSpec = ref<string>('');
+const customComponentType = ref<string>('');
 onMounted(() => {
   // parse/validate grammar
   parsedSpec.value = parseSpecification(props.spec);
@@ -60,10 +65,15 @@ function buildVisualization(): void {
   if (isVegaLiteCompatible(parsedSpec.value)) {
     vegaLiteSpec.value = convertToVegaSpec(parsedSpec.value);
     isGoGComponent.value = true;
+  } else {
+    customComponentType.value = (
+      parsedSpec.value.dataRepresentation as CustomComponent
+    ).type;
   }
 }
 
 function isVegaLiteCompatible(spec: ParsedUDIGrammar): boolean {
+  // TODO: make type guard
   return Array.isArray(spec.dataRepresentation);
 }
 
@@ -108,9 +118,8 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
 </script>
 
 <template>
-  <div>Blargen Flargen</div>
-  <div>{{ props.spec }}</div>
   <VegaLite v-if="isGoGComponent" :spec="vegaLiteSpec" />
+  <component v-else :is="customComponentType" />
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped></style>

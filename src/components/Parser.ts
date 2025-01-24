@@ -32,11 +32,17 @@ export type CustomComponent =
   | FilterPanelComponent
   | OrganMapComponent;
 
-export interface TableComponent extends Component {}
+export interface TableComponent extends Component {
+  type: 'TableComponent';
+}
 
-export interface FilterPanelComponent extends Component {}
+export interface FilterPanelComponent extends Component {
+  type: 'FilterPanelComponent';
+}
 
-export interface OrganMapComponent extends Component {}
+export interface OrganMapComponent extends Component {
+  type: 'OrganMapComponent';
+}
 
 export interface Mark {
   // point, bar, text?. icon

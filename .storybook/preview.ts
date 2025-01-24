@@ -5,11 +5,16 @@ import { type Preview, setup } from '@storybook/vue3';
 import { type App } from 'vue';
 
 import { createPinia } from 'pinia';
-
-const pinia = createPinia();
+import TableComponent from '../src/components/TableComponent.vue';
+import OrganMapComponent from '../src/components/OrganMapComponent.vue';
+import FilterPanelComponent from '../src/components/FilterPanelComponent.vue';
 
 setup((app: App) => {
-  app.use(pinia);
+  app
+    .use(createPinia())
+    .component('TableComponent', TableComponent)
+    .component('OrganMapComponent', OrganMapComponent)
+    .component('FilterPanelComponent', FilterPanelComponent);
 });
 
 const preview: Preview = {
