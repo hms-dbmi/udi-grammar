@@ -57,12 +57,12 @@ export const ScatterDonors = {
   },
 };
 
-export const BarChartMeanMass = {
+export const BarChartAverageWeight = {
   args: {
     spec: {
       dataSource: {
-        key: 'penguins',
-        source: './data/penguins.csv',
+        key: 'donors',
+        source: './data/donors.csv',
       },
       dataTransformations: [
         {
@@ -70,7 +70,7 @@ export const BarChartMeanMass = {
         },
         {
           rollup: {
-            mean_mass: { op: 'mean', field: 'body_mass_g' },
+            mean_mass: { op: 'mean', field: 'weight_value' },
           },
         },
       ],
@@ -209,8 +209,8 @@ export const Layering = {
   args: {
     spec: {
       dataSource: {
-        key: 'penguins',
-        source: './data/penguins.csv',
+        key: 'donors',
+        source: './data/donors.csv',
       },
       dataTransformations: [
         {
@@ -218,7 +218,7 @@ export const Layering = {
         },
         {
           rollup: {
-            mean_mass: { op: 'mean', field: 'body_mass_g' },
+            mean_mass: { op: 'mean', field: 'weight_value' },
           },
         },
       ],
