@@ -57,35 +57,6 @@ export const ScatterDonors = {
   },
 };
 
-export const BarChartSexCounts = {
-  args: {
-    spec: {
-      dataSource: {
-        key: 'penguins',
-        source: './data/penguins.csv',
-      },
-      dataTransformations: [
-        {
-          groupby: 'sex',
-        },
-        {
-          rollup: {
-            sex_count: { op: 'count' },
-          },
-        },
-      ],
-      dataRepresentation: {
-        type: 'GoGComponent',
-        mark: 'bar',
-        encoding: {
-          x: { field: 'sex' },
-          y: { field: 'sex_count' },
-        },
-      },
-    },
-  },
-};
-
 export const BarChartMeanMass = {
   args: {
     spec: {
@@ -109,6 +80,35 @@ export const BarChartMeanMass = {
         encoding: {
           x: { field: 'sex' },
           y: { field: 'mean_mass' },
+        },
+      },
+    },
+  },
+};
+
+export const BarChartSexCounts = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'donors',
+        source: './data/donors.csv',
+      },
+      dataTransformations: [
+        {
+          groupby: 'sex',
+        },
+        {
+          rollup: {
+            sex_count: { op: 'count' },
+          },
+        },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'sex' },
+          y: { field: 'sex_count' },
         },
       },
     },
