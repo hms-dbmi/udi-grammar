@@ -12,19 +12,20 @@ export interface DataSource {
 export type DataTransformation = GroupBy | RollUp | Join; // TODO: expand transformations
 
 interface DataTransformationBase {
-  in: string | [string, string]; // key of input table(s)
-  out: string; // key of output table
+  in?: string | [string, string]; // key of input table(s)
+  // If no key is specified, it assumes the output of the previous operation.
+  out?: string; // key of output table
 }
 
 // ideally in/out could be assumed and ommitted.
 
 export interface GroupBy extends DataTransformationBase {
-  in: string;
+  in?: string;
   groupby: string;
 }
 
 export interface RollUp extends DataTransformationBase {
-  in: string;
+  in?: string;
   rollup: {
     [outputName: string]: AggregateFunction;
   };

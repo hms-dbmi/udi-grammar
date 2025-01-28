@@ -36,43 +36,17 @@ defineProps({
   ></ParserComponent> -->
   <ParserComponent
     :spec="{
-      dataSource: [
-        {
-          key: 'donors',
-          source: './data/donors.csv',
-        },
-        {
-          key: 'datasets',
-          source: './data/datasets.csv',
-        },
-      ],
-      dataTransformations: [
-        {
-          in: ['donors', 'datasets'],
-          join: {
-            on: ['hubmap_id', 'donor.hubmap_id'],
-          },
-          out: 'donor_dataset_combined',
-        },
-        {
-          in: 'donor_dataset_combined',
-          groupby: 'sex',
-          out: 'donor_dataset_combined',
-        },
-        {
-          in: 'donor_dataset_combined',
-          rollup: {
-            datasets_by_sex: { op: 'count' },
-          },
-          out: 'donor_dataset_combined',
-        },
-      ],
+      dataSource: {
+        key: 'penguins',
+        source: './data/penguins.csv',
+      },
       dataRepresentation: {
         type: 'GoGComponent',
-        mark: 'bar',
+        mark: 'point',
         encoding: {
-          x: { field: 'sex' },
-          y: { field: 'datasets_by_sex' },
+          x: { field: 'bill_length_mm' },
+          y: { field: 'flipper_length_mm' },
+          color: { field: 'body_mass_g' },
         },
       },
     }"

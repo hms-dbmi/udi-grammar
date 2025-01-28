@@ -67,43 +67,58 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     // TODO: incorporate data transformations
     // maybe filter to only fields used?
 
-    if (!dataTransformations) {
-      return namedTables.get(keys[0]).objects();
-    }
+    const dataTable = PerformDataTransformations(
+      namedTables,
+      dataTransformations ?? [],
+    );
 
-    const table = PerformDataTransformations(namedTables, dataTransformations);
+    console.log('BLARGEN FLARGEN');
 
-    return table.objects();
+    return dataTable.objects();
   }
 
   function PerformDataTransformations(
     namedTables: Map<string, ColumnTable>,
     dataTransformations: DataTransformation[],
   ): ColumnTable {
-    let outTable: ColumnTable;
+    const key = namedTables.keys().next().value;
+    const table = namedTables.get(key);
+    const currentTable: {
+      key: string;
+      table: ColumnTable;
+    } = { key, table };
+
+    const getInTable = (key?: string): ColumnTable => {
+      return key ? namedTables.get(key) : currentTable.table;
+    };
+
+    const setOutTable = (key?: string) => {
+      if (key) {
+        currentTable.key = key;
+      }
+      namedTables.set(currentTable.key, currentTable.table);
+    };
+
     for (const transform of dataTransformations) {
       if ('groupby' in transform) {
-        const inTable = namedTables.get(transform.in);
-        outTable = inTable.groupby(transform.groupby);
-        namedTables.set(transform.out, outTable);
+        const inTable = getInTable(transform.in);
+        currentTable.table = inTable.groupby(transform.groupby);
       } else if ('rollup' in transform) {
-        const inTable = namedTables.get(transform.in);
+        const inTable = getInTable(transform.in);
         let aggregateFunctions = {};
         for (const [as, aggFunction] of Object.entries(transform.rollup)) {
           aggregateFunctions[as] = getArqueroAggregateFunction(aggFunction);
         }
-        outTable = inTable.rollup(aggregateFunctions);
-        namedTables.set(transform.out, outTable);
+        currentTable.table = inTable.rollup(aggregateFunctions);
       } else if ('join' in transform) {
-        // TODO
         const [leftKey, rightKey] = transform.in;
         const leftTable = namedTables.get(leftKey);
         const rightTable = namedTables.get(rightKey);
-        outTable = leftTable.join(rightTable, transform.join.on);
-        namedTables.set(transform.out, outTable);
+        currentTable.table = leftTable.join(rightTable, transform.join.on);
       }
+      setOutTable(transform.out);
     }
-    return outTable;
+    return currentTable.table;
   }
 
   function getArqueroAggregateFunction(aggFunc: AggregateFunction): any {

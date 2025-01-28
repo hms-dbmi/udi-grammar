@@ -137,16 +137,12 @@ export const BarChartJoinExample = {
           out: 'donor_dataset_combined',
         },
         {
-          in: 'donor_dataset_combined',
           groupby: 'sex',
-          out: 'donor_dataset_combined',
         },
         {
-          in: 'donor_dataset_combined',
           rollup: {
             datasets_by_sex: { op: 'count' },
           },
-          out: 'donor_dataset_combined',
         },
       ],
       dataRepresentation: {
