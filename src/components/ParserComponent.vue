@@ -127,6 +127,10 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
 <template>
   <VegaLite v-if="isGoGComponent" :spec="vegaLiteSpec" />
   <component v-else :is="customComponentType" />
+  <hr />
+  <pre>
+    {{ props.spec }}
+  </pre>
 </template>
 
 <style scoped></style>
