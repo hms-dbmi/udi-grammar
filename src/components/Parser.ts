@@ -9,15 +9,31 @@ export interface DataSource {
   source: string; // url of csv for now
 }
 
-export type DataTransformation = GroupBy | RollUp; // TODO: expand transformations
+export type DataTransformation = GroupBy | RollUp | Join; // TODO: expand transformations
 
-export interface GroupBy {
+interface DataTransformationBase {
+  in: string | [string, string]; // key of input table(s)
+  out: string; // key of output table
+}
+
+// ideally in/out could be assumed and ommitted.
+
+export interface GroupBy extends DataTransformationBase {
+  in: string;
   groupby: string;
 }
 
-export interface RollUp {
+export interface RollUp extends DataTransformationBase {
+  in: string;
   rollup: {
     [outputName: string]: AggregateFunction;
+  };
+}
+
+export interface Join extends DataTransformationBase {
+  in: [string, string];
+  join: {
+    on: string | [string, string];
   };
 }
 

@@ -33,6 +33,7 @@ const columnTypes = {
   mean_mass: 'quantitative',
   weight_value: 'quantitative',
   height_value: 'quantitative',
+  datasets_by_sex: 'quantitative',
 };
 
 const props = defineProps<ParserProps>();
@@ -45,9 +46,7 @@ const customComponentType = ref<string>('');
 onMounted(() => {
   // parse/validate grammar
   parsedSpec.value = parseSpecification(props.spec);
-  for (const dataSource of parsedSpec.value.dataSource) {
-    dataSourcesStore.initDataSource(dataSource);
-  }
+  dataSourcesStore.initDataSources(parsedSpec.value.dataSource);
   buildVisualization();
 
   // if (isVegaLiteCompatible(parsedSpec.value)) {
@@ -92,7 +91,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   // TODO: assume one data source
   const dataInterface = spec.dataSource[0];
   vegaSpec.data.values = dataSourcesStore.getDataObject(
-    dataInterface.key,
+    spec.dataSource.map((x) => x.key),
     spec.dataTransformations,
   );
   console.log(vegaSpec);

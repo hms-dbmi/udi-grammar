@@ -6,7 +6,7 @@ import type {
   DataTransformation,
 } from '../components/Parser.ts';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
-import { loadCSV, all, desc, op, table, type ColumnTable } from 'arquero';
+import { loadCSV, all, desc, op, table, from, type ColumnTable } from 'arquero';
 
 interface DataInterface {
   source: DataSource;
@@ -29,13 +29,18 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
   const loading = ref<boolean>(true);
 
+  async function initDataSources(dataSources: DataSource[]): Promise<void> {
+    const promises = dataSources.map((dataSource) =>
+      initDataSource(dataSource),
+    );
+    await Promise.all(promises);
+    loading.value = false;
+  }
+
   async function initDataSource(dataSource: DataSource): Promise<void> {
     if (getDataSource(dataSource.key)) return;
     const dest: ColumnTable = await loadCSV(dataSource.source);
     dataSources.value[dataSource.key] = { source: dataSource, dest };
-    // TODO: actually create data interface object
-    console.log(dataSources.value);
-    loading.value = false;
   }
 
   function getDataSource(key: string): DataInterface | null {
@@ -44,42 +49,60 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   }
 
   function getDataObject(
-    key: string,
+    keys: string[],
     dataTransformations: DataTransformation[],
   ): any {
-    const dataInterface = getDataSource(key);
-    if (dataInterface === null) return null;
+    if (loading.value) return null;
+
+    // make copy of tables from data sources
+    const namedTables = new Map();
+    for (const key of keys) {
+      const dataInterface = getDataSource(key);
+      if (dataInterface === null) {
+        // continue;
+        throw new Error(`key not found in data sources: [${key}]`);
+      }
+      namedTables.set(key, from(dataInterface.dest.reify()));
+    }
     // TODO: incorporate data transformations
     // maybe filter to only fields used?
 
-    let table = dataInterface.dest;
-    if (dataTransformations) {
-      table = PerformDataTransformations(table, dataTransformations);
+    if (!dataTransformations) {
+      return namedTables.get(keys[0]).objects();
     }
 
-    // e.g.
-    // dataInterface.dest.groupby('sex').rollup
+    const table = PerformDataTransformations(namedTables, dataTransformations);
 
     return table.objects();
   }
 
   function PerformDataTransformations(
-    inTable: ColumnTable,
+    namedTables: Map<string, ColumnTable>,
     dataTransformations: DataTransformation[],
   ): ColumnTable {
-    let outTable = inTable;
+    let outTable: ColumnTable;
     for (const transform of dataTransformations) {
       if ('groupby' in transform) {
-        outTable = outTable.groupby(transform.groupby);
+        const inTable = namedTables.get(transform.in);
+        outTable = inTable.groupby(transform.groupby);
+        namedTables.set(transform.out, outTable);
       } else if ('rollup' in transform) {
+        const inTable = namedTables.get(transform.in);
         let aggregateFunctions = {};
         for (const [as, aggFunction] of Object.entries(transform.rollup)) {
           aggregateFunctions[as] = getArqueroAggregateFunction(aggFunction);
         }
-        outTable = outTable.rollup(aggregateFunctions);
+        outTable = inTable.rollup(aggregateFunctions);
+        namedTables.set(transform.out, outTable);
+      } else if ('join' in transform) {
+        // TODO
+        const [leftKey, rightKey] = transform.in;
+        const leftTable = namedTables.get(leftKey);
+        const rightTable = namedTables.get(rightKey);
+        outTable = leftTable.join(rightTable, transform.join.on);
+        namedTables.set(transform.out, outTable);
       }
     }
-    console.log('blargen flargen');
     return outTable;
   }
 
@@ -100,5 +123,5 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     }
   }
 
-  return { dataSources, loading, initDataSource, getDataObject };
+  return { dataSources, loading, initDataSources, getDataObject };
 });

@@ -36,18 +36,35 @@ defineProps({
   ></ParserComponent> -->
   <ParserComponent
     :spec="{
-      dataSource: {
-        key: 'penguins',
-        source: './data/penguins.csv',
-      },
-      dataTransformations: [
+      dataSource: [
         {
-          groupby: 'sex',
+          key: 'donors',
+          source: './data/donors.csv',
         },
         {
-          rollup: {
-            mean_mass: { op: 'mean', field: 'body_mass_g' },
+          key: 'datasets',
+          source: './data/datasets.csv',
+        },
+      ],
+      dataTransformations: [
+        {
+          in: ['donors', 'datasets'],
+          join: {
+            on: ['hubmap_id', 'donor.hubmap_id'],
           },
+          out: 'donor_dataset_combined',
+        },
+        {
+          in: 'donor_dataset_combined',
+          groupby: 'sex',
+          out: 'donor_dataset_combined',
+        },
+        {
+          in: 'donor_dataset_combined',
+          rollup: {
+            datasets_by_sex: { op: 'count' },
+          },
+          out: 'donor_dataset_combined',
         },
       ],
       dataRepresentation: {
@@ -55,7 +72,7 @@ defineProps({
         mark: 'bar',
         encoding: {
           x: { field: 'sex' },
-          y: { field: 'mean_mass' },
+          y: { field: 'datasets_by_sex' },
         },
       },
     }"

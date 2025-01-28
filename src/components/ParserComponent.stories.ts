@@ -130,18 +130,23 @@ export const BarChartJoinExample = {
       ],
       dataTransformations: [
         {
+          in: ['donors', 'datasets'],
           join: {
-            tables: ['donors', 'datasets'],
             on: ['hubmap_id', 'donor.hubmap_id'],
           },
+          out: 'donor_dataset_combined',
         },
         {
+          in: 'donor_dataset_combined',
           groupby: 'sex',
+          out: 'donor_dataset_combined',
         },
         {
+          in: 'donor_dataset_combined',
           rollup: {
             datasets_by_sex: { op: 'count' },
           },
+          out: 'donor_dataset_combined',
         },
       ],
       dataRepresentation: {
@@ -174,6 +179,36 @@ export const BarChartJoinExample = {
 //   }
 // }
 
+// export const Layering = {
+//   args: {
+//     spec: {
+//       dataSource: {
+//         key: 'penguins',
+//         source: './data/penguins.csv',
+//       },
+//       dataRepresentation: [
+//         {
+//           type: 'GoGComponent',
+//           mark: 'point',
+//           encoding: {
+//             x: { field: 'bill_length_mm' },
+//             y: { field: 'flipper_length_mm' },
+//           },
+//         },
+//         {
+//           type: 'GoGComponent',
+//           mark: 'circle',
+//           encoding: {
+//             x: { field: 'bill_length_mm' },
+//             y: { field: 'flipper_length_mm' },
+//             color: { field: 'sex' },
+//           },
+//         },
+//       ],
+//     },
+//   },
+// };
+
 export const Layering = {
   args: {
     spec: {
@@ -181,22 +216,32 @@ export const Layering = {
         key: 'penguins',
         source: './data/penguins.csv',
       },
+      dataTransformations: [
+        {
+          groupby: 'sex',
+        },
+        {
+          rollup: {
+            mean_mass: { op: 'mean', field: 'body_mass_g' },
+          },
+        },
+      ],
       dataRepresentation: [
         {
           type: 'GoGComponent',
-          mark: 'point',
+          mark: 'bar',
           encoding: {
-            x: { field: 'bill_length_mm' },
-            y: { field: 'flipper_length_mm' },
+            y: { field: 'sex' },
+            x: { field: 'mean_mass' },
           },
         },
         {
           type: 'GoGComponent',
-          mark: 'circle',
+          mark: 'text',
           encoding: {
-            x: { field: 'bill_length_mm' },
-            y: { field: 'flipper_length_mm' },
-            color: { field: 'sex' },
+            y: { field: 'sex' },
+            x: { field: 'mean_mass' },
+            text: { field: 'mean_mass' },
           },
         },
       ],
@@ -204,47 +249,47 @@ export const Layering = {
   },
 };
 
-export const Table = {
-  args: {
-    spec: {
-      dataSource: {
-        key: 'penguins',
-        source: './data/penguins.csv',
-      },
-      dataRepresentation: {
-        type: 'TableComponent',
-      },
-    },
-  },
-};
+// export const Table = {
+//   args: {
+//     spec: {
+//       dataSource: {
+//         key: 'penguins',
+//         source: './data/penguins.csv',
+//       },
+//       dataRepresentation: {
+//         type: 'TableComponent',
+//       },
+//     },
+//   },
+// };
 
-export const OrganMap = {
-  args: {
-    spec: {
-      dataSource: {
-        key: 'penguins',
-        source: './data/penguins.csv',
-      },
-      dataRepresentation: {
-        type: 'OrganMapComponent',
-      },
-    },
-  },
-};
+// export const OrganMap = {
+//   args: {
+//     spec: {
+//       dataSource: {
+//         key: 'penguins',
+//         source: './data/penguins.csv',
+//       },
+//       dataRepresentation: {
+//         type: 'OrganMapComponent',
+//       },
+//     },
+//   },
+// };
 
-export const FilterPanel = {
-  args: {
-    spec: {
-      dataSource: {
-        key: 'penguins',
-        source: './data/penguins.csv',
-      },
-      dataRepresentation: {
-        type: 'FilterPanelComponent',
-      },
-    },
-  },
-};
+// export const FilterPanel = {
+//   args: {
+//     spec: {
+//       dataSource: {
+//         key: 'penguins',
+//         source: './data/penguins.csv',
+//       },
+//       dataRepresentation: {
+//         type: 'FilterPanelComponent',
+//       },
+//     },
+//   },
+// };
 
 // export const Test2 = {
 //   args: {
