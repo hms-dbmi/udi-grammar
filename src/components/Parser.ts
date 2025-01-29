@@ -84,6 +84,7 @@ export interface OrganMapComponent extends Component {
 
 export interface Mark {
   // point, bar, text?. icon
+  // point, bar, text, tect
 }
 
 export interface Encoding {

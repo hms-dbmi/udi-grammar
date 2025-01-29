@@ -444,6 +444,39 @@ export const MultipleBarChartStackedRelativeReverse = {
   },
 };
 
+export const Heatmap = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'datasets',
+        source: './data/datasets.csv',
+      },
+      dataTransformations: [
+        {
+          groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+        },
+        {
+          rollup: {
+            count: { op: 'count' },
+          },
+        },
+        // {
+        //   orderby: 'organ_count',
+        // },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'rect',
+        encoding: {
+          color: { field: 'count' },
+          y: { field: 'origin_samples_unique_mapped_organs' },
+          x: { field: 'assay_category' },
+        },
+      },
+    },
+  },
+};
+
 // export const Template = {
 //   args: {
 //     spec: {
