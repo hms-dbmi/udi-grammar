@@ -18,27 +18,27 @@ export default {
   // },
 };
 
-export const Default = {
-  args: {
-    spec: {
-      dataSource: {
-        key: 'penguins',
-        source: './data/penguins.csv',
-      },
-      dataRepresentation: {
-        type: 'GoGComponent',
-        mark: 'point',
-        encoding: {
-          x: { field: 'bill_length_mm' },
-          y: { field: 'flipper_length_mm' },
-          color: { field: 'body_mass_g' },
-        },
-      },
-    },
-  },
-};
+// export const Default = {
+//   args: {
+//     spec: {
+//       dataSource: {
+//         key: 'penguins',
+//         source: './data/penguins.csv',
+//       },
+//       dataRepresentation: {
+//         type: 'GoGComponent',
+//         mark: 'point',
+//         encoding: {
+//           x: { field: 'bill_length_mm' },
+//           y: { field: 'flipper_length_mm' },
+//           color: { field: 'body_mass_g' },
+//         },
+//       },
+//     },
+//   },
+// };
 
-export const ScatterDonors = {
+export const Default = {
   args: {
     spec: {
       dataSource: {
@@ -115,7 +115,7 @@ export const BarChartSexCounts = {
   },
 };
 
-export const BarChartJoinExample = {
+export const BarChartJoin = {
   args: {
     spec: {
       dataSource: [
@@ -151,6 +151,293 @@ export const BarChartJoinExample = {
         encoding: {
           x: { field: 'sex' },
           y: { field: 'datasets_by_sex' },
+        },
+      },
+    },
+  },
+};
+
+export const SingleBarChart = {
+  args: {
+    spec: {
+      dataSource: [
+        {
+          key: 'datasets',
+          source: './data/datasets.csv',
+        },
+      ],
+      dataTransformations: [
+        {
+          rollup: {
+            count: { op: 'count' },
+          },
+        },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'count' },
+        },
+      },
+    },
+  },
+};
+
+export const SingleBarChartStacked = {
+  args: {
+    spec: {
+      dataSource: [
+        {
+          key: 'datasets',
+          source: './data/datasets.csv',
+        },
+      ],
+      dataTransformations: [
+        { groupby: 'assay_category' },
+        {
+          rollup: {
+            count: { op: 'count' },
+          },
+        },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'count' },
+          color: { field: 'assay_category' },
+        },
+      },
+    },
+  },
+};
+
+export const SingleBarChartStackedRelative = {
+  args: {
+    spec: {
+      dataSource: [
+        {
+          key: 'datasets',
+          source: './data/datasets.csv',
+        },
+      ],
+      dataTransformations: [
+        {
+          groupby: 'assay_category',
+        },
+        {
+          rollup: {
+            freq: { op: 'frequency' },
+          },
+        },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'freq', type: 'quantitative' },
+          color: { field: 'assay_category' },
+        },
+      },
+    },
+  },
+};
+
+// export const BarChartGrouped = {
+//   args: {
+//     spec: {
+//       dataSource: {
+//         key: 'datasets',
+//         source: './data/datasets.csv',
+//       },
+//       dataTransformations: [
+//         {
+//           groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+//         },
+//         {
+//           rollup: {
+//             count: { op: 'count' },
+//           },
+//         },
+//         // {
+//         //   orderby: 'organ_count',
+//         // },
+//       ],
+//       dataRepresentation: {
+//         type: 'GoGComponent',
+//         mark: 'bar',
+//         encoding: {
+//           x: { field: 'count' },
+//           y: { field: 'origin_samples_unique_mapped_organs' },
+//           color: { field: 'assay_category' },
+//           yOffset: { field: 'assay_category' },
+//         },
+//       },
+//     },
+//   },
+// };
+
+export const MultipleBarChartStacked = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'datasets',
+        source: './data/datasets.csv',
+      },
+      dataTransformations: [
+        {
+          groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+        },
+        {
+          rollup: {
+            count: { op: 'count' },
+          },
+        },
+        // {
+        //   orderby: 'organ_count',
+        // },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'count' },
+          y: { field: 'origin_samples_unique_mapped_organs' },
+          color: { field: 'assay_category' },
+        },
+      },
+    },
+  },
+};
+
+export const MultipleBarChartStackedReverse = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'datasets',
+        source: './data/datasets.csv',
+      },
+      dataTransformations: [
+        {
+          groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+        },
+        {
+          rollup: {
+            count: { op: 'count' },
+          },
+        },
+        // {
+        //   orderby: 'organ_count',
+        // },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'count' },
+          color: { field: 'origin_samples_unique_mapped_organs' },
+          y: { field: 'assay_category' },
+        },
+      },
+    },
+  },
+};
+
+export const MultipleBarChartStackedRelative = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'datasets',
+        source: './data/datasets.csv',
+      },
+      dataTransformations: [
+        {
+          groupby: 'origin_samples_unique_mapped_organs',
+          out: 'groupCounts',
+        },
+        {
+          rollup: {
+            organ_count: { op: 'count' },
+          },
+        },
+        {
+          in: 'datasets',
+          groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+        },
+        {
+          rollup: {
+            organ_assay_count: { op: 'count' },
+          },
+        },
+        {
+          in: ['datasets', 'groupCounts'],
+          join: 'origin_samples_unique_mapped_organs',
+          out: 'datasets',
+        },
+        {
+          derive: {
+            freq: 'd.organ_assay_count / d.organ_count',
+          },
+        },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'freq', type: 'quantitative' },
+          y: { field: 'origin_samples_unique_mapped_organs' },
+          color: { field: 'assay_category' },
+        },
+      },
+    },
+  },
+};
+
+export const MultipleBarChartStackedRelativeReverse = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'datasets',
+        source: './data/datasets.csv',
+      },
+      dataTransformations: [
+        {
+          groupby: 'assay_category',
+          out: 'groupCounts',
+        },
+        {
+          rollup: {
+            organ_count: { op: 'count' },
+          },
+        },
+        {
+          in: 'datasets',
+          groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+        },
+        {
+          rollup: {
+            organ_assay_count: { op: 'count' },
+          },
+        },
+        {
+          in: ['datasets', 'groupCounts'],
+          join: 'origin_samples_unique_mapped_organs',
+          out: 'datasets',
+        },
+        {
+          derive: {
+            freq: 'd.organ_assay_count / d.organ_count',
+          },
+        },
+      ],
+      dataRepresentation: {
+        type: 'GoGComponent',
+        mark: 'bar',
+        encoding: {
+          x: { field: 'freq', type: 'quantitative' },
+          y: { field: 'assay_category' },
+          color: { field: 'origin_samples_unique_mapped_organs' },
         },
       },
     },
@@ -286,27 +573,3 @@ export const Layering = {
 //     },
 //   },
 // };
-
-// export const Test2 = {
-//   args: {
-//     blarg: 'test 2!',
-//   },
-// };
-
-// export const Pinned = {
-//   args: {
-//     task: {
-//       ...Default.args.task,
-//       state: 'TASK_PINNED',
-//     },
-//   },
-// }
-
-// export const Archived = {
-//   args: {
-//     task: {
-//       ...Default.args.task,
-//       state: 'TASK_ARCHIVED',
-//     },
-//   },
-// }

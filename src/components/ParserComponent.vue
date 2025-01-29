@@ -34,6 +34,10 @@ const columnTypes = {
   weight_value: 'quantitative',
   height_value: 'quantitative',
   datasets_by_sex: 'quantitative',
+  origin_samples_unique_mapped_organs: 'nominal',
+  organ_count: 'quantitative',
+  assay_type: 'nominal',
+  count: 'quantitative',
 };
 
 const props = defineProps<ParserProps>();
@@ -94,6 +98,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     spec.dataSource.map((x) => x.key),
     spec.dataTransformations,
   );
+  debugVegaData.value = vegaSpec.data.values;
   console.log(vegaSpec);
   // TODO: perform transformations
 
@@ -109,7 +114,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     for (let [key, value] of Object.entries(gogComponent.encoding)) {
       encoding[key] = {
         field: value.field,
-        type: columnTypes[value.field],
+        type: value.type ?? columnTypes[value.field],
       };
     }
     return {
@@ -121,6 +126,8 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
 
   return JSON.stringify(vegaSpec);
 }
+
+const debugVegaData = ref();
 </script>
 
 <template>
@@ -129,6 +136,10 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   <hr />
   <pre>
     {{ props.spec }}
+  </pre>
+  <hr />
+  <pre>
+  {{ debugVegaData }}
   </pre>
 </template>
 

@@ -36,17 +36,28 @@ defineProps({
   ></ParserComponent> -->
   <ParserComponent
     :spec="{
-      dataSource: {
-        key: 'penguins',
-        source: './data/penguins.csv',
-      },
+      dataSource: [
+        {
+          key: 'datasets',
+          source: './data/datasets.csv',
+        },
+      ],
+      dataTransformations: [
+        {
+          groupby: 'assay_category',
+        },
+        {
+          rollup: {
+            freq: { op: 'frequency' },
+          },
+        },
+      ],
       dataRepresentation: {
         type: 'GoGComponent',
-        mark: 'point',
+        mark: 'bar',
         encoding: {
-          x: { field: 'bill_length_mm' },
-          y: { field: 'flipper_length_mm' },
-          color: { field: 'body_mass_g' },
+          x: { field: 'freq', type: 'quantitative' },
+          color: { field: 'assay_category' },
         },
       },
     }"

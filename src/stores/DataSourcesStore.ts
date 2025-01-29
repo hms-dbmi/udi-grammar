@@ -7,6 +7,7 @@ import type {
 } from '../components/Parser.ts';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
 import { loadCSV, all, desc, op, table, from, type ColumnTable } from 'arquero';
+import { f } from 'msw/lib/core/HttpResponse-DE19n76Q.js';
 
 interface DataInterface {
   source: DataSource;
@@ -72,8 +73,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       dataTransformations ?? [],
     );
 
-    console.log('BLARGEN FLARGEN');
-
     return dataTable.objects();
   }
 
@@ -92,9 +91,11 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       return key ? namedTables.get(key) : currentTable.table;
     };
 
-    const setOutTable = (key?: string) => {
-      if (key) {
-        currentTable.key = key;
+    const setOutTable = (transform: DataTransformation) => {
+      if (transform.out) {
+        currentTable.key = transform.out;
+      } else if (transform.in && !Array.isArray(transform.in)) {
+        currentTable.key = transform.in;
       }
       namedTables.set(currentTable.key, currentTable.table);
     };
@@ -102,21 +103,45 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     for (const transform of dataTransformations) {
       if ('groupby' in transform) {
         const inTable = getInTable(transform.in);
-        currentTable.table = inTable.groupby(transform.groupby);
+        if (Array.isArray(transform.groupby)) {
+          currentTable.table = inTable.groupby(...transform.groupby);
+        } else {
+          currentTable.table = inTable.groupby(transform.groupby);
+        }
       } else if ('rollup' in transform) {
         const inTable = getInTable(transform.in);
         let aggregateFunctions = {};
+        const frequencyKeys: string[] = [];
         for (const [as, aggFunction] of Object.entries(transform.rollup)) {
           aggregateFunctions[as] = getArqueroAggregateFunction(aggFunction);
+          if (aggFunction.op === 'frequency') {
+            frequencyKeys.push(as);
+          }
         }
         currentTable.table = inTable.rollup(aggregateFunctions);
+        for (const freqKey of frequencyKeys) {
+          const deriveExpression = {};
+          deriveExpression[freqKey] = (d, $) =>
+            d[$.freqKey] / op.sum(d[$.freqKey]);
+
+          currentTable.table = currentTable.table
+            .params({ freqKey: freqKey })
+            .derive(deriveExpression);
+        }
+        // TODO: handle normalization
+      } else if ('orderby' in transform) {
+        const inTable = getInTable(transform.in);
+        currentTable.table = inTable.orderby(transform.orderby);
+      } else if ('derive' in transform) {
+        const inTable = getInTable(transform.in);
+        currentTable.table = inTable.derive(transform.derive);
       } else if ('join' in transform) {
         const [leftKey, rightKey] = transform.in;
         const leftTable = namedTables.get(leftKey);
         const rightTable = namedTables.get(rightKey);
         currentTable.table = leftTable.join(rightTable, transform.join.on);
       }
-      setOutTable(transform.out);
+      setOutTable(transform);
     }
     return currentTable.table;
   }
@@ -131,6 +156,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         return op.max(aggFunc.field);
       case 'mean':
         return op.mean(aggFunc.field);
+      case 'frequency':
+        // frequency is a two step process, step one is getting the counts.
+        // normalizing the counts happens outside this function.
+        return op.count();
       default:
         throw new Error(
           'unsupported Aggregate Function' + JSON.stringify(aggFunc),

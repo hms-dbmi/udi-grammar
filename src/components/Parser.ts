@@ -9,7 +9,7 @@ export interface DataSource {
   source: string; // url of csv for now
 }
 
-export type DataTransformation = GroupBy | RollUp | Join; // TODO: expand transformations
+export type DataTransformation = GroupBy | RollUp | Join | OrderBy | Derive; // TODO: expand transformations
 
 interface DataTransformationBase {
   in?: string | [string, string]; // key of input table(s)
@@ -21,7 +21,7 @@ interface DataTransformationBase {
 
 export interface GroupBy extends DataTransformationBase {
   in?: string;
-  groupby: string;
+  groupby: string | string[];
 }
 
 export interface RollUp extends DataTransformationBase {
@@ -31,6 +31,11 @@ export interface RollUp extends DataTransformationBase {
   };
 }
 
+export interface OrderBy extends DataTransformationBase {
+  in?: string;
+  orderby: string; // TODO: probably should support list of strings
+}
+
 export interface Join extends DataTransformationBase {
   in: [string, string];
   join: {
@@ -38,8 +43,15 @@ export interface Join extends DataTransformationBase {
   };
 }
 
+export interface Derive extends DataTransformationBase {
+  in?: string;
+  derive: TableExpression;
+}
+
+export type TableExpression = string; // TODO: can/should we support more types like arquero?
+
 export interface AggregateFunction {
-  op: 'count' | 'mean' | 'min' | 'max' | 'median';
+  op: 'count' | 'mean' | 'min' | 'max' | 'median' | 'frequency';
   field?: 'string';
 }
 
@@ -75,7 +87,8 @@ export interface Mark {
 }
 
 export interface Encoding {
-  // x,y,color, opacity, size, htmlInject?
+  // x,y,color, xOffset, yOffset, x2,y2, text
+  // line, opacity, size
 }
 
 // point
