@@ -135,6 +135,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       } else if ('derive' in transform) {
         const inTable = getInTable(transform.in);
         currentTable.table = inTable.derive(transform.derive);
+      } else if ('filter' in transform) {
+        const inTable = getInTable(transform.in);
+        currentTable.table = inTable.filter(transform.filter);
       } else if ('join' in transform) {
         const [leftKey, rightKey] = transform.in;
         const leftTable = namedTables.get(leftKey);

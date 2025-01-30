@@ -9,7 +9,13 @@ export interface DataSource {
   source: string; // url of csv for now
 }
 
-export type DataTransformation = GroupBy | RollUp | Join | OrderBy | Derive; // TODO: expand transformations
+export type DataTransformation =
+  | GroupBy
+  | RollUp
+  | Join
+  | OrderBy
+  | Derive
+  | Filter; // TODO: expand transformations
 
 interface DataTransformationBase {
   in?: string | [string, string]; // key of input table(s)
@@ -46,6 +52,11 @@ export interface Join extends DataTransformationBase {
 export interface Derive extends DataTransformationBase {
   in?: string;
   derive: TableExpression;
+}
+
+export interface Derive extends DataTransformation {
+  in?: string;
+  filter: TableExpression;
 }
 
 export type TableExpression = string; // TODO: can/should we support more types like arquero?
