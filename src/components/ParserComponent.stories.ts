@@ -22,7 +22,7 @@ export default {
 //   args: {
 //     spec: {
 //       dataSource: {
-//         key: 'penguins',
+//         name: 'penguins',
 //         source: './data/penguins.csv',
 //       },
 //       dataRepresentation: {
@@ -89,7 +89,7 @@ export const BarChartSexCounts = {
   args: {
     spec: {
       dataSource: {
-        key: 'donors',
+        name: 'donors',
         source: './data/donors.csv',
       },
       dataTransformations: [
@@ -119,11 +119,11 @@ export const BarChartJoin = {
     spec: {
       dataSource: [
         {
-          key: 'donors',
+          name: 'donors',
           source: './data/donors.csv',
         },
         {
-          key: 'datasets',
+          name: 'datasets',
           source: './data/datasets.csv',
         },
       ],
@@ -161,7 +161,7 @@ export const SingleBarChart = {
     spec: {
       dataSource: [
         {
-          key: 'datasets',
+          name: 'datasets',
           source: './data/datasets.csv',
         },
       ],
@@ -186,7 +186,7 @@ export const SingleBarChartStacked = {
     spec: {
       dataSource: [
         {
-          key: 'datasets',
+          name: 'datasets',
           source: './data/datasets.csv',
         },
       ],
@@ -215,7 +215,7 @@ export const SingleBarChartStackedRelative = {
     spec: {
       dataSource: [
         {
-          key: 'datasets',
+          name: 'datasets',
           source: './data/datasets.csv',
         },
       ],
@@ -245,7 +245,7 @@ export const SingleBarChartStackedRelative = {
 //   args: {
 //     spec: {
 //       dataSource: {
-//         key: 'datasets',
+//         name: 'datasets',
 //         source: './data/datasets.csv',
 //       },
 //       dataTransformations: [
@@ -279,7 +279,7 @@ export const MultipleBarChartStacked = {
   args: {
     spec: {
       dataSource: {
-        key: 'datasets',
+        name: 'datasets',
         source: './data/datasets.csv',
       },
       dataTransformations: [
@@ -316,7 +316,7 @@ export const MultipleBarChartStackedReverse = {
   args: {
     spec: {
       dataSource: {
-        key: 'datasets',
+        name: 'datasets',
         source: './data/datasets.csv',
       },
       dataTransformations: [
@@ -353,7 +353,7 @@ export const MultipleBarChartStackedRelative = {
   args: {
     spec: {
       dataSource: {
-        key: 'datasets',
+        name: 'datasets',
         source: './data/datasets.csv',
       },
       dataTransformations: [
@@ -407,7 +407,7 @@ export const MultipleBarChartStackedRelativeReverse = {
   args: {
     spec: {
       dataSource: {
-        key: 'datasets',
+        name: 'datasets',
         source: './data/datasets.csv',
       },
       dataTransformations: [
@@ -461,7 +461,7 @@ export const MultipleBarChartStackedFiltered = {
   args: {
     spec: {
       dataSource: {
-        key: 'datasets',
+        name: 'datasets',
         source: './data/datasets.csv',
       },
       dataTransformations: [
@@ -498,7 +498,7 @@ export const Heatmap = {
   args: {
     spec: {
       dataSource: {
-        key: 'datasets',
+        name: 'datasets',
         source: './data/datasets.csv',
       },
       dataTransformations: [
@@ -547,7 +547,7 @@ export const Heatmap = {
 //   args: {
 //     spec: {
 //       dataSource: {
-//         key: 'penguins',
+//         name: 'penguins',
 //         source: './data/penguins.csv',
 //       },
 //       dataRepresentation: {
@@ -565,7 +565,7 @@ export const Heatmap = {
 //   args: {
 //     spec: {
 //       dataSource: {
-//         key: 'penguins',
+//         name: 'penguins',
 //         source: './data/penguins.csv',
 //       },
 //       dataRepresentation: [
@@ -595,7 +595,7 @@ export const Layering = {
   args: {
     spec: {
       dataSource: {
-        key: 'donors',
+        name: 'donors',
         source: './data/donors.csv',
       },
       dataTransformations: [
@@ -636,7 +636,7 @@ export const TableExample = {
   args: {
     spec: {
       dataSource: {
-        key: 'donors',
+        name: 'donors',
         source: './data/donors.csv',
       },
       dataRepresentation: {
@@ -656,7 +656,7 @@ export const TableDefault = {
   args: {
     spec: {
       dataSource: {
-        key: 'donors',
+        name: 'donors',
         source: './data/donors.csv',
       },
       dataRepresentation: {
@@ -672,7 +672,7 @@ export const ScatterWithMapping = {
   args: {
     spec: {
       dataSource: {
-        key: 'donors',
+        name: 'donors',
         source: './data/donors.csv',
       },
       dataRepresentation: {
@@ -691,7 +691,7 @@ export const OrganMap = {
   args: {
     spec: {
       dataSource: {
-        key: 'donors',
+        name: 'donors',
         source: './data/organs.json', // e.g. a geojson format
       },
       ///
@@ -710,7 +710,7 @@ export const Checkboxes = {
   args: {
     spec: {
       dataSource: {
-        key: 'donors',
+        name: 'donors',
         source: './data/donors.csv',
       },
       dataRepresentation: {
