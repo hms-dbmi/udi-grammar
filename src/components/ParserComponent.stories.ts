@@ -21,11 +21,11 @@ export default {
 // export const Default = {
 //   args: {
 //     spec: {
-//       dataSource: {
+//       source: {
 //         name: 'penguins',
 //         source: './data/penguins.csv',
 //       },
-//       dataRepresentation: {
+//       representation: {
 //         type: 'GoGComponent',
 //         mark: 'point',
 //         encoding: {
@@ -88,11 +88,11 @@ export const BarChartAverageWeight = {
 export const BarChartSexCounts = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'donors',
         source: './data/donors.csv',
       },
-      dataTransformations: [
+      transformations: [
         {
           groupby: 'sex',
         },
@@ -102,7 +102,7 @@ export const BarChartSexCounts = {
           },
         },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
         mapping: [
@@ -117,7 +117,7 @@ export const BarChartSexCounts = {
 export const BarChartJoin = {
   args: {
     spec: {
-      dataSource: [
+      source: [
         {
           name: 'donors',
           source: './data/donors.csv',
@@ -127,7 +127,7 @@ export const BarChartJoin = {
           source: './data/datasets.csv',
         },
       ],
-      dataTransformations: [
+      transformations: [
         {
           in: ['donors', 'datasets'],
           join: {
@@ -144,7 +144,7 @@ export const BarChartJoin = {
           },
         },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
         mapping: [
@@ -159,20 +159,20 @@ export const BarChartJoin = {
 export const SingleBarChart = {
   args: {
     spec: {
-      dataSource: [
+      source: [
         {
           name: 'datasets',
           source: './data/datasets.csv',
         },
       ],
-      dataTransformations: [
+      transformations: [
         {
           rollup: {
             count: { op: 'count' },
           },
         },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
         mapping: [{ encoding: 'x', field: 'count', type: 'quantitative' }],
@@ -184,13 +184,13 @@ export const SingleBarChart = {
 export const SingleBarChartStacked = {
   args: {
     spec: {
-      dataSource: [
+      source: [
         {
           name: 'datasets',
           source: './data/datasets.csv',
         },
       ],
-      dataTransformations: [
+      transformations: [
         { groupby: 'assay_category' },
         {
           rollup: {
@@ -198,7 +198,7 @@ export const SingleBarChartStacked = {
           },
         },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
         mapping: [
@@ -213,13 +213,13 @@ export const SingleBarChartStacked = {
 export const SingleBarChartStackedRelative = {
   args: {
     spec: {
-      dataSource: [
+      source: [
         {
           name: 'datasets',
           source: './data/datasets.csv',
         },
       ],
-      dataTransformations: [
+      transformations: [
         {
           groupby: 'assay_category',
         },
@@ -229,7 +229,7 @@ export const SingleBarChartStackedRelative = {
           },
         },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
         mapping: [
@@ -244,11 +244,11 @@ export const SingleBarChartStackedRelative = {
 // export const BarChartGrouped = {
 //   args: {
 //     spec: {
-//       dataSource: {
+//       source: {
 //         name: 'datasets',
 //         source: './data/datasets.csv',
 //       },
-//       dataTransformations: [
+//       transformations: [
 //         {
 //           groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
 //         },
@@ -261,7 +261,7 @@ export const SingleBarChartStackedRelative = {
 //         //   orderby: 'organ_count',
 //         // },
 //       ],
-//       dataRepresentation: {
+//       representation: {
 //         type: 'GoGComponent',
 //         mark: 'bar',
 //         encoding: {
@@ -278,11 +278,11 @@ export const SingleBarChartStackedRelative = {
 export const MultipleBarChartStacked = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      dataTransformations: [
+      transformations: [
         {
           groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
         },
@@ -295,7 +295,7 @@ export const MultipleBarChartStacked = {
         //   orderby: 'organ_count',
         // },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
         mapping: [
@@ -315,11 +315,11 @@ export const MultipleBarChartStacked = {
 export const MultipleBarChartStackedReverse = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      dataTransformations: [
+      transformations: [
         {
           groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
         },
@@ -332,7 +332,7 @@ export const MultipleBarChartStackedReverse = {
         //   orderby: 'organ_count',
         // },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
         mapping: [
@@ -352,11 +352,11 @@ export const MultipleBarChartStackedReverse = {
 export const MultipleBarChartStackedRelative = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      dataTransformations: [
+      transformations: [
         {
           groupby: 'origin_samples_unique_mapped_organs',
           out: 'groupCounts',
@@ -386,7 +386,7 @@ export const MultipleBarChartStackedRelative = {
           },
         },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
         mapping: [
@@ -406,11 +406,11 @@ export const MultipleBarChartStackedRelative = {
 export const MultipleBarChartStackedRelativeReverse = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      dataTransformations: [
+      transformations: [
         {
           groupby: 'assay_category',
           out: 'groupCounts',
@@ -440,7 +440,7 @@ export const MultipleBarChartStackedRelativeReverse = {
           },
         },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
         mapping: [
@@ -460,11 +460,11 @@ export const MultipleBarChartStackedRelativeReverse = {
 export const MultipleBarChartStackedFiltered = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      dataTransformations: [
+      transformations: [
         {
           filter: 'd.assay_category !== null',
         },
@@ -477,7 +477,7 @@ export const MultipleBarChartStackedFiltered = {
           },
         },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
         mapping: [
@@ -497,11 +497,11 @@ export const MultipleBarChartStackedFiltered = {
 export const Heatmap = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      dataTransformations: [
+      transformations: [
         {
           groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
         },
@@ -514,7 +514,7 @@ export const Heatmap = {
         //   orderby: 'organ_count',
         // },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'rect',
         mapping: [
@@ -546,11 +546,11 @@ export const Heatmap = {
 // export const Template = {
 //   args: {
 //     spec: {
-//       dataSource: {
+//       source: {
 //         name: 'penguins',
 //         source: './data/penguins.csv',
 //       },
-//       dataRepresentation: {
+//       representation: {
 //         type: 'GoGComponent',
 //         mark: '',
 //         encoding: {
@@ -564,11 +564,11 @@ export const Heatmap = {
 // export const Layering = {
 //   args: {
 //     spec: {
-//       dataSource: {
+//       source: {
 //         name: 'penguins',
 //         source: './data/penguins.csv',
 //       },
-//       dataRepresentation: [
+//       representation: [
 //         {
 //           type: 'GoGComponent',
 //           mark: 'point',
@@ -594,11 +594,11 @@ export const Heatmap = {
 export const Layering = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'donors',
         source: './data/donors.csv',
       },
-      dataTransformations: [
+      transformations: [
         {
           groupby: 'sex',
         },
@@ -608,7 +608,7 @@ export const Layering = {
           },
         },
       ],
-      dataRepresentation: [
+      representation: [
         {
           type: 'GoGComponent',
           mark: 'bar',
@@ -635,11 +635,11 @@ export const Layering = {
 export const TableExample = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'donors',
         source: './data/donors.csv',
       },
-      dataRepresentation: {
+      representation: {
         mark: 'row',
         mapping: [
           { field: 'weight_value', encoding: 'color', type: 'quantitative' },
@@ -655,11 +655,11 @@ export const TableExample = {
 export const TableDefault = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'donors',
         source: './data/donors.csv',
       },
-      dataRepresentation: {
+      representation: {
         mark: 'row',
         mapping: [{ field: '*', encoding: 'text' }],
       },
@@ -671,11 +671,11 @@ export const TableDefault = {
 export const ScatterWithMapping = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'donors',
         source: './data/donors.csv',
       },
-      dataRepresentation: {
+      representation: {
         mark: 'point',
         mapping: [
           { field: 'height_value', encoding: 'x', type: 'quantitative' },
@@ -690,12 +690,12 @@ export const ScatterWithMapping = {
 export const OrganMap = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'donors',
         source: './data/organs.json', // e.g. a geojson format
       },
       ///
-      dataRepresentation: {
+      representation: {
         mark: 'geometry',
         mapping: [
           { field: 'count', encoding: 'text', type: 'quantitative' },
@@ -709,11 +709,11 @@ export const OrganMap = {
 export const Checkboxes = {
   args: {
     spec: {
-      dataSource: {
+      source: {
         name: 'donors',
         source: './data/donors.csv',
       },
-      dataRepresentation: {
+      representation: {
         mark: 'checkbox',
         mapping: [{ field: 'sex', encoding: 'text', type: 'nominal' }],
       },
