@@ -41,17 +41,16 @@ export default {
 export const Default = {
   args: {
     spec: {
-      dataSource: {
-        key: 'donors',
+      source: {
+        name: 'donors',
         source: './data/donors.csv',
       },
-      dataRepresentation: {
-        type: 'GoGComponent',
+      representation: {
         mark: 'point',
-        encoding: {
-          x: { field: 'weight_value' },
-          y: { field: 'height_value' },
-        },
+        mapping: [
+          { encoding: 'y', field: 'height_value', type: 'quantitative' },
+          { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+        ],
       },
     },
   },
@@ -60,11 +59,11 @@ export const Default = {
 export const BarChartAverageWeight = {
   args: {
     spec: {
-      dataSource: {
-        key: 'donors',
+      source: {
+        name: 'donors',
         source: './data/donors.csv',
       },
-      dataTransformations: [
+      transformations: [
         {
           groupby: 'sex',
         },
@@ -74,13 +73,13 @@ export const BarChartAverageWeight = {
           },
         },
       ],
-      dataRepresentation: {
+      representation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'sex' },
-          y: { field: 'mean_mass' },
-        },
+        mapping: [
+          { encoding: 'x', field: 'sex', type: 'nominal' },
+          { encoding: 'y', field: 'mean_mass', type: 'quantitative' },
+        ],
       },
     },
   },
@@ -106,10 +105,10 @@ export const BarChartSexCounts = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'sex' },
-          y: { field: 'sex_count' },
-        },
+        mapping: [
+          { encoding: 'x', field: 'sex', type: 'nominal' },
+          { encoding: 'y', field: 'sex_count', type: 'quantitative' },
+        ],
       },
     },
   },
@@ -148,10 +147,10 @@ export const BarChartJoin = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'sex' },
-          y: { field: 'datasets_by_sex' },
-        },
+        mapping: [
+          { encoding: 'x', field: 'sex', type: 'nominal' },
+          { encoding: 'y', field: 'datasets_by_sex', type: 'quantitative' },
+        ],
       },
     },
   },
@@ -176,9 +175,7 @@ export const SingleBarChart = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'count' },
-        },
+        mapping: [{ encoding: 'x', field: 'count', type: 'quantitative' }],
       },
     },
   },
@@ -204,10 +201,10 @@ export const SingleBarChartStacked = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'count' },
-          color: { field: 'assay_category' },
-        },
+        mapping: [
+          { encoding: 'x', field: 'count', type: 'quantitative' },
+          { encoding: 'color', field: 'assay_category', type: 'nominal' },
+        ],
       },
     },
   },
@@ -235,10 +232,10 @@ export const SingleBarChartStackedRelative = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'freq', type: 'quantitative' },
-          color: { field: 'assay_category' },
-        },
+        mapping: [
+          { encoding: 'x', field: 'freq', type: 'quantitative' },
+          { encoding: 'color', field: 'assay_category', type: 'nominal' },
+        ],
       },
     },
   },
@@ -301,11 +298,15 @@ export const MultipleBarChartStacked = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'count' },
-          y: { field: 'origin_samples_unique_mapped_organs' },
-          color: { field: 'assay_category' },
-        },
+        mapping: [
+          { encoding: 'x', field: 'count', type: 'quantitative' },
+          {
+            encoding: 'y',
+            field: 'origin_samples_unique_mapped_organs',
+            type: 'nominal',
+          },
+          { encoding: 'color', field: 'assay_category', type: 'nominal' },
+        ],
       },
     },
   },
@@ -334,11 +335,15 @@ export const MultipleBarChartStackedReverse = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'count' },
-          color: { field: 'origin_samples_unique_mapped_organs' },
-          y: { field: 'assay_category' },
-        },
+        mapping: [
+          { encoding: 'x', field: 'count', type: 'quantitative' },
+          {
+            encoding: 'color',
+            field: 'origin_samples_unique_mapped_organs',
+            type: 'nominal',
+          },
+          { encoding: 'y', field: 'assay_category', type: 'nominal' },
+        ],
       },
     },
   },
@@ -384,11 +389,15 @@ export const MultipleBarChartStackedRelative = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'freq', type: 'quantitative' },
-          y: { field: 'origin_samples_unique_mapped_organs' },
-          color: { field: 'assay_category' },
-        },
+        mapping: [
+          { encoding: 'x', field: 'freq', type: 'quantitative' },
+          {
+            encoding: 'y',
+            field: 'origin_samples_unique_mapped_organs',
+            type: 'nominal',
+          },
+          { encoding: 'color', field: 'assay_category', type: 'nominal' },
+        ],
       },
     },
   },
@@ -434,11 +443,15 @@ export const MultipleBarChartStackedRelativeReverse = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'freq', type: 'quantitative' },
-          y: { field: 'assay_category' },
-          color: { field: 'origin_samples_unique_mapped_organs' },
-        },
+        mapping: [
+          { encoding: 'x', field: 'freq', type: 'quantitative' },
+          { encoding: 'y', field: 'assay_category', type: 'nominal' },
+          {
+            encoding: 'color',
+            field: 'origin_samples_unique_mapped_organs',
+            type: 'nominal',
+          },
+        ],
       },
     },
   },
@@ -467,11 +480,15 @@ export const MultipleBarChartStackedFiltered = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'bar',
-        encoding: {
-          x: { field: 'count' },
-          y: { field: 'origin_samples_unique_mapped_organs' },
-          color: { field: 'assay_category' },
-        },
+        mapping: [
+          { encoding: 'x', field: 'count', type: 'quantitative' },
+          {
+            encoding: 'y',
+            field: 'origin_samples_unique_mapped_organs',
+            type: 'nominal',
+          },
+          { encoding: 'color', field: 'assay_category', type: 'nominal' },
+        ],
       },
     },
   },
@@ -500,11 +517,15 @@ export const Heatmap = {
       dataRepresentation: {
         type: 'GoGComponent',
         mark: 'rect',
-        encoding: {
-          color: { field: 'count' },
-          y: { field: 'origin_samples_unique_mapped_organs' },
-          x: { field: 'assay_category' },
-        },
+        mapping: [
+          { encoding: 'color', field: 'count', type: 'quantitative' },
+          {
+            encoding: 'y',
+            field: 'origin_samples_unique_mapped_organs',
+            type: 'nominal',
+          },
+          { encoding: 'x', field: 'assay_category', type: 'nominal' },
+        ],
       },
     },
   },
@@ -591,19 +612,19 @@ export const Layering = {
         {
           type: 'GoGComponent',
           mark: 'bar',
-          encoding: {
-            y: { field: 'sex' },
-            x: { field: 'mean_mass' },
-          },
+          mapping: [
+            { encoding: 'y', field: 'sex', type: 'nominal' },
+            { encoding: 'x', field: 'mean_mass', type: 'quantitative' },
+          ],
         },
         {
           type: 'GoGComponent',
           mark: 'text',
-          encoding: {
-            y: { field: 'sex' },
-            x: { field: 'mean_mass' },
-            text: { field: 'mean_mass' },
-          },
+          mapping: [
+            { encoding: 'y', field: 'sex', type: 'nominal' },
+            { encoding: 'x', field: 'mean_mass', type: 'quantitative' },
+            { encoding: 'text', field: 'mean_mass', type: 'quantitative' },
+          ],
         },
       ],
     },
