@@ -510,6 +510,18 @@ export const Heatmap = {
   },
 };
 
+//  {
+//   type: 'columnar'
+//   mark: 'table',
+//   mapping: {
+//     // text, color, bar,
+
+//     // other data representations
+
+//     // map, images,
+//   }
+//  }
+
 // export const Template = {
 //   args: {
 //     spec: {
@@ -598,44 +610,92 @@ export const Layering = {
   },
 };
 
-// export const Table = {
-//   args: {
-//     spec: {
-//       dataSource: {
-//         key: 'penguins',
-//         source: './data/penguins.csv',
-//       },
-//       dataRepresentation: {
-//         type: 'TableComponent',
-//       },
-//     },
-//   },
-// };
+// List of encodings, column as a mark
+export const TableExample = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'donors',
+        source: './data/donors.csv',
+      },
+      dataRepresentation: {
+        mark: 'row',
+        mapping: [
+          { field: 'weight_value', encoding: 'color', type: 'quantitative' },
+          { field: 'height_value', encoding: 'size', type: 'quantitative' },
+          { field: '*', encoding: 'text' },
+        ],
+      },
+    },
+  },
+};
 
-// export const OrganMap = {
-//   args: {
-//     spec: {
-//       dataSource: {
-//         key: 'penguins',
-//         source: './data/penguins.csv',
-//       },
-//       dataRepresentation: {
-//         type: 'OrganMapComponent',
-//       },
-//     },
-//   },
-// };
+// List of encodings
+export const TableDefault = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'donors',
+        source: './data/donors.csv',
+      },
+      dataRepresentation: {
+        mark: 'row',
+        mapping: [{ field: '*', encoding: 'text' }],
+      },
+    },
+  },
+};
 
-// export const FilterPanel = {
-//   args: {
-//     spec: {
-//       dataSource: {
-//         key: 'penguins',
-//         source: './data/penguins.csv',
-//       },
-//       dataRepresentation: {
-//         type: 'FilterPanelComponent',
-//       },
-//     },
-//   },
-// };
+// List of encodings
+export const ScatterWithMapping = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'donors',
+        source: './data/donors.csv',
+      },
+      dataRepresentation: {
+        mark: 'point',
+        mapping: [
+          { field: 'height_value', encoding: 'x', type: 'quantitative' },
+          { field: 'weight_value', encoding: 'y', type: 'quantitative' },
+          { field: 'bmi', encoding: 'color', type: 'quantitative' },
+        ],
+      },
+    },
+  },
+};
+
+export const OrganMap = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'donors',
+        source: './data/organs.json', // e.g. a geojson format
+      },
+      ///
+      dataRepresentation: {
+        mark: 'geometry',
+        mapping: [
+          { field: 'count', encoding: 'text', type: 'quantitative' },
+          { field: 'name', encoding: 'color', type: 'quantitative' },
+        ],
+      },
+    },
+  },
+};
+
+export const Checkboxes = {
+  args: {
+    spec: {
+      dataSource: {
+        key: 'donors',
+        source: './data/donors.csv',
+      },
+      dataRepresentation: {
+        mark: 'checkbox',
+        mapping: [{ field: 'sex', encoding: 'text', type: 'nominal' }],
+      },
+    },
+  },
+};
