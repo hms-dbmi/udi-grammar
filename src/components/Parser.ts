@@ -143,6 +143,7 @@ export type RowEncodingOptions =
   | 'size'
   | 'shape';
 export type RowMarkOptions =
+  | 'select'
   | 'text'
   | 'geometry'
   | 'point'
