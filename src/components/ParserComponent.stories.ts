@@ -175,7 +175,7 @@ export const SingleBarChart = {
       representation: {
         type: 'GoGComponent',
         mark: 'bar',
-        mapping: [{ encoding: 'x', field: 'count', type: 'quantitative' }],
+        mapping: { encoding: 'x', field: 'count', type: 'quantitative' },
       },
     },
   },
@@ -642,9 +642,19 @@ export const TableExample = {
       representation: {
         mark: 'row',
         mapping: [
-          { field: 'weight_value', encoding: 'color', type: 'quantitative' },
-          { field: 'height_value', encoding: 'size', type: 'quantitative' },
-          { field: '*', encoding: 'text' },
+          {
+            mark: 'rect',
+            field: 'weight_value',
+            encoding: 'color',
+            type: 'quantitative',
+          },
+          {
+            mark: 'point',
+            field: 'height_value',
+            encoding: 'size',
+            type: 'quantitative',
+          },
+          { mark: 'text', field: '*', encoding: 'text' },
         ],
       },
     },
@@ -661,28 +671,51 @@ export const TableDefault = {
       },
       representation: {
         mark: 'row',
-        mapping: [{ field: '*', encoding: 'text' }],
+        mapping: [{ mark: 'text', field: '*', encoding: 'text' }],
       },
     },
   },
 };
 
-// List of encodings
-export const ScatterWithMapping = {
+export const LayeredTableExample1 = {
   args: {
     spec: {
       source: {
         name: 'donors',
         source: './data/donors.csv',
       },
-      representation: {
-        mark: 'point',
-        mapping: [
-          { field: 'height_value', encoding: 'x', type: 'quantitative' },
-          { field: 'weight_value', encoding: 'y', type: 'quantitative' },
-          { field: 'bmi', encoding: 'color', type: 'quantitative' },
-        ],
+      representation: [
+        {
+          mark: 'row',
+          mapping: [{ mark: 'rect', field: '*', encoding: 'color' }],
+        },
+        {
+          mark: 'row',
+          mapping: [
+            { mark: 'text', field: '*', value: 'white', encoding: 'color' },
+          ],
+        },
+      ],
+    },
+  },
+};
+
+export const LayeredTableExample2 = {
+  args: {
+    spec: {
+      source: {
+        name: 'donors',
+        source: './data/donors.csv',
       },
+      representation: [
+        {
+          mark: 'row',
+          mapping: [
+            { mark: 'point', field: '*', encoding: 'size' },
+            { mark: 'point', field: '*', encoding: 'color' },
+          ],
+        },
+      ],
     },
   },
 };

@@ -1,11 +1,11 @@
 export interface UDIGrammar {
-  dataSource: DataSource | DataSource[];
-  dataTransformations?: DataTransformation[];
-  dataRepresentation: GoGComponent | GoGComponent[] | CustomComponent;
+  source: DataSource | DataSource[];
+  transformations?: DataTransformation[];
+  representation: Representation | Representations;
 }
 
 export interface DataSource {
-  key: string;
+  name: string;
   source: string; // url of csv for now
 }
 
@@ -18,12 +18,10 @@ export type DataTransformation =
   | Filter; // TODO: expand transformations
 
 interface DataTransformationBase {
-  in?: string | [string, string]; // key of input table(s)
-  // If no key is specified, it assumes the output of the previous operation.
-  out?: string; // key of output table
+  in?: string | [string, string]; // name of input table(s)
+  // If no name is specified, it assumes the output of the previous operation.
+  out?: string; // name of output table
 }
-
-// ideally in/out could be assumed and ommitted.
 
 export interface GroupBy extends DataTransformationBase {
   in?: string;
@@ -54,7 +52,7 @@ export interface Derive extends DataTransformationBase {
   derive: TableExpression;
 }
 
-export interface Derive extends DataTransformation {
+export interface Filter extends DataTransformationBase {
   in?: string;
   filter: TableExpression;
 }
@@ -66,60 +64,97 @@ export interface AggregateFunction {
   field?: 'string';
 }
 
-export interface Component {
-  type: string;
-}
+export type Representation = VisualizationLayer | RowLayer;
+export type Representations = VisualizationLayer[] | RowLayer[];
 
-export interface GoGComponent extends Component {
-  type: 'GoGComponent';
+export type DataTypes = 'quantitative' | 'ordinal' | 'nominal';
+
+export interface GenericLayer<Mark, Mapping> {
   mark: Mark;
+  mapping: Mapping | Mapping[];
+}
+export interface GenericFieldMapping<Encoding> {
   encoding: Encoding;
+  field: string;
+  type: DataTypes;
 }
-
-export type CustomComponent =
-  | TableComponent
-  | FilterPanelComponent
-  | OrganMapComponent;
-
-export interface TableComponent extends Component {
-  type: 'TableComponent';
+export interface GenericValueMapping<Encoding> {
+  encoding: Encoding;
+  value: string | number;
 }
+export type VisualizationLayer =
+  | LineLayer
+  | AreaLayer
+  | GeometryLayer
+  | RectLayer
+  | BarLayer
+  | PointLayer;
+// Mark = line
+export type LineEncodingOptions = 'x' | 'y' | 'color';
+export type LineLayer = GenericLayer<'line', LineMapping>;
+export type LineMapping = LineFieldMapping | LineValueMapping;
+export type LineFieldMapping = GenericFieldMapping<LineEncodingOptions>;
+export type LineValueMapping = GenericValueMapping<LineEncodingOptions>;
+// Mark = area
+export type AreaEncodingOptions = 'x' | 'y' | 'y2' | 'color' | 'stroke';
+export type AreaLayer = GenericLayer<'area', AreaMapping>;
+export type AreaMapping = AreaFieldMapping | AreaValueMapping;
+export type AreaFieldMapping = GenericFieldMapping<AreaEncodingOptions>;
+export type AreaValueMapping = GenericValueMapping<AreaEncodingOptions>;
+// Mark = geometry
+export type GeometryEncodingOptions = 'color' | 'stroke' | 'strokeWidth';
+export type GeometryLayer = GenericLayer<'geometry', GeometryMapping>;
+export type GeometryMapping = GeometryFieldMapping | GeometryValueMapping;
+export type GeometryFieldMapping = GenericFieldMapping<GeometryEncodingOptions>;
+export type GeometryValueMapping = GenericValueMapping<GeometryEncodingOptions>;
+// Mark = rect
+export type RectEncodingOptions = 'x' | 'x2' | 'y' | 'y2' | 'color';
+export type RectLayer = GenericLayer<'rect', RectMapping>;
+export type RectMapping = RectFieldMapping | RectValueMapping;
+export type RectFieldMapping = GenericFieldMapping<RectEncodingOptions>;
+export type RectValueMapping = GenericValueMapping<RectEncodingOptions>;
+// Mark = bar
+export type BarEncodingOptions =
+  | 'x'
+  | 'x2'
+  | 'y'
+  | 'y2'
+  | 'xOffset'
+  | 'yOffset'
+  | 'color';
+export type BarLayer = GenericLayer<'bar', BarMapping>;
+export type BarMapping = BarFieldMapping | BarValueMapping;
+export type BarFieldMapping = GenericFieldMapping<BarEncodingOptions>;
+export type BarValueMapping = GenericValueMapping<BarEncodingOptions>;
+// Mark = point
+export type PointEncodingOptions = 'x' | 'y' | 'color' | 'size' | 'shape';
+export type PointLayer = GenericLayer<'point', PointMapping>;
+export type PointMapping = PointFieldMapping | PointValueMapping;
+export type PointFieldMapping = GenericFieldMapping<PointEncodingOptions>;
+export type PointValueMapping = GenericValueMapping<PointEncodingOptions>;
 
-export interface FilterPanelComponent extends Component {
-  type: 'FilterPanelComponent';
+// Mark = row
+// The pattern for Rows is intentionally different from other marks
+export type RowEncodingOptions =
+  | 'text'
+  | 'x'
+  | 'y'
+  | 'color'
+  | 'size'
+  | 'shape';
+export type RowMarkOptions =
+  | 'text'
+  | 'geometry'
+  | 'point'
+  | 'bar'
+  | 'rect'
+  | 'line';
+// TODO: there are some invalid mark/encoding combinations here. Maybe that's ok though.
+export type RowLayer = GenericLayer<'row', RowMapping>;
+export interface RowMapping extends GenericFieldMapping<RowEncodingOptions> {
+  mark: RowMarkOptions;
 }
-
-export interface OrganMapComponent extends Component {
-  type: 'OrganMapComponent';
-}
-
-export interface Mark {
-  // point, bar, text?. icon
-  // point, bar, text, tect
-}
-
-export interface Encoding {
-  // x,y,color, xOffset, yOffset, x2,y2, text
-  // line, opacity, size
-}
-
-// point
-// bar
-
-// count thingy
-// rectangle (heatmap)
-
-// table
-// list of cards
-
-// checkbox thingy
-// organ man
-
-// version 1.
-// bar charts
-// scatterplots
-// tables
-// filter panel
+//
 
 export interface ParsedUDIGrammar {
   dataSource: DataSource[];
