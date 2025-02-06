@@ -88,7 +88,15 @@ export type VisualizationLayer =
   | GeometryLayer
   | RectLayer
   | BarLayer
-  | PointLayer;
+  | PointLayer
+  | TextLayer;
+
+// Mark = text
+export type TextEncodingOptions = 'x' | 'y' | 'color' | 'text' | 'size';
+export type TextLayer = GenericLayer<'text', TextMapping>;
+export type TextMapping = TextFieldMapping | TextValueMapping;
+export type TextFieldMapping = GenericFieldMapping<TextEncodingOptions>;
+export type TextValueMapping = GenericValueMapping<TextEncodingOptions>;
 // Mark = line
 export type LineEncodingOptions = 'x' | 'y' | 'color';
 export type LineLayer = GenericLayer<'line', LineMapping>;
@@ -127,7 +135,14 @@ export type BarMapping = BarFieldMapping | BarValueMapping;
 export type BarFieldMapping = GenericFieldMapping<BarEncodingOptions>;
 export type BarValueMapping = GenericValueMapping<BarEncodingOptions>;
 // Mark = point
-export type PointEncodingOptions = 'x' | 'y' | 'color' | 'size' | 'shape';
+export type PointEncodingOptions =
+  | 'x'
+  | 'y'
+  | 'xOffset'
+  | 'yOffset'
+  | 'color'
+  | 'size'
+  | 'shape';
 export type PointLayer = GenericLayer<'point', PointMapping>;
 export type PointMapping = PointFieldMapping | PointValueMapping;
 export type PointFieldMapping = GenericFieldMapping<PointEncodingOptions>;
@@ -139,6 +154,8 @@ export type RowEncodingOptions =
   | 'text'
   | 'x'
   | 'y'
+  | 'xOffset'
+  | 'yOffset'
   | 'color'
   | 'size'
   | 'shape';
