@@ -12,7 +12,7 @@ export interface UDIGrammar {
    * The data transformations applied to the source data before displaying
    * the data.
    */
-  transformations?: DataTransformation[];
+  transformation?: DataTransformation[];
 
   /**
    * The visual representation of the data as either a visualization or table.
