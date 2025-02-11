@@ -1,0 +1,1217 @@
+{
+  "$ref": "#/definitions/UDIGrammar",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "AggregateFunction": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "field": {
+          "const": "string",
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "op": {
+          "description": "TODO: Description",
+          "enum": [
+            "count",
+            "mean",
+            "min",
+            "max",
+            "median",
+            "frequency"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "op"
+      ],
+      "type": "object"
+    },
+    "AreaEncodingOptions": {
+      "description": "TODO: Description",
+      "enum": [
+        "x",
+        "y",
+        "y2",
+        "color",
+        "stroke"
+      ],
+      "type": "string"
+    },
+    "AreaFieldMapping": {
+      "$ref": "#/definitions/GenericFieldMapping%3CAreaEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "AreaLayer": {
+      "$ref": "#/definitions/GenericLayer%3C%22area%22%2CAreaMapping%3E",
+      "description": "TODO: Description"
+    },
+    "AreaMapping": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/AreaFieldMapping"
+        },
+        {
+          "$ref": "#/definitions/AreaValueMapping"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "AreaValueMapping": {
+      "$ref": "#/definitions/GenericValueMapping%3CAreaEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "BarEncodingOptions": {
+      "description": "TODO: Description",
+      "enum": [
+        "x",
+        "x2",
+        "y",
+        "y2",
+        "xOffset",
+        "yOffset",
+        "color"
+      ],
+      "type": "string"
+    },
+    "BarFieldMapping": {
+      "$ref": "#/definitions/GenericFieldMapping%3CBarEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "BarLayer": {
+      "$ref": "#/definitions/GenericLayer%3C%22bar%22%2CBarMapping%3E",
+      "description": "TODO: Description"
+    },
+    "BarMapping": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/BarFieldMapping"
+        },
+        {
+          "$ref": "#/definitions/BarValueMapping"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "BarValueMapping": {
+      "$ref": "#/definitions/GenericValueMapping%3CBarEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "DataSource": {
+      "additionalProperties": false,
+      "description": "TODO: DataSource",
+      "properties": {
+        "name": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "source": {
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "source"
+      ],
+      "type": "object"
+    },
+    "DataTransformation": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/GroupBy"
+        },
+        {
+          "$ref": "#/definitions/RollUp"
+        },
+        {
+          "$ref": "#/definitions/Join"
+        },
+        {
+          "$ref": "#/definitions/OrderBy"
+        },
+        {
+          "$ref": "#/definitions/Derive"
+        },
+        {
+          "$ref": "#/definitions/Filter"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "DataTypes": {
+      "description": "TODO: Description",
+      "enum": [
+        "quantitative",
+        "ordinal",
+        "nominal"
+      ],
+      "type": "string"
+    },
+    "Derive": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "derive": {
+          "$ref": "#/definitions/TableExpression",
+          "description": "TODO: Description"
+        },
+        "in": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "out": {
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "derive"
+      ],
+      "type": "object"
+    },
+    "Filter": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "filter": {
+          "$ref": "#/definitions/TableExpression",
+          "description": "TODO: Description"
+        },
+        "in": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "out": {
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filter"
+      ],
+      "type": "object"
+    },
+    "GenericFieldMapping<AreaEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/AreaEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "field": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/DataTypes",
+          "description": "TODO: Description"
+        }
+      },
+      "required": [
+        "encoding",
+        "field",
+        "type"
+      ],
+      "type": "object"
+    },
+    "GenericFieldMapping<BarEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/BarEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "field": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/DataTypes",
+          "description": "TODO: Description"
+        }
+      },
+      "required": [
+        "encoding",
+        "field",
+        "type"
+      ],
+      "type": "object"
+    },
+    "GenericFieldMapping<GeometryEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/GeometryEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "field": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/DataTypes",
+          "description": "TODO: Description"
+        }
+      },
+      "required": [
+        "encoding",
+        "field",
+        "type"
+      ],
+      "type": "object"
+    },
+    "GenericFieldMapping<LineEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/LineEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "field": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/DataTypes",
+          "description": "TODO: Description"
+        }
+      },
+      "required": [
+        "encoding",
+        "field",
+        "type"
+      ],
+      "type": "object"
+    },
+    "GenericFieldMapping<PointEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/PointEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "field": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/DataTypes",
+          "description": "TODO: Description"
+        }
+      },
+      "required": [
+        "encoding",
+        "field",
+        "type"
+      ],
+      "type": "object"
+    },
+    "GenericFieldMapping<RectEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/RectEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "field": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/DataTypes",
+          "description": "TODO: Description"
+        }
+      },
+      "required": [
+        "encoding",
+        "field",
+        "type"
+      ],
+      "type": "object"
+    },
+    "GenericFieldMapping<TextEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/TextEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "field": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/DataTypes",
+          "description": "TODO: Description"
+        }
+      },
+      "required": [
+        "encoding",
+        "field",
+        "type"
+      ],
+      "type": "object"
+    },
+    "GenericLayer<\"area\",AreaMapping>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "mapping": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/AreaMapping"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/AreaMapping"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "TODO: Description"
+        },
+        "mark": {
+          "const": "area",
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mark",
+        "mapping"
+      ],
+      "type": "object"
+    },
+    "GenericLayer<\"bar\",BarMapping>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "mapping": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/BarMapping"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/BarMapping"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "TODO: Description"
+        },
+        "mark": {
+          "const": "bar",
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mark",
+        "mapping"
+      ],
+      "type": "object"
+    },
+    "GenericLayer<\"geometry\",GeometryMapping>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "mapping": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/GeometryMapping"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/GeometryMapping"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "TODO: Description"
+        },
+        "mark": {
+          "const": "geometry",
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mark",
+        "mapping"
+      ],
+      "type": "object"
+    },
+    "GenericLayer<\"line\",LineMapping>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "mapping": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/LineMapping"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/LineMapping"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "TODO: Description"
+        },
+        "mark": {
+          "const": "line",
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mark",
+        "mapping"
+      ],
+      "type": "object"
+    },
+    "GenericLayer<\"point\",PointMapping>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "mapping": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PointMapping"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/PointMapping"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "TODO: Description"
+        },
+        "mark": {
+          "const": "point",
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mark",
+        "mapping"
+      ],
+      "type": "object"
+    },
+    "GenericLayer<\"rect\",RectMapping>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "mapping": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/RectMapping"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/RectMapping"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "TODO: Description"
+        },
+        "mark": {
+          "const": "rect",
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mark",
+        "mapping"
+      ],
+      "type": "object"
+    },
+    "GenericLayer<\"row\",RowMapping>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "mapping": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/RowMapping"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/RowMapping"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "TODO: Description"
+        },
+        "mark": {
+          "const": "row",
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mark",
+        "mapping"
+      ],
+      "type": "object"
+    },
+    "GenericLayer<\"text\",TextMapping>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "mapping": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/TextMapping"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/TextMapping"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "TODO: Description"
+        },
+        "mark": {
+          "const": "text",
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mark",
+        "mapping"
+      ],
+      "type": "object"
+    },
+    "GenericValueMapping<AreaEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/AreaEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "value": {
+          "description": "TODO: Description",
+          "type": [
+            "string",
+            "number"
+          ]
+        }
+      },
+      "required": [
+        "encoding",
+        "value"
+      ],
+      "type": "object"
+    },
+    "GenericValueMapping<BarEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/BarEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "value": {
+          "description": "TODO: Description",
+          "type": [
+            "string",
+            "number"
+          ]
+        }
+      },
+      "required": [
+        "encoding",
+        "value"
+      ],
+      "type": "object"
+    },
+    "GenericValueMapping<GeometryEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/GeometryEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "value": {
+          "description": "TODO: Description",
+          "type": [
+            "string",
+            "number"
+          ]
+        }
+      },
+      "required": [
+        "encoding",
+        "value"
+      ],
+      "type": "object"
+    },
+    "GenericValueMapping<LineEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/LineEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "value": {
+          "description": "TODO: Description",
+          "type": [
+            "string",
+            "number"
+          ]
+        }
+      },
+      "required": [
+        "encoding",
+        "value"
+      ],
+      "type": "object"
+    },
+    "GenericValueMapping<PointEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/PointEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "value": {
+          "description": "TODO: Description",
+          "type": [
+            "string",
+            "number"
+          ]
+        }
+      },
+      "required": [
+        "encoding",
+        "value"
+      ],
+      "type": "object"
+    },
+    "GenericValueMapping<RectEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/RectEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "value": {
+          "description": "TODO: Description",
+          "type": [
+            "string",
+            "number"
+          ]
+        }
+      },
+      "required": [
+        "encoding",
+        "value"
+      ],
+      "type": "object"
+    },
+    "GenericValueMapping<TextEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/TextEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "value": {
+          "description": "TODO: Description",
+          "type": [
+            "string",
+            "number"
+          ]
+        }
+      },
+      "required": [
+        "encoding",
+        "value"
+      ],
+      "type": "object"
+    },
+    "GeometryEncodingOptions": {
+      "description": "TODO: Description",
+      "enum": [
+        "color",
+        "stroke",
+        "strokeWidth"
+      ],
+      "type": "string"
+    },
+    "GeometryFieldMapping": {
+      "$ref": "#/definitions/GenericFieldMapping%3CGeometryEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "GeometryLayer": {
+      "$ref": "#/definitions/GenericLayer%3C%22geometry%22%2CGeometryMapping%3E",
+      "description": "TODO: Description"
+    },
+    "GeometryMapping": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/GeometryFieldMapping"
+        },
+        {
+          "$ref": "#/definitions/GeometryValueMapping"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "GeometryValueMapping": {
+      "$ref": "#/definitions/GenericValueMapping%3CGeometryEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "GroupBy": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "groupby": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "TODO: Description"
+        },
+        "in": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "out": {
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "groupby"
+      ],
+      "type": "object"
+    },
+    "Join": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "in": {
+          "description": "TODO: Description",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        "join": {
+          "additionalProperties": false,
+          "description": "TODO: Description",
+          "properties": {
+            "on": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          "required": [
+            "on"
+          ],
+          "type": "object"
+        },
+        "out": {
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "in",
+        "join"
+      ],
+      "type": "object"
+    },
+    "LineEncodingOptions": {
+      "description": "TODO: Description",
+      "enum": [
+        "x",
+        "y",
+        "color"
+      ],
+      "type": "string"
+    },
+    "LineFieldMapping": {
+      "$ref": "#/definitions/GenericFieldMapping%3CLineEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "LineLayer": {
+      "$ref": "#/definitions/GenericLayer%3C%22line%22%2CLineMapping%3E",
+      "description": "TODO: Description"
+    },
+    "LineMapping": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/LineFieldMapping"
+        },
+        {
+          "$ref": "#/definitions/LineValueMapping"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "LineValueMapping": {
+      "$ref": "#/definitions/GenericValueMapping%3CLineEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "OrderBy": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "in": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "orderby": {
+          "type": "string"
+        },
+        "out": {
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "orderby"
+      ],
+      "type": "object"
+    },
+    "PointEncodingOptions": {
+      "description": "TODO: Description",
+      "enum": [
+        "x",
+        "y",
+        "xOffset",
+        "yOffset",
+        "color",
+        "size",
+        "shape"
+      ],
+      "type": "string"
+    },
+    "PointFieldMapping": {
+      "$ref": "#/definitions/GenericFieldMapping%3CPointEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "PointLayer": {
+      "$ref": "#/definitions/GenericLayer%3C%22point%22%2CPointMapping%3E"
+    },
+    "PointMapping": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/PointFieldMapping"
+        },
+        {
+          "$ref": "#/definitions/PointValueMapping"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "PointValueMapping": {
+      "$ref": "#/definitions/GenericValueMapping%3CPointEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "RectEncodingOptions": {
+      "description": "TODO: Description",
+      "enum": [
+        "x",
+        "x2",
+        "y",
+        "y2",
+        "color"
+      ],
+      "type": "string"
+    },
+    "RectFieldMapping": {
+      "$ref": "#/definitions/GenericFieldMapping%3CRectEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "RectLayer": {
+      "$ref": "#/definitions/GenericLayer%3C%22rect%22%2CRectMapping%3E",
+      "description": "TODO: Description"
+    },
+    "RectMapping": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/RectFieldMapping"
+        },
+        {
+          "$ref": "#/definitions/RectValueMapping"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "RectValueMapping": {
+      "$ref": "#/definitions/GenericValueMapping%3CRectEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "Representation": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/VisualizationLayer"
+        },
+        {
+          "$ref": "#/definitions/RowLayer"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "Representations": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/definitions/VisualizationLayer"
+          },
+          "type": "array"
+        },
+        {
+          "items": {
+            "$ref": "#/definitions/RowLayer"
+          },
+          "type": "array"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "RollUp": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "in": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "out": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "rollup": {
+          "additionalProperties": {
+            "$ref": "#/definitions/AggregateFunction"
+          },
+          "description": "TODO: Description",
+          "type": "object"
+        }
+      },
+      "required": [
+        "rollup"
+      ],
+      "type": "object"
+    },
+    "RowEncodingOptions": {
+      "description": "TODO: Description",
+      "enum": [
+        "text",
+        "x",
+        "y",
+        "xOffset",
+        "yOffset",
+        "color",
+        "size",
+        "shape"
+      ],
+      "type": "string"
+    },
+    "RowLayer": {
+      "$ref": "#/definitions/GenericLayer%3C%22row%22%2CRowMapping%3E",
+      "description": "TODO: Description"
+    },
+    "RowMapping": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/RowEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "field": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "mark": {
+          "$ref": "#/definitions/RowMarkOptions",
+          "description": "TODO: Description"
+        },
+        "type": {
+          "$ref": "#/definitions/DataTypes",
+          "description": "TODO: Description"
+        }
+      },
+      "required": [
+        "encoding",
+        "field",
+        "mark",
+        "type"
+      ],
+      "type": "object"
+    },
+    "RowMarkOptions": {
+      "description": "TODO: Description",
+      "enum": [
+        "select",
+        "text",
+        "geometry",
+        "point",
+        "bar",
+        "rect",
+        "line"
+      ],
+      "type": "string"
+    },
+    "TableExpression": {
+      "description": "TODO: Description",
+      "type": "string"
+    },
+    "TextEncodingOptions": {
+      "description": "TODO: Description",
+      "enum": [
+        "x",
+        "y",
+        "color",
+        "text",
+        "size",
+        "theta",
+        "radius"
+      ],
+      "type": "string"
+    },
+    "TextFieldMapping": {
+      "$ref": "#/definitions/GenericFieldMapping%3CTextEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "TextLayer": {
+      "$ref": "#/definitions/GenericLayer%3C%22text%22%2CTextMapping%3E",
+      "description": "TODO: Description"
+    },
+    "TextMapping": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/TextFieldMapping"
+        },
+        {
+          "$ref": "#/definitions/TextValueMapping"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "TextValueMapping": {
+      "$ref": "#/definitions/GenericValueMapping%3CTextEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "UDIGrammar": {
+      "additionalProperties": false,
+      "description": "The Universal Discovery Interface (UDI) Grammar.",
+      "properties": {
+        "representation": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Representation"
+            },
+            {
+              "$ref": "#/definitions/Representations"
+            }
+          ],
+          "description": "The visual representation of the data as either a visualization or table."
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/DataSource"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/DataSource"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "The data source or data sources. Typically this is a path to a single csv file or a list of csv files."
+        },
+        "transformations": {
+          "description": "The data transformations applied to the source data before displaying the data.",
+          "items": {
+            "$ref": "#/definitions/DataTransformation"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "source",
+        "representation"
+      ],
+      "type": "object"
+    },
+    "VisualizationLayer": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/LineLayer"
+        },
+        {
+          "$ref": "#/definitions/AreaLayer"
+        },
+        {
+          "$ref": "#/definitions/GeometryLayer"
+        },
+        {
+          "$ref": "#/definitions/RectLayer"
+        },
+        {
+          "$ref": "#/definitions/BarLayer"
+        },
+        {
+          "$ref": "#/definitions/PointLayer"
+        },
+        {
+          "$ref": "#/definitions/TextLayer"
+        }
+      ],
+      "description": "TODO: Description"
+    }
+  }
+}
