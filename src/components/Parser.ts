@@ -91,8 +91,26 @@ export type VisualizationLayer =
   | PointLayer
   | TextLayer;
 
+// Mark = arc
+export type ArcEncodingOptions =
+  | 'theta'
+  | 'theta2'
+  | 'radius'
+  | 'radius2'
+  | 'color';
+export type ArcLayer = GenericLayer<'arc', ArcMapping>;
+export type ArcMapping = ArcFieldMapping | ArcValueMapping;
+export type ArcFieldMapping = GenericFieldMapping<ArcEncodingOptions>;
+export type ArcValueMapping = GenericValueMapping<ArcEncodingOptions>;
 // Mark = text
-export type TextEncodingOptions = 'x' | 'y' | 'color' | 'text' | 'size';
+export type TextEncodingOptions =
+  | 'x'
+  | 'y'
+  | 'color'
+  | 'text'
+  | 'size'
+  | 'theta'
+  | 'radius';
 export type TextLayer = GenericLayer<'text', TextMapping>;
 export type TextMapping = TextFieldMapping | TextValueMapping;
 export type TextFieldMapping = GenericFieldMapping<TextEncodingOptions>;
