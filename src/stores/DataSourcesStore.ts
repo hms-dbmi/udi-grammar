@@ -4,10 +4,9 @@ import type {
   AggregateFunction,
   DataSource,
   DataTransformation,
-} from '../components/Parser.ts';
+} from './GrammarTypes';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
 import { loadCSV, all, desc, op, table, from, type ColumnTable } from 'arquero';
-import { f } from 'msw/lib/core/HttpResponse-DE19n76Q.js';
 
 interface DataInterface {
   source: DataSource;
@@ -39,9 +38,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   }
 
   async function initDataSource(dataSource: DataSource): Promise<void> {
-    if (getDataSource(dataSource.key)) return;
+    if (getDataSource(dataSource.name)) return;
     const dest: ColumnTable = await loadCSV(dataSource.source);
-    dataSources.value[dataSource.key] = { source: dataSource, dest };
+    dataSources.value[dataSource.name] = { source: dataSource, dest };
   }
 
   function getDataSource(key: string): DataInterface | null {
@@ -80,6 +79,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     namedTables: Map<string, ColumnTable>,
     dataTransformations: DataTransformation[],
   ): ColumnTable {
+    console.log('perform data transforations');
     const key = namedTables.keys().next().value;
     const table = namedTables.get(key);
     const currentTable: {

@@ -62,7 +62,7 @@ export const BarChartAverageWeight = {
         name: 'donors',
         source: './data/donors.csv',
       },
-      transformations: [
+      transformation: [
         {
           groupby: 'sex',
         },
@@ -90,7 +90,7 @@ export const BarChartSexCounts = {
         name: 'donors',
         source: './data/donors.csv',
       },
-      transformations: [
+      transformation: [
         {
           groupby: 'sex',
         },
@@ -124,7 +124,7 @@ export const BarChartJoin = {
           source: './data/datasets.csv',
         },
       ],
-      transformations: [
+      transformation: [
         {
           in: ['donors', 'datasets'],
           join: {
@@ -161,7 +161,7 @@ export const SingleBarChart = {
           source: './data/datasets.csv',
         },
       ],
-      transformations: [
+      transformation: [
         {
           rollup: {
             count: { op: 'count' },
@@ -185,7 +185,7 @@ export const SingleBarChartStacked = {
           source: './data/datasets.csv',
         },
       ],
-      transformations: [
+      transformation: [
         { groupby: 'assay_category' },
         {
           rollup: {
@@ -213,7 +213,7 @@ export const SingleBarChartStackedRelative = {
           source: './data/datasets.csv',
         },
       ],
-      transformations: [
+      transformation: [
         {
           groupby: 'assay_category',
         },
@@ -241,7 +241,7 @@ export const SingleBarChartStackedRelative = {
 //         name: 'datasets',
 //         source: './data/datasets.csv',
 //       },
-//       transformations: [
+//       transformation: [
 //         {
 //           groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
 //         },
@@ -274,7 +274,7 @@ export const MultipleBarChartStacked = {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      transformations: [
+      transformation: [
         {
           groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
         },
@@ -310,7 +310,7 @@ export const MultipleBarChartStackedReverse = {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      transformations: [
+      transformation: [
         {
           groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
         },
@@ -346,7 +346,7 @@ export const MultipleBarChartStackedRelative = {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      transformations: [
+      transformation: [
         {
           groupby: 'origin_samples_unique_mapped_organs',
           out: 'groupCounts',
@@ -399,7 +399,7 @@ export const MultipleBarChartStackedRelativeReverse = {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      transformations: [
+      transformation: [
         {
           groupby: 'assay_category',
           out: 'groupCounts',
@@ -452,7 +452,7 @@ export const MultipleBarChartStackedFiltered = {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      transformations: [
+      transformation: [
         {
           filter: 'd.assay_category !== null',
         },
@@ -488,7 +488,7 @@ export const Heatmap = {
         name: 'datasets',
         source: './data/datasets.csv',
       },
-      transformations: [
+      transformation: [
         {
           groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
         },
@@ -584,7 +584,7 @@ export const Layering = {
         name: 'donors',
         source: './data/donors.csv',
       },
-      transformations: [
+      transformation: [
         {
           groupby: 'sex',
         },

@@ -4,12 +4,12 @@ import VegaLite from './VegaLite.vue';
 import OrganMapComponent from './OrganMapComponent.vue';
 import TableComponent from './TableComponent.vue';
 import FilterPanelComponent from './FilterPanelComponent.vue';
-import {
-  CustomComponent,
-  type ParsedUDIGrammar,
-  type UDIGrammar,
-  parseSpecification,
-} from './Parser';
+import { type ParsedUDIGrammar, parseSpecification } from './Parser';
+import type {
+  UDIGrammar,
+  VisualizationLayer,
+  VisualizationMapping,
+} from '@/stores/GrammarTypes';
 import { useDataSourcesStore } from '@/stores/DataSourcesStore';
 import { storeToRefs } from 'pinia';
 
@@ -20,37 +20,16 @@ export interface ParserProps {
   spec: UDIGrammar;
 }
 
-// TODO: infer based on data, or assume schema
-const columnTypes = {
-  species: 'nominal',
-  island: 'nominal',
-  bill_length_mm: 'quantitative',
-  bill_depth_mm: 'quantitative',
-  flipper_length_mm: 'quantitative',
-  body_mass_g: 'quantitative',
-  sex: 'nominal',
-  sex_count: 'quantitative',
-  mean_mass: 'quantitative',
-  weight_value: 'quantitative',
-  height_value: 'quantitative',
-  datasets_by_sex: 'quantitative',
-  origin_samples_unique_mapped_organs: 'nominal',
-  organ_count: 'quantitative',
-  assay_type: 'nominal',
-  count: 'quantitative',
-};
-
 const props = defineProps<ParserProps>();
 
 const parsedSpec = ref<ParsedUDIGrammar | null>(null);
 
-const isGoGComponent = ref<boolean>(false);
+const isVegaLiteComponent = ref<boolean>(false);
 const vegaLiteSpec = ref<string>('');
-const customComponentType = ref<string>('');
 onMounted(() => {
   // parse/validate grammar
   parsedSpec.value = parseSpecification(props.spec);
-  dataSourcesStore.initDataSources(parsedSpec.value.dataSource);
+  dataSourcesStore.initDataSources(parsedSpec.value.source);
   buildVisualization();
 
   // if (isVegaLiteCompatible(parsedSpec.value)) {
@@ -71,17 +50,12 @@ function buildVisualization(): void {
 
   if (isVegaLiteCompatible(parsedSpec.value)) {
     vegaLiteSpec.value = convertToVegaSpec(parsedSpec.value);
-    isGoGComponent.value = true;
-  } else {
-    customComponentType.value = (
-      parsedSpec.value.dataRepresentation as CustomComponent
-    ).type;
+    isVegaLiteComponent.value = true;
   }
 }
 
 function isVegaLiteCompatible(spec: ParsedUDIGrammar): boolean {
-  // TODO: make type guard
-  return Array.isArray(spec.dataRepresentation);
+  return !spec.representation.map((x) => x.mark).includes('row');
 }
 
 function convertToVegaSpec(spec: ParsedUDIGrammar): string {
@@ -92,11 +66,9 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   };
 
   // add data
-  // TODO: assume one data source
-  const dataInterface = spec.dataSource[0];
   vegaSpec.data.values = dataSourcesStore.getDataObject(
-    spec.dataSource.map((x) => x.key),
-    spec.dataTransformations,
+    spec.source.map((x) => x.name),
+    spec.transformation,
   );
   debugVegaData.value = vegaSpec.data.values;
   console.log(vegaSpec);
@@ -105,21 +77,32 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   // dataInterface.
 
   // add layers
-  const inputLayers = spec.dataRepresentation;
+  const inputLayers = spec.representation as VisualizationLayer[];
   if (!Array.isArray(inputLayers)) {
     throw new Error('invalid spec passed to vega conversion');
   }
-  const outputLayers = inputLayers.map((gogComponent) => {
-    let encoding = {};
-    for (let [key, value] of Object.entries(gogComponent.encoding)) {
-      encoding[key] = {
-        field: value.field,
-        type: value.type ?? columnTypes[value.field],
-      };
+  const outputLayers = inputLayers.map((layer) => {
+    let mapping = Array.isArray(layer.mapping)
+      ? layer.mapping
+      : [layer.mapping];
+
+    let vegaEncoding = {};
+    for (let map of mapping) {
+      const { encoding } = map;
+      if ('value' in map) {
+        vegaEncoding[encoding] = {
+          value: map.value,
+        };
+      } else {
+        vegaEncoding[encoding] = {
+          field: map.field,
+          type: map.type,
+        };
+      }
     }
     return {
-      mark: gogComponent.mark,
-      encoding,
+      mark: layer.mark,
+      encoding: vegaEncoding,
     };
   });
   vegaSpec['layer'] = outputLayers;
@@ -131,15 +114,15 @@ const debugVegaData = ref();
 </script>
 
 <template>
-  <VegaLite v-if="isGoGComponent" :spec="vegaLiteSpec" />
-  <component v-else :is="customComponentType" />
+  <VegaLite v-if="isVegaLiteComponent" :spec="vegaLiteSpec" />
+  <TableComponent v-else />
   <hr />
-  <pre>
-    {{ props.spec }}
+  <pre
+    >{{ props.spec }}
   </pre>
   <hr />
-  <pre>
-  {{ debugVegaData }}
+  <pre
+    >{{ debugVegaData }}
   </pre>
 </template>
 
