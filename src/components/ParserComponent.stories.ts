@@ -26,7 +26,6 @@ export default {
 //         source: './data/penguins.csv',
 //       },
 //       representation: {
-//         type: 'GoGComponent',
 //         mark: 'point',
 //         encoding: {
 //           x: { field: 'bill_length_mm' },
@@ -74,7 +73,6 @@ export const BarChartAverageWeight = {
         },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: [
           { encoding: 'x', field: 'sex', type: 'nominal' },
@@ -103,7 +101,6 @@ export const BarChartSexCounts = {
         },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: [
           { encoding: 'x', field: 'sex', type: 'nominal' },
@@ -145,7 +142,6 @@ export const BarChartJoin = {
         },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: [
           { encoding: 'x', field: 'sex', type: 'nominal' },
@@ -173,7 +169,6 @@ export const SingleBarChart = {
         },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: { encoding: 'x', field: 'count', type: 'quantitative' },
       },
@@ -199,7 +194,6 @@ export const SingleBarChartStacked = {
         },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: [
           { encoding: 'x', field: 'count', type: 'quantitative' },
@@ -230,7 +224,6 @@ export const SingleBarChartStackedRelative = {
         },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: [
           { encoding: 'x', field: 'freq', type: 'quantitative' },
@@ -262,7 +255,6 @@ export const SingleBarChartStackedRelative = {
 //         // },
 //       ],
 //       representation: {
-//         type: 'GoGComponent',
 //         mark: 'bar',
 //         encoding: {
 //           x: { field: 'count' },
@@ -296,7 +288,6 @@ export const MultipleBarChartStacked = {
         // },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: [
           { encoding: 'x', field: 'count', type: 'quantitative' },
@@ -333,7 +324,6 @@ export const MultipleBarChartStackedReverse = {
         // },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: [
           { encoding: 'x', field: 'count', type: 'quantitative' },
@@ -387,7 +377,6 @@ export const MultipleBarChartStackedRelative = {
         },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: [
           { encoding: 'x', field: 'freq', type: 'quantitative' },
@@ -441,7 +430,6 @@ export const MultipleBarChartStackedRelativeReverse = {
         },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: [
           { encoding: 'x', field: 'freq', type: 'quantitative' },
@@ -478,7 +466,6 @@ export const MultipleBarChartStackedFiltered = {
         },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'bar',
         mapping: [
           { encoding: 'x', field: 'count', type: 'quantitative' },
@@ -515,7 +502,6 @@ export const Heatmap = {
         // },
       ],
       representation: {
-        type: 'GoGComponent',
         mark: 'rect',
         mapping: [
           { encoding: 'color', field: 'count', type: 'quantitative' },
@@ -610,7 +596,6 @@ export const Layering = {
       ],
       representation: [
         {
-          type: 'GoGComponent',
           mark: 'bar',
           mapping: [
             { encoding: 'y', field: 'sex', type: 'nominal' },
@@ -618,7 +603,6 @@ export const Layering = {
           ],
         },
         {
-          type: 'GoGComponent',
           mark: 'text',
           mapping: [
             { encoding: 'y', field: 'sex', type: 'nominal' },
