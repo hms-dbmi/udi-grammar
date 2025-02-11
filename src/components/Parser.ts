@@ -1,23 +1,32 @@
+import type {
+  UDIGrammar,
+  DataSource,
+  DataTransformation,
+  Representations,
+  Representation,
+} from '../stores/GrammarTypes';
+
 export interface ParsedUDIGrammar {
-  dataSource: DataSource[];
-  dataTransformations?: DataTransformation[];
-  dataRepresentation: GoGComponent[] | CustomComponent;
+  source: DataSource[];
+  transformation?: DataTransformation[];
+  representation: Representations;
 }
 
+/**
+ * Convenience function to simplify the specification
+ * to ensure that source and representation are always arrays
+ */
 export function parseSpecification(spec: UDIGrammar): ParsedUDIGrammar {
-  let { dataSource, dataTransformations, dataRepresentation } = spec;
-  if (!Array.isArray(dataSource)) {
-    dataSource = [dataSource];
+  let { source, transformation, representation } = spec;
+  if (!Array.isArray(source)) {
+    source = [source];
   }
-  if (
-    !Array.isArray(dataRepresentation) &&
-    dataRepresentation.type === 'GoGComponent'
-  ) {
-    dataRepresentation = [dataRepresentation as GoGComponent];
+  if (!Array.isArray(representation)) {
+    representation = [representation] as Representations;
   }
-  if (dataTransformations) {
-    return { dataSource, dataTransformations, dataRepresentation };
+  if (transformation) {
+    return { source, transformation, representation };
   }
 
-  return { dataSource, dataRepresentation };
+  return { source, representation };
 }
