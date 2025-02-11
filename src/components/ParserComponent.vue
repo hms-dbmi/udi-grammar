@@ -5,11 +5,7 @@ import OrganMapComponent from './OrganMapComponent.vue';
 import TableComponent from './TableComponent.vue';
 import FilterPanelComponent from './FilterPanelComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
-import type {
-  UDIGrammar,
-  VisualizationLayer,
-  VisualizationMapping,
-} from '@/stores/GrammarTypes';
+import type { UDIGrammar, VisualizationLayer } from '@/stores/GrammarTypes';
 import { useDataSourcesStore } from '@/stores/DataSourcesStore';
 import { storeToRefs } from 'pinia';
 
