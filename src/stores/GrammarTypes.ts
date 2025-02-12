@@ -40,6 +40,7 @@ export interface DataSource {
  */
 export type DataTransformation =
   | GroupBy
+  | Bin
   | RollUp
   | Join
   | OrderBy
@@ -75,6 +76,19 @@ export interface GroupBy extends DataTransformationBase {
    * TODO: Description
    */
   groupby: string | string[];
+}
+/**
+ * TODO: Description
+ */
+export interface BinBy extends DataTransformationBase {
+  in?: string;
+  binby: {
+    field: string;
+    bins?: number;
+    nice?: boolean;
+    bin_start?: string;
+    bin_end?: string;
+  };
 }
 
 /**

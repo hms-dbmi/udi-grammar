@@ -6,7 +6,16 @@ import type {
   DataTransformation,
 } from './GrammarTypes';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
-import { loadCSV, all, desc, op, table, from, type ColumnTable } from 'arquero';
+import {
+  loadCSV,
+  all,
+  desc,
+  op,
+  table,
+  from,
+  bin,
+  type ColumnTable,
+} from 'arquero';
 
 interface DataInterface {
   source: DataSource;
@@ -108,6 +117,21 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         } else {
           currentTable.table = inTable.groupby(transform.groupby);
         }
+      } else if ('binby' in transform) {
+        const inTable = getInTable(transform.in);
+        const {
+          field,
+          bins = 10,
+          nice = true,
+          bin_start = 'bin_start',
+          bin_end = 'bin_end',
+        } = transform.binby;
+
+        const groupbyObject = {};
+        groupbyObject[bin_start] = bin(field, { maxbins: bins, nice });
+        groupbyObject[bin_end] = bin(field, { maxbins: bins, nice, offset: 1 });
+
+        currentTable.table = inTable.groupby(groupbyObject);
       } else if ('rollup' in transform) {
         const inTable = getInTable(transform.in);
         let aggregateFunctions = {};
