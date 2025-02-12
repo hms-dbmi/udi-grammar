@@ -50,3 +50,57 @@ export const Default = {
     },
   },
 };
+
+export const HierarchicalDonut = {
+  args: {
+    spec: {
+      source: [
+        {
+          name: 'datasets',
+          source: './data/datasets.csv',
+        },
+      ],
+      transformation: [
+        {
+          filter: 'd.assay_category != null',
+        },
+        {
+          groupby: 'origin_samples_unique_mapped_organs',
+        },
+        {
+          rollup: {
+            freq: { op: 'frequency' },
+          },
+        },
+      ],
+      representation: [
+        {
+          mark: 'arc',
+          mapping: [
+            { encoding: 'theta', field: 'freq', type: 'quantitative' },
+            { encoding: 'radius', value: 60 },
+            { encoding: 'radius2', value: 40 },
+            {
+              encoding: 'color',
+              field: 'origin_samples_unique_mapped_organs',
+              type: 'nominal',
+            },
+          ],
+        },
+        {
+          mark: 'arc',
+          mapping: [
+            { encoding: 'theta', field: 'freq', type: 'quantitative' },
+            { encoding: 'radius', value: 62 },
+            { encoding: 'radius2', value: 74 },
+            {
+              encoding: 'color',
+              field: 'origin_samples_unique_mapped_organs',
+              type: 'nominal',
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
