@@ -1,0 +1,53 @@
+{
+  "question": "Are taller people also heavier?",
+  "context": {
+    "datasets": [
+      {
+        "name": "people",
+        "path": "./data/people.csv",
+        "description": "A collection of attributes of individual people.",
+        "columns": [
+          {
+            "name": "height",
+            "type": "quantitative",
+            "description": "The height of people, in centimeters."
+          },
+          {
+            "name": "weight",
+            "type": "quantitative",
+            "description": "The weigh of people, in kilograms."
+          },
+          {
+            "name": "age",
+            "type": "quantitative",
+            "description": "The age of people, in years."
+          },
+          {
+            "name": "sex",
+            "type": "nominal",
+            "description": "The sex of people."
+          }
+        ]
+      }
+    ]
+  },
+  "tool_call": {
+    "name": "renderVisualization",
+    "arguments": {
+      "spec": {
+        "source": {
+          "name": "people",
+          "source": "./data/people.csv"
+        },
+        "representation": {
+          "mark": "point",
+          "mapping": [
+            { "encoding": "y", "field": "height", "type": "quantitative" },
+            { "encoding": "x", "field": "weight", "type": "quantitative" }
+          ]
+        }
+      }
+    }
+  },
+  "history": []
+}

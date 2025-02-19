@@ -1,0 +1,14 @@
+{
+  "question": "blargen?",
+  "context": {
+    "datasets": [
+      {
+        "name": "",
+        "path": "",
+        "description": ""
+      }
+    ]
+  },
+  "tool_call": {},
+  "history": []
+}
