@@ -32,7 +32,7 @@ The Grammar maps variables to visual encodings. For instance, to create a scatte
 
 Resulting in a visualization that would look like:
 
-![A scatterplot with weight_value on the x-axis and height_value on the y-axis.](./docs/scatterplot.png.png)
+![A scatterplot with weight_value on the x-axis and height_value on the y-axis.](./docs/scatterplot.png)
 
 Scatterplots are easy since they map rows in data tables directly to marks. However, many visualizations first require transforming the data. For instance to create a bar chart showing the counts of donors faceted by sex requires a data transformation to calculated those counts.
 
@@ -72,7 +72,7 @@ Scatterplots are easy since they map rows in data tables directly to marks. Howe
 }
 ```
 
-![A Bar chart showing the counts of male and female donors.](bar_chart_sex.png)
+![A Bar chart showing the counts of male and female donors.](./docs/bar_chart_sex.png)
 
 These data transformations can get more complex. For instance to create a relative stacked bar chart with multiple bars can be accomplished with this specification.
 
@@ -139,7 +139,7 @@ These data transformations can get more complex. For instance to create a relati
 }
 ```
 
-![Stacked relative bar chart.](stacked_relative_bar_chart.png)
+![Stacked relative bar chart.](./docs/stacked_relative_bar_chart.png)
 
 ## 🚅 Quick start for developers
 
