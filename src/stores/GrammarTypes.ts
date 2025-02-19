@@ -40,7 +40,7 @@ export interface DataSource {
  */
 export type DataTransformation =
   | GroupBy
-  | Bin
+  | BinBy
   | RollUp
   | Join
   | OrderBy
