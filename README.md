@@ -21,3 +21,5 @@
     UDI-Grammar uses [storybook](https://storybook.js.org/) to test the grammar with individual stories.
 
     Run `yarn storybook` to see stories at `http://localhost:6006`
+
+    ![Interface showing a selection of many example visualizations, with one selected showing multiple stacked bar charts.](./docs/example_storybook.png)
