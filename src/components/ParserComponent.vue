@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import VegaLite from './VegaLite.vue';
-import OrganMapComponent from './OrganMapComponent.vue';
 import TableComponent from './TableComponent.vue';
-import FilterPanelComponent from './FilterPanelComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
 import type { UDIGrammar, VisualizationLayer } from 'src/stores/GrammarTypes';
 import { useDataSourcesStore } from 'src/stores/DataSourcesStore';
