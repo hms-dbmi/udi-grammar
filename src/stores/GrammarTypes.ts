@@ -180,7 +180,7 @@ export interface AggregateFunction {
   /**
    * TODO: Description
    */
-  field?: 'string';
+  field?: string;
 }
 
 /**

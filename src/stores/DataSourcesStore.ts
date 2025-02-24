@@ -54,13 +54,13 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
   function getDataSource(key: string): DataInterface | null {
     if (!(key in dataSources.value)) return null;
-    return dataSources.value[key];
+    return dataSources.value[key] ?? null;
   }
 
   function getDataObject(
     keys: string[],
-    dataTransformations: DataTransformation[],
-  ): any {
+    dataTransformations?: DataTransformation[],
+  ): object[] | null {
     if (loading.value) return null;
 
     // make copy of tables from data sources
@@ -89,15 +89,22 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     dataTransformations: DataTransformation[],
   ): ColumnTable {
     console.log('perform data transforations');
-    const key = namedTables.keys().next().value;
+    const key = namedTables.keys().next().value ?? '';
     const table = namedTables.get(key);
+    if (!table) {
+      throw new Error('table not found');
+    }
     const currentTable: {
       key: string;
       table: ColumnTable;
     } = { key, table };
 
     const getInTable = (key?: string): ColumnTable => {
-      return key ? namedTables.get(key) : currentTable.table;
+      const columnTable = key ? namedTables.get(key) : currentTable.table;
+      if (!columnTable) {
+        throw new Error('in table not found');
+      }
+      return columnTable;
     };
 
     const setOutTable = (transform: DataTransformation) => {
@@ -127,14 +134,14 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           bin_end = 'bin_end',
         } = transform.binby;
 
-        const groupbyObject = {};
+        const groupbyObject: any = {};
         groupbyObject[bin_start] = bin(field, { maxbins: bins, nice });
         groupbyObject[bin_end] = bin(field, { maxbins: bins, nice, offset: 1 });
 
         currentTable.table = inTable.groupby(groupbyObject);
       } else if ('rollup' in transform) {
         const inTable = getInTable(transform.in);
-        let aggregateFunctions = {};
+        const aggregateFunctions: any = {};
         const frequencyKeys: string[] = [];
         for (const [as, aggFunction] of Object.entries(transform.rollup)) {
           aggregateFunctions[as] = getArqueroAggregateFunction(aggFunction);
@@ -144,8 +151,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         }
         currentTable.table = inTable.rollup(aggregateFunctions);
         for (const freqKey of frequencyKeys) {
-          const deriveExpression = {};
-          deriveExpression[freqKey] = (d, $) =>
+          const deriveExpression: any = {};
+          deriveExpression[freqKey] = (d: any, $: any) =>
             d[$.freqKey] / op.sum(d[$.freqKey]);
 
           currentTable.table = currentTable.table
@@ -158,6 +165,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         currentTable.table = inTable.orderby(transform.orderby);
       } else if ('derive' in transform) {
         const inTable = getInTable(transform.in);
+        // @ts-ignore: TODO: ensure derive is a valid expression>?
         currentTable.table = inTable.derive(transform.derive);
       } else if ('filter' in transform) {
         const inTable = getInTable(transform.in);
@@ -166,6 +174,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         const [leftKey, rightKey] = transform.in;
         const leftTable = namedTables.get(leftKey);
         const rightTable = namedTables.get(rightKey);
+        if (!leftTable || !rightTable) {
+          throw new Error('join table not found');
+        }
         currentTable.table = leftTable.join(rightTable, transform.join.on);
       }
       setOutTable(transform);

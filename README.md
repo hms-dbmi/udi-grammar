@@ -166,3 +166,15 @@ These data transformations can get more complex. For instance to create a relati
     Run `yarn storybook` to see stories at `http://localhost:6006`
 
     ![Interface showing a selection of many example visualizations, with one selected showing multiple stacked bar charts.](./docs/example_storybook.png)
+
+1.  **Run the code editor with Quasar in development mode.**
+
+```bash
+quasar dev
+```
+
+### Build the code editor application for production
+
+```bash
+quasar build
+```

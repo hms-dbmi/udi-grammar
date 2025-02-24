@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import vegaEmbed from 'vega-embed';
 import { defineProps } from 'vue';
@@ -11,9 +11,9 @@ const props = defineProps({
   },
 });
 
-const vegaContainer = ref(null);
+const vegaContainer = ref();
 
-const errorMessage = ref(null);
+const errorMessage = ref();
 
 function updateVegaChart() {
   let specObject;
@@ -21,7 +21,7 @@ function updateVegaChart() {
     specObject = JSON.parse(props.spec);
   } catch (error) {
     console.error('Error parsing spec', error);
-    errorMessage.value = 'Error parsing spec: ' + error;
+    errorMessage.value = 'Error parsing spec: ' + (error as any).toString();
     // clear the container so the chart doesn't show up
     vegaContainer.value.innerHTML = '';
     return;
@@ -34,7 +34,7 @@ function updateVegaChart() {
     })
     .catch((error) => {
       console.error('Error rendering chart', error);
-      errorMessage.value = 'Error rendering chart: ' + error;
+      errorMessage.value = 'Error rendering chart: ' + error.toString();
       // clear the container so the chart doesn't show up
       vegaContainer.value.innerHTML = '';
     });

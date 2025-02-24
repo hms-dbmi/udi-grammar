@@ -16,7 +16,8 @@ export interface ParsedUDIGrammar {
  * to ensure that source and representation are always arrays
  */
 export function parseSpecification(spec: UDIGrammar): ParsedUDIGrammar {
-  let { source, transformation, representation } = spec;
+  let { source, representation } = spec;
+  const { transformation } = spec;
   if (!Array.isArray(source)) {
     source = [source];
   }

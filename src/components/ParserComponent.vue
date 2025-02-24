@@ -5,8 +5,8 @@ import OrganMapComponent from './OrganMapComponent.vue';
 import TableComponent from './TableComponent.vue';
 import FilterPanelComponent from './FilterPanelComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
-import type { UDIGrammar, VisualizationLayer } from '@/stores/GrammarTypes';
-import { useDataSourcesStore } from '@/stores/DataSourcesStore';
+import type { UDIGrammar, VisualizationLayer } from 'src/stores/GrammarTypes';
+import { useDataSourcesStore } from 'src/stores/DataSourcesStore';
 import { storeToRefs } from 'pinia';
 
 const dataSourcesStore = useDataSourcesStore();
@@ -44,18 +44,20 @@ function buildVisualization(): void {
   //   dataSourcesStore.initDataSource(dataSource);
   // }
 
+  // @ts-ignore
   if (isVegaLiteCompatible(parsedSpec.value)) {
+    // @ts-ignore
     vegaLiteSpec.value = convertToVegaSpec(parsedSpec.value);
     isVegaLiteComponent.value = true;
   }
 }
 
 function isVegaLiteCompatible(spec: ParsedUDIGrammar): boolean {
-  return !spec.representation.map((x) => x.mark).includes('row');
+  return !spec.representation.map((x: any) => x.mark).includes('row');
 }
 
 function convertToVegaSpec(spec: ParsedUDIGrammar): string {
-  const vegaSpec = {
+  const vegaSpec: any = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     // data: { url: './data/penguins.csv' },
     data: { values: [] },
@@ -63,7 +65,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
 
   // add data
   vegaSpec.data.values = dataSourcesStore.getDataObject(
-    spec.source.map((x) => x.name),
+    spec.source.map((x: any) => x.name),
     spec.transformation,
   );
   debugVegaData.value = vegaSpec.data.values;
@@ -78,12 +80,12 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     throw new Error('invalid spec passed to vega conversion');
   }
   const outputLayers = inputLayers.map((layer) => {
-    let mapping = Array.isArray(layer.mapping)
+    const mapping = Array.isArray(layer.mapping)
       ? layer.mapping
       : [layer.mapping];
 
-    let vegaEncoding = {};
-    for (let map of mapping) {
+    const vegaEncoding: any = {};
+    for (const map of mapping) {
       const { encoding } = map;
       if ('value' in map) {
         vegaEncoding[encoding] = {
