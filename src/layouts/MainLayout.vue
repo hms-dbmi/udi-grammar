@@ -10,7 +10,7 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         /> -->
-        <q-tabs v-model="tab" shrink inline-label dense>
+        <q-tabs shrink inline-label dense>
           <q-route-tab
             no-caps
             to="/"

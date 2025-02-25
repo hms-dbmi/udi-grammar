@@ -18,6 +18,7 @@
     "build-schema": "./node_modules/.bin/ts-json-schema-generator --path './src/stores/GrammarTypes.ts' --type 'UDIGrammar' >  UDIGrammarSchema.json"
   },
   "dependencies": {
+    "@guolao/vue-monaco-editor": "^1.5.4",
     "@quasar/extras": "^1.16.4",
     "arquero": "^8.0.1",
     "pinia": "^3.0.1",
