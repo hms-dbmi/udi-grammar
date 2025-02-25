@@ -1,6 +1,6 @@
 <template>
   <q-page class="row items-center justify-evenly">
-    <div>TODO HOMEPAGE</div>
+    <div>TODO Editor</div>
   </q-page>
 </template>
 

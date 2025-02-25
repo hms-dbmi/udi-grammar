@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar>
+      <q-toolbar class="bg-white text-primary">
         <!-- <q-btn
           flat
           dense
@@ -10,8 +10,26 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         /> -->
-
-        <q-toolbar-title> UDI Editor </q-toolbar-title>
+        <q-tabs v-model="tab" shrink inline-label dense>
+          <q-route-tab
+            no-caps
+            to="/"
+            label=" Universal Discovery Interface"
+            icon="home"
+          />
+          <q-route-tab no-caps to="/Examples" label="Examples" />
+          <q-route-tab no-caps to="/Editor" label="Editor" />
+        </q-tabs>
+        <q-space />
+        <!-- github -->
+        <q-btn
+          flat
+          dense
+          round
+          icon="fab fa-github"
+          aria-label="GitHub"
+          href="https://github.com/hms-dbmi/udi-grammar"
+        />
       </q-toolbar>
     </q-header>
 
