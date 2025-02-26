@@ -199,8 +199,11 @@
       "description": "TODO: Description",
       "properties": {
         "derive": {
-          "$ref": "#/definitions/TableExpression",
-          "description": "TODO: Description"
+          "additionalProperties": {
+            "$ref": "#/definitions/TableExpression"
+          },
+          "description": "TODO: Description",
+          "type": "object"
         },
         "in": {
           "description": "TODO: Description",

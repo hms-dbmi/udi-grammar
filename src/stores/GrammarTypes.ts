@@ -145,7 +145,9 @@ export interface Derive extends DataTransformationBase {
   /**
    * TODO: Description
    */
-  derive: TableExpression;
+  derive: {
+    [outputName: string]: TableExpression;
+  };
 }
 
 /**
