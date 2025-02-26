@@ -40,6 +40,15 @@ const spec = computed(() => {
   return JSON.parse(code.value);
 });
 
+const errorMessage = computed<string>(() => {
+  try {
+    JSON.parse(code.value);
+    return '';
+  } catch (error: unkown) {
+    return error.message;
+  }
+});
+
 const validSpec = computed(() => {
   try {
     JSON.parse(code.value);
@@ -64,6 +73,7 @@ const validSpec = computed(() => {
       </template>
       <template v-slot:after>
         <parser-component v-if="validSpec" :spec="spec"></parser-component>
+        <div v-else>{{ errorMessage }}</div>
       </template>
     </q-splitter>
   </q-page>
