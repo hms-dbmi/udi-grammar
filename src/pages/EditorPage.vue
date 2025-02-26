@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, shallowRef, onMounted, onBeforeMount } from 'vue';
+import ParserComponent from 'src/components/ParserComponent.vue';
+import { ref, computed, shallowRef, onMounted, onBeforeMount } from 'vue';
 
 const MONACO_EDITOR_OPTIONS = {
   automaticLayout: true,
@@ -9,8 +10,17 @@ const MONACO_EDITOR_OPTIONS = {
 
 // "$schema": "https://raw.githubusercontent.com/hms-dbmi/udi-grammar/refs/heads/main/UDIGrammarSchema.json",
 const code = ref(`{
-   "source": [],
-"asdlfasdf0000": 4
+  "source": {
+    "name": "donors",
+    "source": "./data/donors.csv"
+  },
+  "representation": {
+    "mark": "point",
+    "mapping": [
+      { "encoding": "y", "field": "height_value", "type": "quantitative" },
+      { "encoding": "x", "field": "weight_value", "type": "quantitative" }
+    ]
+  }
 }`);
 const editorRef = shallowRef();
 
@@ -24,6 +34,19 @@ const splitterModel = ref(50);
 function handleMount(editor: any) {
   editorRef.value = editor;
 }
+
+const spec = computed(() => {
+  return JSON.parse(code.value);
+});
+
+const validSpec = computed(() => {
+  try {
+    JSON.parse(code.value);
+    return true;
+  } catch (e) {
+    return false;
+  }
+});
 </script>
 <template>
   <q-page class="flex row">
@@ -39,7 +62,7 @@ function handleMount(editor: any) {
         />
       </template>
       <template v-slot:after>
-        <div>{{ code }}</div>
+        <parser-component v-if="validSpec" :spec="spec"></parser-component>
       </template>
     </q-splitter>
   </q-page>

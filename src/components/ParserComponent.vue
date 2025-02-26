@@ -21,6 +21,10 @@ const parsedSpec = ref<ParsedUDIGrammar | null>(null);
 const isVegaLiteComponent = ref<boolean>(false);
 const vegaLiteSpec = ref<string>('');
 onMounted(() => {
+  render();
+});
+
+function render() {
   // parse/validate grammar
   parsedSpec.value = parseSpecification(props.spec);
   dataSourcesStore.initDataSources(parsedSpec.value.source);
@@ -30,7 +34,14 @@ onMounted(() => {
   //   vegaLiteSpec.value = convertToVegaSpec(parsedSpec.value);
   //   isGoGComponent.value = true;
   // }
-});
+}
+
+watch(
+  () => props.spec,
+  () => {
+    render();
+  },
+);
 
 watch(loading, () => buildVisualization());
 
@@ -112,14 +123,14 @@ const debugVegaData = ref();
 <template>
   <VegaLite v-if="isVegaLiteComponent" :spec="vegaLiteSpec" />
   <TableComponent v-else />
-  <hr />
+  <!-- <hr />
   <pre
     >{{ props.spec }}
   </pre>
   <hr />
   <pre
     >{{ debugVegaData }}
-  </pre>
+  </pre> -->
 </template>
 
 <style scoped></style>
