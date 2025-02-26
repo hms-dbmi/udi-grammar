@@ -330,7 +330,7 @@ export const MultipleBarChartStackedRelative = {
         },
         {
           in: ['datasets', 'groupCounts'],
-          join: 'origin_samples_unique_mapped_organs',
+          join: { on: 'origin_samples_unique_mapped_organs' },
           out: 'datasets',
         },
         {

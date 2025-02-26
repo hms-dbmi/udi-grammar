@@ -19,8 +19,29 @@ const exampleGroups: ExampleGroup[] = [
     name: 'Bar Charts',
     examples: [
       {
-        name: 'Simple Bar Chart! 2asdf asdf asdf asdf asdf ',
-        thumbnail: './example_thumbnails/bar_charts/simple_bar_chart.png',
+        name: 'Total Record Count',
+        thumbnail: './example_thumbnails/bar_charts/total_record_count.png',
+        spec: {
+          source: {
+            name: 'donors',
+            source: './data/example_donors.csv',
+          },
+          transformation: [
+            {
+              rollup: {
+                count: { op: 'count' },
+              },
+            },
+          ],
+          representation: {
+            mark: 'bar',
+            mapping: { encoding: 'x', field: 'count', type: 'quantitative' },
+          },
+        },
+      },
+      {
+        name: 'Count by Category',
+        thumbnail: './example_thumbnails/bar_charts/count_by_category.png',
         spec: {
           source: {
             name: 'donors',
@@ -32,7 +53,7 @@ const exampleGroups: ExampleGroup[] = [
             },
             {
               rollup: {
-                mean_mass: { op: 'mean', field: 'weight' },
+                count: { op: 'count' },
               },
             },
           ],
@@ -40,12 +61,231 @@ const exampleGroups: ExampleGroup[] = [
             mark: 'bar',
             mapping: [
               { encoding: 'x', field: 'sex', type: 'nominal' },
-              { encoding: 'y', field: 'mean_mass', type: 'quantitative' },
+              { encoding: 'y', field: 'count', type: 'quantitative' },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Aggregate by Category',
+        thumbnail: './example_thumbnails/bar_charts/aggregate_by_cateogory.png',
+        spec: {
+          source: {
+            name: 'donors',
+            source: './data/example_donors.csv',
+          },
+          transformation: [
+            {
+              groupby: 'sex',
+            },
+            {
+              rollup: {
+                'average weight': { op: 'mean', field: 'weight' },
+              },
+            },
+          ],
+          representation: {
+            mark: 'bar',
+            mapping: [
+              { encoding: 'x', field: 'sex', type: 'nominal' },
+              { encoding: 'y', field: 'average weight', type: 'quantitative' },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Combining Data Sources',
+        thumbnail: './example_thumbnails/bar_charts/combining_data_sources.png',
+        spec: {
+          source: [
+            {
+              name: 'donors',
+              source: './data/example_donors.csv',
+            },
+            {
+              name: 'samples',
+              source: './data/example_samples.csv',
+            },
+          ],
+          transformation: [
+            {
+              in: ['donors', 'samples'],
+              join: {
+                on: ['id', 'donor_id'],
+              },
+              out: 'donor_sample_combined',
+            },
+            {
+              groupby: 'sex',
+            },
+            {
+              rollup: {
+                'sample count': { op: 'count' },
+              },
+            },
+          ],
+          representation: {
+            mark: 'bar',
+            mapping: [
+              { encoding: 'x', field: 'sex', type: 'nominal' },
+              { encoding: 'y', field: 'sample count', type: 'quantitative' },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Single Stacked Bar Chart',
+        thumbnail:
+          './example_thumbnails/bar_charts/single_stacked_bar_chart.png',
+        spec: {
+          source: {
+            name: 'samples',
+            source: './data/example_samples.csv',
+          },
+          transformation: [
+            { groupby: 'organ' },
+            {
+              rollup: {
+                count: { op: 'count' },
+              },
+            },
+          ],
+          representation: {
+            mark: 'bar',
+            mapping: [
+              { encoding: 'x', field: 'count', type: 'quantitative' },
+              { encoding: 'color', field: 'organ', type: 'nominal' },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Single Stacked Bar Chart (relative)',
+        thumbnail:
+          './example_thumbnails/bar_charts/single_stacked_bar_chart_relative.png',
+        spec: {
+          source: {
+            name: 'samples',
+            source: './data/example_samples.csv',
+          },
+          transformation: [
+            { groupby: 'organ' },
+            {
+              rollup: {
+                frequency: { op: 'frequency' },
+              },
+            },
+          ],
+          representation: {
+            mark: 'bar',
+            mapping: [
+              { encoding: 'x', field: 'frequency', type: 'quantitative' },
+              { encoding: 'color', field: 'organ', type: 'nominal' },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Multiple Stacked Bar Charts',
+        thumbnail:
+          './example_thumbnails/bar_charts/multiple_stacked_bar_charts.png',
+        spec: {
+          source: {
+            name: 'samples',
+            source: './data/example_samples.csv',
+          },
+          transformation: [
+            { groupby: ['organ', 'organ_condition'] },
+            {
+              rollup: {
+                count: { op: 'count' },
+              },
+            },
+          ],
+          representation: {
+            mark: 'bar',
+            mapping: [
+              { encoding: 'x', field: 'count', type: 'quantitative' },
+              { encoding: 'y', field: 'organ', type: 'nominal' },
+              { encoding: 'color', field: 'organ_condition', type: 'nominal' },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Multiple Stacked Bar Charts (relative)',
+        thumbnail:
+          './example_thumbnails/bar_charts/multiple_stacked_bar_charts_relative.png',
+        spec: {
+          source: {
+            name: 'samples',
+            source: './data/example_samples.csv',
+          },
+          transformation: [
+            {
+              groupby: 'organ',
+              out: 'groupCounts',
+            },
+            {
+              rollup: {
+                organ_count: { op: 'count' },
+              },
+            },
+            {
+              in: 'samples',
+              groupby: ['organ', 'organ_condition'],
+            },
+            {
+              rollup: {
+                organ_and_condition_count: { op: 'count' },
+              },
+            },
+            {
+              in: ['samples', 'groupCounts'],
+              join: { on: 'organ' },
+              out: 'datasets',
+            },
+            {
+              derive: {
+                frequency: 'd.organ_and_condition_count / d.organ_count',
+              },
+            },
+          ],
+          representation: {
+            mark: 'bar',
+            mapping: [
+              { encoding: 'x', field: 'frequency', type: 'quantitative' },
+              { encoding: 'y', field: 'organ', type: 'nominal' },
+              { encoding: 'color', field: 'organ_condition', type: 'nominal' },
             ],
           },
         },
       },
     ],
+  },
+  {
+    name: 'Scatter Plots',
+    examples: [],
+  },
+  {
+    name: 'Heatmaps',
+    examples: [],
+  },
+  {
+    name: 'Histograms',
+    examples: [],
+  },
+  {
+    name: 'Line Charts',
+    examples: [],
+  },
+  {
+    name: 'Area Charts',
+    examples: [],
+  },
+  {
+    name: 'Pie Charts',
+    examples: [],
   },
 ];
 

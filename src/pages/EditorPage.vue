@@ -15,13 +15,13 @@ const MONACO_EDITOR_OPTIONS = {
 const code = ref(`{
   "source": {
     "name": "donors",
-    "source": "./data/donors.csv"
+    "source": "./data/example_donors.csv"
   },
   "representation": {
     "mark": "point",
     "mapping": [
-      { "encoding": "y", "field": "height_value", "type": "quantitative" },
-      { "encoding": "x", "field": "weight_value", "type": "quantitative" }
+      { "encoding": "y", "field": "height", "type": "quantitative" },
+      { "encoding": "x", "field": "weight", "type": "quantitative" }
     ]
   }
 }`);
