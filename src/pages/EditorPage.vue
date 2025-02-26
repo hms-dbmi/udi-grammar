@@ -44,8 +44,12 @@ const errorMessage = computed<string>(() => {
   try {
     JSON.parse(code.value);
     return '';
-  } catch (error: unkown) {
-    return error.message;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return error.message;
+    } else {
+      return 'Error parsing specification.';
+    }
   }
 });
 
