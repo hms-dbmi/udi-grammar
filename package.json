@@ -21,6 +21,7 @@
     "@guolao/vue-monaco-editor": "^1.5.4",
     "@quasar/extras": "^1.16.4",
     "arquero": "^8.0.1",
+    "lz-string": "^1.5.0",
     "monaco-editor": "^0.52.2",
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",

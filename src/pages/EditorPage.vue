@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import ParserComponent from 'src/components/ParserComponent.vue';
 import { ref, computed, shallowRef } from 'vue';
+import { useRoute } from 'vue-router';
+import { decompressFromEncodedURIComponent } from 'lz-string';
 
 const MONACO_EDITOR_OPTIONS = {
   automaticLayout: true,
@@ -9,6 +11,7 @@ const MONACO_EDITOR_OPTIONS = {
 };
 
 // "$schema": "https://raw.githubusercontent.com/hms-dbmi/udi-grammar/refs/heads/main/UDIGrammarSchema.json",
+
 const code = ref(`{
   "source": {
     "name": "donors",
@@ -22,6 +25,17 @@ const code = ref(`{
     ]
   }
 }`);
+
+const route = useRoute();
+if (route.query.spec) {
+  try {
+    code.value = decompressFromEncodedURIComponent(route.query.spec as string);
+    // formatCode();
+  } catch (error) {
+    console.error('Failed to decode spec from URL parameter:', error);
+  }
+}
+
 const editorRef = shallowRef();
 
 // your action
