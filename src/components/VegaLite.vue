@@ -19,16 +19,21 @@ function updateVegaChart() {
   let specObject;
   try {
     specObject = JSON.parse(props.spec);
-  } catch (error) {
-    console.error('Error parsing spec', error);
-    errorMessage.value = 'Error parsing spec: ' + (error as any).toString();
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error parsing spec', error);
+      errorMessage.value = 'Error parsing spec: ' + error.message;
+    } else {
+      console.error('Error parsing spec: Non-error value', error);
+      errorMessage.value = 'Error parsing spec: Unknown error';
+    }
     // clear the container so the chart doesn't show up
     vegaContainer.value.innerHTML = '';
     return;
   }
 
   vegaEmbed(vegaContainer.value, specObject)
-    .then((result) => {
+    .then((_result) => {
       console.log('Chart rendered successfully');
       errorMessage.value = null;
     })

@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import type {
   AggregateFunction,
@@ -6,16 +6,8 @@ import type {
   DataTransformation,
 } from './GrammarTypes';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
-import {
-  loadCSV,
-  all,
-  desc,
-  op,
-  table,
-  from,
-  bin,
-  type ColumnTable,
-} from 'arquero';
+import { loadCSV, op, from, bin, type ColumnTable } from 'arquero';
+import type { ExprObject, TableExpr } from 'arquero/dist/types/table/types';
 
 interface DataInterface {
   source: DataSource;
@@ -134,14 +126,14 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           bin_end = 'bin_end',
         } = transform.binby;
 
-        const groupbyObject: any = {};
+        const groupbyObject: { [key: string]: string } = {};
         groupbyObject[bin_start] = bin(field, { maxbins: bins, nice });
         groupbyObject[bin_end] = bin(field, { maxbins: bins, nice, offset: 1 });
 
         currentTable.table = inTable.groupby(groupbyObject);
       } else if ('rollup' in transform) {
         const inTable = getInTable(transform.in);
-        const aggregateFunctions: any = {};
+        const aggregateFunctions: { [key: string]: TableExpr } = {};
         const frequencyKeys: string[] = [];
         for (const [as, aggFunction] of Object.entries(transform.rollup)) {
           aggregateFunctions[as] = getArqueroAggregateFunction(aggFunction);
@@ -151,7 +143,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         }
         currentTable.table = inTable.rollup(aggregateFunctions);
         for (const freqKey of frequencyKeys) {
-          const deriveExpression: any = {};
+          const deriveExpression: ExprObject = {};
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           deriveExpression[freqKey] = (d: any, $: any) =>
             d[$.freqKey] / op.sum(d[$.freqKey]);
 
@@ -165,8 +158,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         currentTable.table = inTable.orderby(transform.orderby);
       } else if ('derive' in transform) {
         const inTable = getInTable(transform.in);
-        // @ts-ignore: TODO: ensure derive is a valid expression>?
-        currentTable.table = inTable.derive(transform.derive);
+        //TODO: this typing conversion is ugly (something is probably wrong in typing somewhere)
+        currentTable.table = inTable.derive(
+          transform.derive as unknown as ExprObject,
+        );
       } else if ('filter' in transform) {
         const inTable = getInTable(transform.in);
         currentTable.table = inTable.filter(transform.filter);
@@ -184,13 +179,19 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     return currentTable.table;
   }
 
-  function getArqueroAggregateFunction(aggFunc: AggregateFunction): any {
+  function getArqueroAggregateFunction(aggFunc: AggregateFunction): TableExpr {
     switch (aggFunc.op) {
       case 'count':
         return op.count();
       case 'min':
+        if (!aggFunc.field) {
+          throw new Error('Field is required for min operation');
+        }
         return op.min(aggFunc.field);
       case 'max':
+        if (!aggFunc.field) {
+          throw new Error('Field is required for max operation');
+        }
         return op.max(aggFunc.field);
       case 'mean':
         return op.mean(aggFunc.field);

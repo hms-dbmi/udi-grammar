@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
@@ -46,26 +46,27 @@ watch(
 watch(loading, () => buildVisualization());
 
 function buildVisualization(): void {
-  console.log('build vis');
+  if (!parsedSpec.value) {
+    return;
+  }
   // // parse/validate grammar
   // parsedSpec.value = parseSpecification(props.spec);
   // for (const dataSource of parsedSpec.value.dataSource) {
   //   dataSourcesStore.initDataSource(dataSource);
   // }
 
-  // @ts-ignore
   if (isVegaLiteCompatible(parsedSpec.value)) {
-    // @ts-ignore
     vegaLiteSpec.value = convertToVegaSpec(parsedSpec.value);
     isVegaLiteComponent.value = true;
   }
 }
 
 function isVegaLiteCompatible(spec: ParsedUDIGrammar): boolean {
-  return !spec.representation.map((x: any) => x.mark).includes('row');
+  return !spec.representation.map((x) => x.mark).includes('row');
 }
 
 function convertToVegaSpec(spec: ParsedUDIGrammar): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const vegaSpec: any = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     // data: { url: './data/penguins.csv' },
@@ -73,8 +74,8 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   };
 
   // add data
-  vegaSpec.data.values = dataSourcesStore.getDataObject(
-    spec.source.map((x: any) => x.name),
+  vegaSpec.data!.values = dataSourcesStore.getDataObject(
+    spec.source.map((x) => x.name),
     spec.transformation,
   );
   debugVegaData.value = vegaSpec.data.values;
@@ -93,6 +94,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       ? layer.mapping
       : [layer.mapping];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const vegaEncoding: any = {};
     for (const map of mapping) {
       const { encoding } = map;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ParserComponent from 'src/components/ParserComponent.vue';
-import { ref, computed, shallowRef, onMounted, onBeforeMount } from 'vue';
+import { ref, computed, shallowRef } from 'vue';
 
 const MONACO_EDITOR_OPTIONS = {
   automaticLayout: true,
@@ -25,12 +25,13 @@ const code = ref(`{
 const editorRef = shallowRef();
 
 // your action
-function formatCode() {
-  editorRef.value?.getAction('editor.action.formatDocument').run();
-}
+// function formatCode() {
+//   editorRef.value?.getAction('editor.action.formatDocument').run();
+// }
 
 const splitterModel = ref(50);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function handleMount(editor: any) {
   editorRef.value = editor;
 }
@@ -43,7 +44,7 @@ const validSpec = computed(() => {
   try {
     JSON.parse(code.value);
     return true;
-  } catch (e) {
+  } catch (_error) {
     return false;
   }
 });
