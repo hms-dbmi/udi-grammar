@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { VueMonacoEditor } from '@guolao/vue-monaco-editor';
-
-import { ref, shallowRef } from 'vue';
+import { ref, shallowRef, onMounted, onBeforeMount } from 'vue';
 
 const MONACO_EDITOR_OPTIONS = {
   automaticLayout: true,
@@ -9,9 +7,12 @@ const MONACO_EDITOR_OPTIONS = {
   formatOnPaste: true,
 };
 
-const code = ref('// some code...');
+// "$schema": "https://raw.githubusercontent.com/hms-dbmi/udi-grammar/refs/heads/main/UDIGrammarSchema.json",
+const code = ref(`{
+   "source": [],
+"asdlfasdf0000": 4
+}`);
 const editorRef = shallowRef();
-const handleMount = (editor: any) => (editorRef.value = editor);
 
 // your action
 function formatCode() {
@@ -19,6 +20,10 @@ function formatCode() {
 }
 
 const splitterModel = ref(50);
+
+function handleMount(editor: any) {
+  editorRef.value = editor;
+}
 </script>
 <template>
   <q-page class="flex row">
@@ -27,6 +32,7 @@ const splitterModel = ref(50);
       <template v-slot:before>
         <vue-monaco-editor
           v-model:value="code"
+          language="json"
           theme="vs-light"
           :options="MONACO_EDITOR_OPTIONS"
           @mount="handleMount"
