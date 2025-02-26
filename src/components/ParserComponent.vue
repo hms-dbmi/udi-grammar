@@ -26,6 +26,7 @@ onMounted(() => {
 
 function render() {
   // parse/validate grammar
+  // console.log('render');
   parsedSpec.value = parseSpecification(props.spec);
   dataSourcesStore.initDataSources(parsedSpec.value.source);
   buildVisualization();
@@ -74,12 +75,16 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   };
 
   // add data
-  vegaSpec.data!.values = dataSourcesStore.getDataObject(
-    spec.source.map((x) => x.name),
-    spec.transformation,
-  );
-  debugVegaData.value = vegaSpec.data.values;
-  console.log(vegaSpec);
+  try {
+    vegaSpec.data!.values = dataSourcesStore.getDataObject(
+      spec.source.map((x) => x.name),
+      spec.transformation,
+    );
+  } catch (error) {
+    console.error('Failed to complete data transformation', error);
+  }
+  // debugVegaData.value = vegaSpec.data.values;
+  // console.log(vegaSpec);
   // TODO: perform transformations
 
   // dataInterface.
@@ -119,7 +124,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   return JSON.stringify(vegaSpec);
 }
 
-const debugVegaData = ref();
+// const debugVegaData = ref();
 </script>
 
 <template>
