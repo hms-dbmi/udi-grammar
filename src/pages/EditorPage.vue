@@ -50,8 +50,8 @@ const validSpec = computed(() => {
 </script>
 <template>
   <q-page class="flex row">
-    <q-toolbar dense flat><q-btn dense flat>Run</q-btn></q-toolbar>
-    <q-splitter v-model="splitterModel" class="flex-grow-1">
+    <!-- <q-toolbar dense flat><q-btn dense flat>Run</q-btn></q-toolbar> -->
+    <q-splitter v-model="splitterModel" class="flex-grow-1 q-mt-lg">
       <template v-slot:before>
         <vue-monaco-editor
           v-model:value="code"
