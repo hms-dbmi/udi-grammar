@@ -1,0 +1,16 @@
+id,weight,height,sex,race,age,cause_of_death
+D001,150,68,Male,White,45,Trauma
+D002,130,65,Female,Black,38,Cardiac Arrest
+D003,180,70,Male,Hispanic,52,Anoxia
+D004,160,64,Female,Asian,29,Head Trauma
+D005,200,72,Male,White,60,CVA
+D006,140,66,Female,Native American,50,Cardiac Arrest
+D007,170,69,Male,Black,35,Anoxia
+D008,155,62,Female,Hispanic,42,Head Trauma
+D009,190,71,Male,White,55,Trauma
+D010,165,67,Female,Asian,33,CVA
+D011,175,69,Male,White,47,Stroke
+D012,145,63,Female,Black,39,Respiratory Failure
+D013,185,70,Male,Hispanic,54,Anoxia
+D014,158,66,Female,Asian,31,Head Trauma
+D015,210,73,Male,Native American,62,Trauma

@@ -24,7 +24,7 @@ const exampleGroups: ExampleGroup[] = [
         spec: {
           source: {
             name: 'donors',
-            source: './data/donors.csv',
+            source: './data/example_donors.csv',
           },
           transformation: [
             {
@@ -32,147 +32,7 @@ const exampleGroups: ExampleGroup[] = [
             },
             {
               rollup: {
-                mean_mass: { op: 'mean', field: 'weight_value' },
-              },
-            },
-          ],
-          representation: {
-            mark: 'bar',
-            mapping: [
-              { encoding: 'x', field: 'sex', type: 'nominal' },
-              { encoding: 'y', field: 'mean_mass', type: 'quantitative' },
-            ],
-          },
-        },
-      },
-      {
-        name: 'Simple Bar Chart222222222 azlsdfj alsdkf ',
-        thumbnail: './example_thumbnails/test/image.png',
-        spec: {
-          source: {
-            name: 'donors',
-            source: './data/donors.csv',
-          },
-          transformation: [
-            {
-              groupby: 'sex',
-            },
-            {
-              rollup: {
-                mean_mass: { op: 'mean', field: 'weight_value' },
-              },
-            },
-          ],
-          representation: {
-            mark: 'bar',
-            mapping: [
-              { encoding: 'x', field: 'sex', type: 'nominal' },
-              { encoding: 'y', field: 'mean_mass', type: 'quantitative' },
-            ],
-          },
-        },
-      },
-      {
-        name: 'Simple Bar Chart3',
-        thumbnail: './example_thumbnails/bar_charts/simple_bar_chart.png',
-        spec: {
-          source: {
-            name: 'donors',
-            source: './data/donors.csv',
-          },
-          transformation: [
-            {
-              groupby: 'sex',
-            },
-            {
-              rollup: {
-                mean_mass: { op: 'mean', field: 'weight_value' },
-              },
-            },
-          ],
-          representation: {
-            mark: 'bar',
-            mapping: [
-              { encoding: 'x', field: 'sex', type: 'nominal' },
-              { encoding: 'y', field: 'mean_mass', type: 'quantitative' },
-            ],
-          },
-        },
-      },
-    ],
-  },
-  {
-    name: 'Bar Charts 2',
-    examples: [
-      {
-        name: 'Simple Bar Chart 4',
-        thumbnail: './example_thumbnails/bar_charts/simple_bar_chart.png',
-        spec: {
-          source: {
-            name: 'donors',
-            source: './data/donors.csv',
-          },
-          transformation: [
-            {
-              groupby: 'sex',
-            },
-            {
-              rollup: {
-                mean_mass: { op: 'mean', field: 'weight_value' },
-              },
-            },
-          ],
-          representation: {
-            mark: 'bar',
-            mapping: [
-              { encoding: 'x', field: 'sex', type: 'nominal' },
-              { encoding: 'y', field: 'mean_mass', type: 'quantitative' },
-            ],
-          },
-        },
-      },
-      {
-        name: 'Simple Bar Chart 5',
-        thumbnail: './example_thumbnails/bar_charts/simple_bar_chart.png',
-        spec: {
-          source: {
-            name: 'donors',
-            source: './data/donors.csv',
-          },
-          transformation: [
-            {
-              groupby: 'sex',
-            },
-            {
-              rollup: {
-                mean_mass: { op: 'mean', field: 'weight_value' },
-              },
-            },
-          ],
-          representation: {
-            mark: 'bar',
-            mapping: [
-              { encoding: 'x', field: 'sex', type: 'nominal' },
-              { encoding: 'y', field: 'mean_mass', type: 'quantitative' },
-            ],
-          },
-        },
-      },
-      {
-        name: 'Simple Bar Chart 6',
-        thumbnail: './example_thumbnails/bar_charts/simple_bar_chart.png',
-        spec: {
-          source: {
-            name: 'donors',
-            source: './data/donors.csv',
-          },
-          transformation: [
-            {
-              groupby: 'sex',
-            },
-            {
-              rollup: {
-                mean_mass: { op: 'mean', field: 'weight_value' },
+                mean_mass: { op: 'mean', field: 'weight' },
               },
             },
           ],
