@@ -83,7 +83,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   } catch (error) {
     console.error('Failed to complete data transformation', error);
   }
-  // debugVegaData.value = vegaSpec.data.values;
+  debugVegaData.value = vegaSpec.data.values;
   // console.log(vegaSpec);
   // TODO: perform transformations
 
@@ -124,17 +124,13 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   return JSON.stringify(vegaSpec);
 }
 
-// const debugVegaData = ref();
+const debugVegaData = ref();
 </script>
 
 <template>
   <VegaLite v-if="isVegaLiteComponent" :spec="vegaLiteSpec" />
   <TableComponent v-else />
   <!-- <hr />
-  <pre
-    >{{ props.spec }}
-  </pre>
-  <hr />
   <pre
     >{{ debugVegaData }}
   </pre> -->

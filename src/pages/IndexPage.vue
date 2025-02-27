@@ -22,6 +22,15 @@
         <a href="#/Examples">examples</a> of visualizations that can be
         generated using the grammar or <a href="#/Editor">try it online</a>!
       </p>
+      <p class="text-body1">
+        The grammar includes three high-level sections. The
+        <span class="snippet">source</span> defines the tabular data sources.
+        The optional <span class="snippet">transformation</span> field provides
+        flexibility when working with source data. The
+        <span class="snippet">representation</span> maps fields in the
+        transformed data to visual encodings.
+      </p>
+      <q-img src="/grammar_explanation_figure.png"></q-img>
     </div>
   </q-page>
 </template>
@@ -32,5 +41,14 @@
 <style scoped>
 .text-column {
   max-width: 800px;
+}
+
+.snippet {
+  background-color: #eff0f5;
+  padding: 0 4px;
+  border-radius: 4px;
+  margin: 0 4px;
+  font-family: monospace;
+  color: #a31515;
 }
 </style>
