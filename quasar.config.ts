@@ -37,6 +37,8 @@ export default defineConfig((/* ctx */) => {
         node: 'node20',
       },
 
+      publicPath: '/udi-grammar/',
+
       typescript: {
         strict: true,
         vueShim: true,
