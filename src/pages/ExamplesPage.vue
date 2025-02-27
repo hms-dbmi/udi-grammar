@@ -338,7 +338,7 @@ function getUrlWithSpec(spec: UDIGrammar): string {
 </template>
 <style lang="scss">
 .square {
-  height: 200px;
-  width: 200px;
+  height: 240px;
+  width: 240px;
 }
 </style>
