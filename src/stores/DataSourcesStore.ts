@@ -31,6 +31,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   const loading = ref<boolean>(true);
 
   async function initDataSources(dataSources: DataSource[]): Promise<void> {
+    loading.value = true;
     const promises = dataSources.map((dataSource) =>
       initDataSource(dataSource),
     );

@@ -24,11 +24,11 @@ onMounted(() => {
   render();
 });
 
-function render() {
+async function render() {
   // parse/validate grammar
   // console.log('render');
   parsedSpec.value = parseSpecification(props.spec);
-  dataSourcesStore.initDataSources(parsedSpec.value.source);
+  await dataSourcesStore.initDataSources(parsedSpec.value.source);
   buildVisualization();
 
   // if (isVegaLiteCompatible(parsedSpec.value)) {
@@ -128,12 +128,17 @@ const debugVegaData = ref();
 </script>
 
 <template>
-  <VegaLite v-if="isVegaLiteComponent" :spec="vegaLiteSpec" />
-  <TableComponent v-else />
-  <!-- <hr />
-  <pre
-    >{{ debugVegaData }}
-  </pre> -->
+  <template v-if="!dataSourcesStore.loading">
+    <VegaLite v-if="isVegaLiteComponent" :spec="vegaLiteSpec" />
+    <TableComponent v-else />
+    <!-- <hr />
+    <pre
+      >{{ debugVegaData }}
+    </pre> -->
+  </template>
+  <template v-else>
+    <p>Loading...</p>
+  </template>
 </template>
 
 <style scoped></style>
