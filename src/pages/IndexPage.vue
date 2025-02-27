@@ -30,7 +30,7 @@
         <span class="snippet">representation</span> maps fields in the
         transformed data to visual encodings.
       </p>
-      <q-img src="/grammar_explanation_figure.png"></q-img>
+      <q-img src="grammar_explanation_figure.png"></q-img>
     </div>
   </q-page>
 </template>
