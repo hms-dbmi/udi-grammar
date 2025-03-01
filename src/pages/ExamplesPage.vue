@@ -264,16 +264,296 @@ const exampleGroups: ExampleGroup[] = [
     ],
   },
   {
+    name: 'Pie Charts',
+    examples: [
+      {
+        name: 'Pie Chart',
+        thumbnail: './example_thumbnails/pie_charts/TODO.png',
+        spec: {
+          source: [
+            {
+              name: 'samples',
+              source: './data/example_samples.csv',
+            },
+          ],
+          transformation: [
+            {
+              groupby: 'organ',
+            },
+            {
+              rollup: {
+                frequency: {
+                  op: 'frequency',
+                },
+              },
+            },
+          ],
+          representation: [
+            {
+              mark: 'arc',
+              mapping: [
+                {
+                  encoding: 'color',
+                  field: 'organ',
+                  type: 'nominal',
+                },
+                {
+                  encoding: 'theta',
+                  field: 'frequency',
+                  type: 'quantitative',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        name: 'Donut Chart',
+        thumbnail: './example_thumbnails/pie_charts/TODO.png',
+        spec: {
+          source: [
+            {
+              name: 'samples',
+              source: './data/example_samples.csv',
+            },
+          ],
+          transformation: [
+            {
+              groupby: 'organ',
+            },
+            {
+              rollup: {
+                frequency: {
+                  op: 'frequency',
+                },
+              },
+            },
+          ],
+          representation: [
+            {
+              mark: 'arc',
+              mapping: [
+                {
+                  encoding: 'color',
+                  field: 'organ',
+                  type: 'nominal',
+                },
+                {
+                  encoding: 'theta',
+                  field: 'frequency',
+                  type: 'quantitative',
+                },
+                {
+                  encoding: 'radius2',
+                  value: 60,
+                },
+              ],
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
     name: 'Scatter Plots',
-    examples: [],
+    examples: [
+      {
+        name: 'Basic Scatter Plot',
+        thumbnail: './example_thumbnails/scatter_plots/TODO.png',
+        spec: {
+          source: {
+            name: 'donors',
+            source: './data/example_donors.csv',
+          },
+          representation: {
+            mark: 'point',
+            mapping: [
+              { encoding: 'y', field: 'height', type: 'quantitative' },
+              { encoding: 'x', field: 'weight', type: 'quantitative' },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Scatter Plot with Categories',
+        thumbnail: './example_thumbnails/scatter_plots/TODO.png',
+        spec: {
+          source: {
+            name: 'donors',
+            source: './data/example_donors.csv',
+          },
+          representation: {
+            mark: 'point',
+            mapping: [
+              { encoding: 'y', field: 'height', type: 'quantitative' },
+              { encoding: 'x', field: 'weight', type: 'quantitative' },
+              { encoding: 'color', field: 'sex', type: 'nominal' },
+              { encoding: 'shape', field: 'sex', type: 'nominal' },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Bubble Plot',
+        thumbnail: './example_thumbnails/scatter_plots/TODO.png',
+        spec: {
+          source: {
+            name: 'donors',
+            source: './data/example_donors.csv',
+          },
+          representation: {
+            mark: 'point',
+            mapping: [
+              { encoding: 'y', field: 'height', type: 'quantitative' },
+              { encoding: 'x', field: 'weight', type: 'quantitative' },
+              { encoding: 'size', field: 'age', type: 'quantitative' },
+            ],
+          },
+        },
+      },
+    ],
   },
   {
     name: 'Heatmaps',
-    examples: [],
+    examples: [
+      {
+        name: 'Heatmap of Categories',
+        thumbnail: './example_thumbnails/heatmaps/TODO.png',
+        spec: {
+          source: {
+            name: 'samples',
+            source: './data/example_samples.csv',
+          },
+          transformation: [
+            {
+              groupby: ['organ', 'organ_condition'],
+            },
+            {
+              rollup: {
+                count: {
+                  op: 'count',
+                },
+              },
+            },
+          ],
+          representation: {
+            mark: 'bar',
+            mapping: [
+              {
+                encoding: 'x',
+                field: 'organ_condition',
+                type: 'nominal',
+              },
+              {
+                encoding: 'y',
+                field: 'organ',
+                type: 'nominal',
+              },
+              {
+                encoding: 'color',
+                field: 'count',
+                type: 'quantitative',
+              },
+            ],
+          },
+        },
+      },
+    ],
   },
   {
-    name: 'Histograms',
-    examples: [],
+    name: 'Univariate Distribution',
+    examples: [
+      {
+        name: 'Basic Histogram',
+        thumbnail: './example_thumbnails/distributions/TODO.png',
+        spec: {
+          source: {
+            name: 'penguins',
+            source: './data/penguins.csv',
+          },
+          transformation: [
+            {
+              binby: {
+                field: 'bill_length_mm',
+                bins: 10,
+                nice: true,
+                bin_start: 'start',
+                bin_end: 'end',
+              },
+            },
+            {
+              rollup: {
+                count: {
+                  op: 'count',
+                },
+              },
+            },
+          ],
+          representation: {
+            mark: 'rect',
+            mapping: [
+              {
+                encoding: 'x',
+                field: 'start',
+                type: 'quantitative',
+              },
+              {
+                encoding: 'x2',
+                field: 'end',
+                type: 'quantitative',
+              },
+              {
+                encoding: 'y',
+                field: 'count',
+                type: 'quantitative',
+              },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Empirical CDF',
+        thumbnail: './example_thumbnails/distributions/TODO.png',
+        spec: {
+          source: {
+            name: 'penguins',
+            source: './data/penguins.csv',
+          },
+          transformation: [
+            {
+              orderby: 'bill_length_mm',
+            },
+            {
+              derive: { total: 'count()' },
+            },
+            {
+              derive: {
+                percentile: {
+                  rolling: {
+                    expression: 'count() / d.total',
+                  },
+                },
+              },
+            },
+          ],
+          representation: {
+            mark: 'line',
+            mapping: [
+              {
+                encoding: 'x',
+                field: 'bill_length_mm',
+                type: 'quantitative',
+              },
+              {
+                encoding: 'y',
+                field: 'percentile',
+                type: 'quantitative',
+              },
+            ],
+          },
+        },
+      },
+    ],
   },
   {
     name: 'Line Charts',
@@ -281,10 +561,6 @@ const exampleGroups: ExampleGroup[] = [
   },
   {
     name: 'Area Charts',
-    examples: [],
-  },
-  {
-    name: 'Pie Charts',
     examples: [],
   },
 ];
