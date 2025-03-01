@@ -553,6 +553,54 @@ const exampleGroups: ExampleGroup[] = [
           },
         },
       },
+      {
+        name: 'Empirical CDF (grouped)',
+        thumbnail: './example_thumbnails/distributions/TODO.png',
+        spec: {
+          source: {
+            name: 'penguins',
+            source: './data/penguins.csv',
+          },
+          transformation: [
+            {
+              orderby: 'bill_length_mm',
+            },
+            {
+              groupby: 'species',
+            },
+            {
+              derive: {
+                total: 'count()',
+              },
+            },
+            {
+              derive: {
+                percentile: {
+                  rolling: {
+                    expression: 'count() / d.total',
+                  },
+                },
+              },
+            },
+          ],
+          representation: {
+            mark: 'line',
+            mapping: [
+              {
+                encoding: 'x',
+                field: 'bill_length_mm',
+                type: 'quantitative',
+              },
+              {
+                encoding: 'y',
+                field: 'percentile',
+                type: 'quantitative',
+              },
+              { encoding: 'color', field: 'species', type: 'nominal' },
+            ],
+          },
+        },
+      },
     ],
   },
   {
