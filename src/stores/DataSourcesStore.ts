@@ -1,12 +1,13 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
+import { cloneDeep } from 'lodash';
 import type {
   AggregateFunction,
   DataSource,
   DataTransformation,
 } from './GrammarTypes';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
-import { loadCSV, op, from, bin, type ColumnTable } from 'arquero';
+import { loadCSV, op, from, bin, rolling, type ColumnTable } from 'arquero';
 import type { ExprObject, TableExpr } from 'arquero/dist/types/table/types';
 
 interface DataInterface {
@@ -159,10 +160,13 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         currentTable.table = inTable.orderby(transform.orderby);
       } else if ('derive' in transform) {
         const inTable = getInTable(transform.in);
-        //TODO: this typing conversion is ugly (something is probably wrong in typing somewhere)
-        currentTable.table = inTable.derive(
-          transform.derive as unknown as ExprObject,
-        );
+        const derive = cloneDeep(transform.derive);
+        for (const [as, expr] of Object.entries(derive)) {
+          if (typeof expr !== 'string') {
+            derive[as] = rolling(expr.rolling.expression, expr.rolling.window);
+          }
+        }
+        currentTable.table = inTable.derive(derive);
       } else if ('filter' in transform) {
         const inTable = getInTable(transform.in);
         currentTable.table = inTable.filter(transform.filter);

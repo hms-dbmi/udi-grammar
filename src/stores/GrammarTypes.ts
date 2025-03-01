@@ -146,7 +146,7 @@ export interface Derive extends DataTransformationBase {
    * TODO: Description
    */
   derive: {
-    [outputName: string]: TableExpression;
+    [outputName: string]: DeriveExpression;
   };
 }
 
@@ -162,13 +162,24 @@ export interface Filter extends DataTransformationBase {
   /**
    * TODO: Description
    */
-  filter: TableExpression;
+  filter: FilterExpression;
 }
 
 /**
  * TODO: Description
  */
-export type TableExpression = string; // TODO: can/should we support more types like arquero?
+export type DeriveExpression = string | RollingDeriveExpression;
+export type FilterExpression = string;
+
+/**
+ * TODO: Description
+ */
+export interface RollingDeriveExpression {
+  rolling: {
+    expression: string;
+    window?: [number, number];
+  };
+}
 
 /**
  * TODO: Description
@@ -264,7 +275,8 @@ export type VisualizationLayer =
   | RectLayer
   | BarLayer
   | PointLayer
-  | TextLayer;
+  | TextLayer
+  | ArcLayer;
 
 // Mark = arc
 
