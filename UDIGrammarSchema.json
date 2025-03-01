@@ -28,6 +28,40 @@
       ],
       "type": "object"
     },
+    "ArcEncodingOptions": {
+      "description": "TODO: Description",
+      "enum": [
+        "theta",
+        "theta2",
+        "radius",
+        "radius2",
+        "color"
+      ],
+      "type": "string"
+    },
+    "ArcFieldMapping": {
+      "$ref": "#/definitions/GenericFieldMapping%3CArcEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
+    "ArcLayer": {
+      "$ref": "#/definitions/GenericLayer%3C%22arc%22%2CArcMapping%3E",
+      "description": "TODO: Description"
+    },
+    "ArcMapping": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ArcFieldMapping"
+        },
+        {
+          "$ref": "#/definitions/ArcValueMapping"
+        }
+      ],
+      "description": "TODO: Description"
+    },
+    "ArcValueMapping": {
+      "$ref": "#/definitions/GenericValueMapping%3CArcEncodingOptions%3E",
+      "description": "TODO: Description"
+    },
     "AreaEncodingOptions": {
       "description": "TODO: Description",
       "enum": [
@@ -200,7 +234,7 @@
       "properties": {
         "derive": {
           "additionalProperties": {
-            "$ref": "#/definitions/TableExpression"
+            "$ref": "#/definitions/DeriveExpression"
           },
           "description": "TODO: Description",
           "type": "object"
@@ -219,12 +253,23 @@
       ],
       "type": "object"
     },
+    "DeriveExpression": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/definitions/RollingDeriveExpression"
+        }
+      ],
+      "description": "TODO: Description"
+    },
     "Filter": {
       "additionalProperties": false,
       "description": "TODO: Description",
       "properties": {
         "filter": {
-          "$ref": "#/definitions/TableExpression",
+          "$ref": "#/definitions/FilterExpression",
           "description": "TODO: Description"
         },
         "in": {
@@ -238,6 +283,33 @@
       },
       "required": [
         "filter"
+      ],
+      "type": "object"
+    },
+    "FilterExpression": {
+      "type": "string"
+    },
+    "GenericFieldMapping<ArcEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/ArcEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "field": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/DataTypes",
+          "description": "TODO: Description"
+        }
+      },
+      "required": [
+        "encoding",
+        "field",
+        "type"
       ],
       "type": "object"
     },
@@ -406,6 +478,36 @@
         "encoding",
         "field",
         "type"
+      ],
+      "type": "object"
+    },
+    "GenericLayer<\"arc\",ArcMapping>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "mapping": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ArcMapping"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/ArcMapping"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "TODO: Description"
+        },
+        "mark": {
+          "const": "arc",
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mark",
+        "mapping"
       ],
       "type": "object"
     },
@@ -646,6 +748,28 @@
       "required": [
         "mark",
         "mapping"
+      ],
+      "type": "object"
+    },
+    "GenericValueMapping<ArcEncodingOptions>": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "encoding": {
+          "$ref": "#/definitions/ArcEncodingOptions",
+          "description": "TODO: Description"
+        },
+        "value": {
+          "description": "TODO: Description",
+          "type": [
+            "string",
+            "number"
+          ]
+        }
+      },
+      "required": [
+        "encoding",
+        "value"
       ],
       "type": "object"
     },
@@ -1091,6 +1215,36 @@
       ],
       "type": "object"
     },
+    "RollingDeriveExpression": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "rolling": {
+          "additionalProperties": false,
+          "properties": {
+            "expression": {
+              "type": "string"
+            },
+            "window": {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            }
+          },
+          "required": [
+            "expression"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "rolling"
+      ],
+      "type": "object"
+    },
     "RowEncodingOptions": {
       "description": "TODO: Description",
       "enum": [
@@ -1149,10 +1303,6 @@
         "rect",
         "line"
       ],
-      "type": "string"
-    },
-    "TableExpression": {
-      "description": "TODO: Description",
       "type": "string"
     },
     "TextEncodingOptions": {
@@ -1256,6 +1406,9 @@
         },
         {
           "$ref": "#/definitions/TextLayer"
+        },
+        {
+          "$ref": "#/definitions/ArcLayer"
         }
       ],
       "description": "TODO: Description"
