@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { density1d } from 'fast-kde';
+import { density1d, nrd } from 'fast-kde';
 import { cloneDeep } from 'lodash';
 import type {
   AggregateFunction,
@@ -192,13 +192,18 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         currentTable.table = leftTable.join(rightTable, transform.join.on);
       } else if ('kde' in transform) {
         const inTable = getInTable(transform.in);
-        const { field, bandwidth, samples } = transform.kde;
+        const { field, samples } = transform.kde;
+        let { bandwidth } = transform.kde;
+        if (bandwidth == null) {
+          bandwidth = nrd(inTable.array(field), (x: number) => x);
+        }
+        bandwidth = bandwidth ?? 1;
         const { sample = 'sample', density = 'density' } = transform.kde
           .output ?? { sample: 'sample', density: 'density' };
         let kdeTable;
 
-        const minVal = agg(inTable, op.min(field));
-        const maxVal = agg(inTable, op.max(field));
+        const minVal = agg(inTable, op.min(field)) - bandwidth * 3;
+        const maxVal = agg(inTable, op.max(field)) + bandwidth * 3;
         console.log({ minVal, maxVal });
         const partitions = inTable.partitions();
         for (let i = 0; i < partitions.length; i++) {
