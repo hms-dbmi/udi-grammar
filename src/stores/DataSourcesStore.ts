@@ -196,26 +196,28 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         const { sample = 'sample', density = 'density' } = transform.kde
           .output ?? { sample: 'sample', density: 'density' };
         let kdeTable;
-        if (inTable.isGrouped()) {
-          const minVal = agg(inTable, op.min(field));
-          const maxVal = agg(inTable, op.max(field));
-          console.log({ minVal, maxVal });
-          const groups = inTable.groups();
-          const partitions = inTable.partitions();
-          for (let i = 0; i < partitions.length; i++) {
-            const partition = partitions[i];
-            // partition is a list of indices that define a group
-            if (!partition) {
-              throw new Error('partition is undefined');
-            }
-            const values = partition.map((i) => inTable.get(field, i));
-            const densityEstimates = density1d(values, {
-              bandwidth,
-              bins: samples,
-              extent: [minVal, maxVal],
-            }).points();
-            let groupTable = from(densityEstimates);
-            groupTable = groupTable.rename({ x: sample, y: density });
+
+        const minVal = agg(inTable, op.min(field));
+        const maxVal = agg(inTable, op.max(field));
+        console.log({ minVal, maxVal });
+        const partitions = inTable.partitions();
+        for (let i = 0; i < partitions.length; i++) {
+          const partition = partitions[i];
+          // partition is a list of indices that define a group
+          // if no grouping is present, partition is an array of all indices
+          if (!partition) {
+            throw new Error('partition is undefined');
+          }
+          const values = partition.map((i) => inTable.get(field, i));
+          const densityEstimates = density1d(values, {
+            bandwidth,
+            bins: samples,
+            extent: [minVal, maxVal],
+          }).points();
+          let groupTable = from(densityEstimates);
+          groupTable = groupTable.rename({ x: sample, y: density });
+          if (inTable.isGrouped()) {
+            const groups = inTable.groups();
             for (let j = 0; j < groups.names.length; j++) {
               const name = groups.names[j];
               if (name == null) {
@@ -229,40 +231,17 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
               const value = getGroupValue(rowIndex);
               groupTable = groupTable.derive({ [name]: escape(value) });
             }
-            if (!kdeTable) {
-              kdeTable = groupTable;
-            } else {
-              kdeTable = kdeTable.concat(groupTable);
-            }
           }
           if (!kdeTable) {
-            throw new Error('kdeTable is undefined');
+            kdeTable = groupTable;
+          } else {
+            kdeTable = kdeTable.concat(groupTable);
           }
-          currentTable.table = kdeTable;
-
-          // exampole partisions() output
-          // Array(4) [
-          //   0: Array(2) [0, 5]
-          //   1: Array(2) [1, 3]
-          //   2: Array(1) [2]
-          //   3: Array(1) [4]
-
-          // example groups() output
-          // keys: Uint32Array(6) [0, 1, 2, 1, 3, 0]
-          // get: Array(2) [ƒ(e), ƒ(e)]
-          // names: Array(2) ["country", "medal"]
-          // rows: Array(4) [0, 1, 2, 4]
-          // size: 4
-        } else {
-          const values = inTable.array(field);
-          const densityEstimates = density1d(values, {
-            bandwidth,
-            bins: samples,
-          }).points();
-          let kdeTable = from(densityEstimates);
-          kdeTable = kdeTable.rename({ x: sample, y: density });
-          currentTable.table = kdeTable;
         }
+        if (!kdeTable) {
+          throw new Error('kdeTable is undefined');
+        }
+        currentTable.table = kdeTable;
       }
       setOutTable(transform);
     }
