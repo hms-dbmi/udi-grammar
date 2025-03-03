@@ -69,7 +69,8 @@
         "y",
         "y2",
         "color",
-        "stroke"
+        "stroke",
+        "opacity"
       ],
       "type": "string"
     },
@@ -139,12 +140,6 @@
         "binby": {
           "additionalProperties": false,
           "properties": {
-            "bin_end": {
-              "type": "string"
-            },
-            "bin_start": {
-              "type": "string"
-            },
             "bins": {
               "type": "number"
             },
@@ -153,6 +148,18 @@
             },
             "nice": {
               "type": "boolean"
+            },
+            "output": {
+              "additionalProperties": false,
+              "properties": {
+                "bin_end": {
+                  "type": "string"
+                },
+                "bin_start": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
             }
           },
           "required": [
@@ -215,6 +222,9 @@
         },
         {
           "$ref": "#/definitions/Filter"
+        },
+        {
+          "$ref": "#/definitions/KDE"
         }
       ],
       "description": "TODO: Description"
@@ -1037,6 +1047,54 @@
       "required": [
         "in",
         "join"
+      ],
+      "type": "object"
+    },
+    "KDE": {
+      "additionalProperties": false,
+      "description": "TODO: Description",
+      "properties": {
+        "in": {
+          "description": "TODO: Description",
+          "type": "string"
+        },
+        "kde": {
+          "additionalProperties": false,
+          "properties": {
+            "bandwidth": {
+              "type": "number"
+            },
+            "field": {
+              "type": "string"
+            },
+            "output": {
+              "additionalProperties": false,
+              "properties": {
+                "density": {
+                  "type": "string"
+                },
+                "sample": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "samples": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "field"
+          ],
+          "type": "object"
+        },
+        "out": {
+          "description": "TODO: Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kde"
       ],
       "type": "object"
     },
