@@ -45,7 +45,8 @@ export type DataTransformation =
   | Join
   | OrderBy
   | Derive
-  | Filter; // TODO: expand transformations
+  | Filter
+  | KDE;
 
 /**
  * TODO: Description
@@ -86,8 +87,10 @@ export interface BinBy extends DataTransformationBase {
     field: string;
     bins?: number;
     nice?: boolean;
-    bin_start?: string;
-    bin_end?: string;
+    output?: {
+      bin_start?: string;
+      bin_end?: string;
+    };
   };
 }
 
@@ -130,6 +133,22 @@ export interface Join extends DataTransformationBase {
    */
   join: {
     on: string | [string, string];
+  };
+}
+
+/**
+ * TODO: Description
+ */
+export interface KDE extends DataTransformationBase {
+  in?: string;
+  kde: {
+    field: string;
+    bandwidth?: number;
+    samples?: number;
+    output?: {
+      sample?: string;
+      density?: string;
+    };
   };
 }
 
@@ -381,7 +400,13 @@ export type LineValueMapping = GenericValueMapping<LineEncodingOptions>;
 /**
  * TODO: Description
  */
-export type AreaEncodingOptions = 'x' | 'y' | 'y2' | 'color' | 'stroke';
+export type AreaEncodingOptions =
+  | 'x'
+  | 'y'
+  | 'y2'
+  | 'color'
+  | 'stroke'
+  | 'opacity';
 
 /**
  * TODO: Description

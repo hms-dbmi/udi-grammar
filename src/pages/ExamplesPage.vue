@@ -477,8 +477,10 @@ const exampleGroups: ExampleGroup[] = [
                 field: 'bill_length_mm',
                 bins: 10,
                 nice: true,
-                bin_start: 'start',
-                bin_end: 'end',
+                output: {
+                  bin_start: 'start',
+                  bin_end: 'end',
+                },
               },
             },
             {
@@ -509,6 +511,111 @@ const exampleGroups: ExampleGroup[] = [
               },
             ],
           },
+        },
+      },
+      {
+        name: 'KDE Density Plot',
+        thumbnail: './example_thumbnails/distributions/TODO.png',
+        spec: {
+          source: {
+            name: 'penguins',
+            source: './data/penguins.csv',
+          },
+          transformation: [
+            {
+              kde: {
+                field: 'bill_length_mm',
+                samples: 100,
+                output: {
+                  sample: 'bill_length_mm',
+                  density: 'density',
+                },
+              },
+            },
+          ],
+          representation: {
+            mark: 'area',
+            mapping: [
+              {
+                encoding: 'x',
+                field: 'bill_length_mm',
+                type: 'quantitative',
+              },
+              {
+                encoding: 'y',
+                field: 'density',
+                type: 'quantitative',
+              },
+            ],
+          },
+        },
+      },
+      {
+        name: 'KDE Density Plot (grouped)',
+        thumbnail: './example_thumbnails/distributions/TODO.png',
+        spec: {
+          source: {
+            name: 'penguins',
+            source: './data/penguins.csv',
+          },
+          transformation: [
+            {
+              groupby: 'species',
+            },
+            {
+              kde: {
+                field: 'bill_length_mm',
+                samples: 100,
+                output: {
+                  sample: 'bill_length_mm',
+                  density: 'density',
+                },
+              },
+            },
+          ],
+          representation: [
+            {
+              mark: 'area',
+              mapping: [
+                {
+                  encoding: 'x',
+                  field: 'bill_length_mm',
+                  type: 'quantitative',
+                },
+                {
+                  encoding: 'y',
+                  field: 'density',
+                  type: 'quantitative',
+                },
+                {
+                  encoding: 'color',
+                  field: 'species',
+                  type: 'nominal',
+                },
+                { encoding: 'opacity', value: 0.25 },
+              ],
+            },
+            {
+              mark: 'line',
+              mapping: [
+                {
+                  encoding: 'x',
+                  field: 'bill_length_mm',
+                  type: 'quantitative',
+                },
+                {
+                  encoding: 'y',
+                  field: 'density',
+                  type: 'quantitative',
+                },
+                {
+                  encoding: 'color',
+                  field: 'species',
+                  type: 'nominal',
+                },
+              ],
+            },
+          ],
         },
       },
       {

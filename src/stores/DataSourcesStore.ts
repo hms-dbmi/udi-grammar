@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { defineStore } from 'pinia';
+import { density1d } from 'fast-kde';
 import { cloneDeep } from 'lodash';
 import type {
   AggregateFunction,
@@ -7,8 +7,22 @@ import type {
   DataTransformation,
 } from './GrammarTypes';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
-import { loadCSV, op, from, bin, rolling, type ColumnTable } from 'arquero';
-import type { ExprObject, TableExpr } from 'arquero/dist/types/table/types';
+import {
+  loadCSV,
+  agg,
+  op,
+  from,
+  bin,
+  rolling,
+  escape,
+  type ColumnTable,
+} from 'arquero';
+import type {
+  ColumnGetter,
+  ExprObject,
+  TableExpr,
+} from 'arquero/dist/types/table/types';
+import { defineStore } from 'pinia';
 
 interface DataInterface {
   source: DataSource;
@@ -120,13 +134,12 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         }
       } else if ('binby' in transform) {
         const inTable = getInTable(transform.in);
-        const {
-          field,
-          bins = 10,
-          nice = true,
-          bin_start = 'bin_start',
-          bin_end = 'bin_end',
-        } = transform.binby;
+        const { field, bins = 10, nice = true } = transform.binby;
+        const { bin_start = 'start', bin_end = 'end' } = transform.binby
+          .output ?? {
+          bin_start: 'start',
+          bin_end: 'end',
+        };
 
         const groupbyObject: { [key: string]: string } = {};
         groupbyObject[bin_start] = bin(field, { maxbins: bins, nice });
@@ -154,7 +167,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
             .params({ freqKey: freqKey })
             .derive(deriveExpression);
         }
-        // TODO: handle normalization
       } else if ('orderby' in transform) {
         const inTable = getInTable(transform.in);
         currentTable.table = inTable.orderby(transform.orderby);
@@ -178,6 +190,79 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           throw new Error('join table not found');
         }
         currentTable.table = leftTable.join(rightTable, transform.join.on);
+      } else if ('kde' in transform) {
+        const inTable = getInTable(transform.in);
+        const { field, bandwidth, samples } = transform.kde;
+        const { sample = 'sample', density = 'density' } = transform.kde
+          .output ?? { sample: 'sample', density: 'density' };
+        let kdeTable;
+        if (inTable.isGrouped()) {
+          const minVal = agg(inTable, op.min(field));
+          const maxVal = agg(inTable, op.max(field));
+          console.log({ minVal, maxVal });
+          const groups = inTable.groups();
+          const partitions = inTable.partitions();
+          for (let i = 0; i < partitions.length; i++) {
+            const partition = partitions[i];
+            // partition is a list of indices that define a group
+            if (!partition) {
+              throw new Error('partition is undefined');
+            }
+            const values = partition.map((i) => inTable.get(field, i));
+            const densityEstimates = density1d(values, {
+              bandwidth,
+              bins: samples,
+              extent: [minVal, maxVal],
+            }).points();
+            let groupTable = from(densityEstimates);
+            groupTable = groupTable.rename({ x: sample, y: density });
+            for (let j = 0; j < groups.names.length; j++) {
+              const name = groups.names[j];
+              if (name == null) {
+                throw new Error('name is undefined');
+              }
+              const getGroupValue = groups.get[j] as ColumnGetter;
+              const rowIndex = groups.rows[i];
+              if (rowIndex == null) {
+                throw new Error('rowIndex is undefined');
+              }
+              const value = getGroupValue(rowIndex);
+              groupTable = groupTable.derive({ [name]: escape(value) });
+            }
+            if (!kdeTable) {
+              kdeTable = groupTable;
+            } else {
+              kdeTable = kdeTable.concat(groupTable);
+            }
+          }
+          if (!kdeTable) {
+            throw new Error('kdeTable is undefined');
+          }
+          currentTable.table = kdeTable;
+
+          // exampole partisions() output
+          // Array(4) [
+          //   0: Array(2) [0, 5]
+          //   1: Array(2) [1, 3]
+          //   2: Array(1) [2]
+          //   3: Array(1) [4]
+
+          // example groups() output
+          // keys: Uint32Array(6) [0, 1, 2, 1, 3, 0]
+          // get: Array(2) [ƒ(e), ƒ(e)]
+          // names: Array(2) ["country", "medal"]
+          // rows: Array(4) [0, 1, 2, 4]
+          // size: 4
+        } else {
+          const values = inTable.array(field);
+          const densityEstimates = density1d(values, {
+            bandwidth,
+            bins: samples,
+          }).points();
+          let kdeTable = from(densityEstimates);
+          kdeTable = kdeTable.rename({ x: sample, y: density });
+          currentTable.table = kdeTable;
+        }
       }
       setOutTable(transform);
     }

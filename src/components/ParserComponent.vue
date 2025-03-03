@@ -118,6 +118,9 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
           zero: false,
         };
       }
+      if (layer.mark === 'area' && encoding === 'y') {
+        vegaEncoding[encoding].stack = false;
+      }
     }
     return {
       mark: layer.mark,

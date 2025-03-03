@@ -64,8 +64,10 @@ export const BinTransform2 = {
             field: 'weight_value',
             bins: 10,
             nice: true,
-            bin_start: 'start',
-            bin_end: 'end',
+            output: {
+              bin_start: 'start',
+              bin_end: 'end',
+            },
           },
         },
         {

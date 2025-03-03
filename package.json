@@ -21,6 +21,7 @@
     "@guolao/vue-monaco-editor": "^1.5.4",
     "@quasar/extras": "^1.16.4",
     "arquero": "^8.0.1",
+    "fast-kde": "^0.2.2",
     "lodash": "^4.17.21",
     "lz-string": "^1.5.0",
     "monaco-editor": "^0.52.2",
