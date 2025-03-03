@@ -113,7 +113,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
           type: map.type,
         };
       }
-      if (encoding === 'x' || encoding === 'y') {
+      if (encoding === 'x' || encoding === 'y' || encoding === 'size') {
         vegaEncoding[encoding].scale = {
           zero: false,
         };

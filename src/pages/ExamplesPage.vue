@@ -264,11 +264,11 @@ const exampleGroups: ExampleGroup[] = [
     ],
   },
   {
-    name: 'Pie Charts',
+    name: 'Circular Charts',
     examples: [
       {
         name: 'Pie Chart',
-        thumbnail: './example_thumbnails/pie_charts/TODO.png',
+        thumbnail: './example_thumbnails/circular_charts/pie_chart.png',
         spec: {
           source: [
             {
@@ -309,7 +309,7 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Donut Chart',
-        thumbnail: './example_thumbnails/pie_charts/TODO.png',
+        thumbnail: './example_thumbnails/circular_charts/donut_chart.png',
         spec: {
           source: [
             {
@@ -355,11 +355,11 @@ const exampleGroups: ExampleGroup[] = [
     ],
   },
   {
-    name: 'Scatter Plots',
+    name: 'Scatterplots',
     examples: [
       {
         name: 'Basic Scatter Plot',
-        thumbnail: './example_thumbnails/scatter_plots/TODO.png',
+        thumbnail: './example_thumbnails/scatterplots/scatterplot.png',
         spec: {
           source: {
             name: 'donors',
@@ -376,7 +376,8 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Scatter Plot with Categories',
-        thumbnail: './example_thumbnails/scatter_plots/TODO.png',
+        thumbnail:
+          './example_thumbnails/scatterplots/scatterplot_with_categories.png',
         spec: {
           source: {
             name: 'donors',
@@ -395,7 +396,7 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Bubble Plot',
-        thumbnail: './example_thumbnails/scatter_plots/TODO.png',
+        thumbnail: './example_thumbnails/scatterplots/bubble_plot.png',
         spec: {
           source: {
             name: 'donors',
@@ -418,7 +419,7 @@ const exampleGroups: ExampleGroup[] = [
     examples: [
       {
         name: 'Heatmap of Categories',
-        thumbnail: './example_thumbnails/heatmaps/TODO.png',
+        thumbnail: './example_thumbnails/heatmaps/heatmap_of_categories.png',
         spec: {
           source: {
             name: 'samples',
@@ -461,11 +462,11 @@ const exampleGroups: ExampleGroup[] = [
     ],
   },
   {
-    name: 'Univariate Distribution',
+    name: 'Distribution Plots',
     examples: [
       {
-        name: 'Basic Histogram',
-        thumbnail: './example_thumbnails/distributions/TODO.png',
+        name: 'Histogram',
+        thumbnail: './example_thumbnails/distribution_plots/histogram.png',
         spec: {
           source: {
             name: 'penguins',
@@ -515,7 +516,8 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'KDE Density Plot',
-        thumbnail: './example_thumbnails/distributions/TODO.png',
+        thumbnail:
+          './example_thumbnails/distribution_plots/kde_density_plot.png',
         spec: {
           source: {
             name: 'penguins',
@@ -552,7 +554,8 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'KDE Density Plot (grouped)',
-        thumbnail: './example_thumbnails/distributions/TODO.png',
+        thumbnail:
+          './example_thumbnails/distribution_plots/kde_density_plot_grouped.png',
         spec: {
           source: {
             name: 'penguins',
@@ -620,7 +623,7 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Empirical CDF',
-        thumbnail: './example_thumbnails/distributions/TODO.png',
+        thumbnail: './example_thumbnails/distribution_plots/empirical_cdf.png',
         spec: {
           source: {
             name: 'penguins',
@@ -662,7 +665,8 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Empirical CDF (grouped)',
-        thumbnail: './example_thumbnails/distributions/TODO.png',
+        thumbnail:
+          './example_thumbnails/distribution_plots/empirical_cdf_grouped.png',
         spec: {
           source: {
             name: 'penguins',
@@ -709,14 +713,6 @@ const exampleGroups: ExampleGroup[] = [
         },
       },
     ],
-  },
-  {
-    name: 'Line Charts',
-    examples: [],
-  },
-  {
-    name: 'Area Charts',
-    examples: [],
   },
 ];
 
