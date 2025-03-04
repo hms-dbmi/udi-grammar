@@ -1,4 +1,4 @@
-## **Patient** {#patient}
+## **Patient**
 
 ### **Description**
 

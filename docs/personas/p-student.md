@@ -1,4 +1,4 @@
-## **Student** {#student}
+## **Student**
 
 ### **Description**
 

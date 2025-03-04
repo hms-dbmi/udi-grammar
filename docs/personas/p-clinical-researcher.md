@@ -1,4 +1,4 @@
-## **Clinical Researcher** {#clinical-researcher}
+## **Clinical Researcher**
 
 ### **Description**
 

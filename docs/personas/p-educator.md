@@ -1,4 +1,4 @@
-## **Educator** {#educator}
+## **Educator**
 
 ### **Description**
 

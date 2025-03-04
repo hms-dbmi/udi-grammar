@@ -1,4 +1,4 @@
-## **Software Developer** {#software-developer}
+## **Software Developer**
 
 **Description**
 

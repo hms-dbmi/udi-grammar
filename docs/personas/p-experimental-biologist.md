@@ -1,4 +1,4 @@
-## **Experimental Biologist** {#experimental-biologist}
+## **Experimental Biologist**
 
 ### **Description**
 

@@ -1,4 +1,4 @@
-## **Data Contributor** {#data-contributor}
+## **Data Contributor**
 
 ### **Description**
 

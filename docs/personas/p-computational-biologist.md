@@ -1,4 +1,4 @@
-## **Computational Biologist** {#computational-biologist}
+## **Computational Biologist**
 
 ### **Description**
 
