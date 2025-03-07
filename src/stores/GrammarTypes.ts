@@ -187,8 +187,19 @@ export interface Filter extends DataTransformationBase {
 /**
  * TODO: Description
  */
-export type DeriveExpression = string | RollingDeriveExpression;
 export type FilterExpression = string;
+
+export interface FilterDataSelection {
+  name: string;
+  /**
+   * In the case where the selection is applied across a 1-to-many mapping,
+   * this specifies if filter should use 'all' or 'any' of the selected data.
+   * Default is 'any'.
+   */
+  match?: 'all' | 'any';
+}
+
+export type DeriveExpression = string | RollingDeriveExpression;
 
 /**
  * TODO: Description
