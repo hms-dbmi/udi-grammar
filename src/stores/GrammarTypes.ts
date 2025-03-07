@@ -243,6 +243,11 @@ export interface GenericLayer<Mark, Mapping> {
    * TODO: Description
    */
   mapping: Mapping | Mapping[];
+
+  /**
+   * TODO: Description
+   */
+  select?: DataSelection;
 }
 
 /**
@@ -589,3 +594,23 @@ export interface RowMapping extends GenericFieldMapping<RowEncodingOptions> {
   mark: RowMarkOptions;
 }
 //
+export interface DataSelection {
+  name: string;
+  /**
+   * How the data is selected in the visualization / table.
+   */
+  how: DataSelectionInterval | DataSelectionPoint;
+  /**
+   * The fields selected from the data points. If not specified, all fields are selected.
+   */
+  fields?: string | string[];
+}
+
+export interface DataSelectionInterval {
+  type: 'interval';
+  on: 'x' | 'y' | 'xy';
+}
+
+export interface DataSelectionPoint {
+  type: 'point';
+}
