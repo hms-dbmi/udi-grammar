@@ -21,22 +21,22 @@ export interface UDIGrammar {
 }
 
 /**
- * TODO: DataSource
+ * A single tabular data source. Currently only csv files are accepted.
  */
 export interface DataSource {
   /**
-   * TODO: Description
+   * The unique name of the data source.
    */
   name: string;
 
   /**
-   * TODO: Description
+   * The URL of the CSV file.
    */
-  source: string; // url of csv for now
+  source: string;
 }
 
 /**
- * TODO: Description
+ * The possible data transformations.
  */
 export type DataTransformation =
   | GroupBy
@@ -49,21 +49,21 @@ export type DataTransformation =
   | KDE;
 
 /**
- * TODO: Description
+ * All data transformations have one or two input tables and one output table.
  */
 interface DataTransformationBase {
   /**
-   * TODO: Description
+   * The name of the input table or tables. Which match the name of the data source.
+   * If no table name is specified, it assumes the output of the previous operation.
    */
-  in?: string | [string, string]; // name of input table(s)
+  in?: string | [string, string];
 
-  // If no name is specified, it assumes the output of the previous operation.
   /**
-   * TODO: Description
+   * The output name of the table. If no name is specified,
+   * it uses the name of the previous table, overwriting it.
    */
-  out?: string; // name of output table
+  out?: string;
 }
-
 /**
  * TODO: Description
  */
