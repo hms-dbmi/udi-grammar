@@ -168,11 +168,11 @@
           "type": "object"
         },
         "in": {
-          "description": "TODO: Description",
+          "description": "The name of the input table or tables. Which match the name of the data source. If no table name is specified, it assumes the output of the previous operation.",
           "type": "string"
         },
         "out": {
-          "description": "TODO: Description",
+          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
           "type": "string"
         }
       },
@@ -181,16 +181,89 @@
       ],
       "type": "object"
     },
+    "DataSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "The fields selected from the data points. If not specified, all fields are selected."
+        },
+        "how": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/DataSelectionInterval"
+            },
+            {
+              "$ref": "#/definitions/DataSelectionPoint"
+            }
+          ],
+          "description": "How the data is selected in the visualization / table."
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "how"
+      ],
+      "type": "object"
+    },
+    "DataSelectionInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "enum": [
+            "x",
+            "y",
+            "xy"
+          ],
+          "type": "string"
+        },
+        "type": {
+          "const": "interval",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "on"
+      ],
+      "type": "object"
+    },
+    "DataSelectionPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "point",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
     "DataSource": {
       "additionalProperties": false,
-      "description": "TODO: DataSource",
+      "description": "A single tabular data source. Currently only csv files are accepted.",
       "properties": {
         "name": {
-          "description": "TODO: Description",
+          "description": "The unique name of the data source.",
           "type": "string"
         },
         "source": {
-          "description": "TODO: Description",
+          "description": "The URL of the CSV file.",
           "type": "string"
         }
       },
@@ -227,7 +300,7 @@
           "$ref": "#/definitions/KDE"
         }
       ],
-      "description": "TODO: Description"
+      "description": "The possible data transformations."
     },
     "DataTypes": {
       "description": "TODO: Description",
@@ -254,7 +327,7 @@
           "type": "string"
         },
         "out": {
-          "description": "TODO: Description",
+          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
           "type": "string"
         }
       },
@@ -271,8 +344,7 @@
         {
           "$ref": "#/definitions/RollingDeriveExpression"
         }
-      ],
-      "description": "TODO: Description"
+      ]
     },
     "Filter": {
       "additionalProperties": false,
@@ -287,7 +359,7 @@
           "type": "string"
         },
         "out": {
-          "description": "TODO: Description",
+          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
           "type": "string"
         }
       },
@@ -297,6 +369,7 @@
       "type": "object"
     },
     "FilterExpression": {
+      "description": "TODO: Description",
       "type": "string"
     },
     "GenericFieldMapping<ArcEncodingOptions>": {
@@ -513,6 +586,10 @@
           "const": "arc",
           "description": "TODO: Description",
           "type": "string"
+        },
+        "select": {
+          "$ref": "#/definitions/DataSelection",
+          "description": "TODO: Description"
         }
       },
       "required": [
@@ -543,6 +620,10 @@
           "const": "area",
           "description": "TODO: Description",
           "type": "string"
+        },
+        "select": {
+          "$ref": "#/definitions/DataSelection",
+          "description": "TODO: Description"
         }
       },
       "required": [
@@ -573,6 +654,10 @@
           "const": "bar",
           "description": "TODO: Description",
           "type": "string"
+        },
+        "select": {
+          "$ref": "#/definitions/DataSelection",
+          "description": "TODO: Description"
         }
       },
       "required": [
@@ -603,6 +688,10 @@
           "const": "geometry",
           "description": "TODO: Description",
           "type": "string"
+        },
+        "select": {
+          "$ref": "#/definitions/DataSelection",
+          "description": "TODO: Description"
         }
       },
       "required": [
@@ -633,6 +722,10 @@
           "const": "line",
           "description": "TODO: Description",
           "type": "string"
+        },
+        "select": {
+          "$ref": "#/definitions/DataSelection",
+          "description": "TODO: Description"
         }
       },
       "required": [
@@ -663,6 +756,10 @@
           "const": "point",
           "description": "TODO: Description",
           "type": "string"
+        },
+        "select": {
+          "$ref": "#/definitions/DataSelection",
+          "description": "TODO: Description"
         }
       },
       "required": [
@@ -693,6 +790,10 @@
           "const": "rect",
           "description": "TODO: Description",
           "type": "string"
+        },
+        "select": {
+          "$ref": "#/definitions/DataSelection",
+          "description": "TODO: Description"
         }
       },
       "required": [
@@ -723,6 +824,10 @@
           "const": "row",
           "description": "TODO: Description",
           "type": "string"
+        },
+        "select": {
+          "$ref": "#/definitions/DataSelection",
+          "description": "TODO: Description"
         }
       },
       "required": [
@@ -753,6 +858,10 @@
           "const": "text",
           "description": "TODO: Description",
           "type": "string"
+        },
+        "select": {
+          "$ref": "#/definitions/DataSelection",
+          "description": "TODO: Description"
         }
       },
       "required": [
@@ -992,7 +1101,7 @@
           "type": "string"
         },
         "out": {
-          "description": "TODO: Description",
+          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
           "type": "string"
         }
       },
@@ -1040,7 +1149,7 @@
           "type": "object"
         },
         "out": {
-          "description": "TODO: Description",
+          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
           "type": "string"
         }
       },
@@ -1055,7 +1164,7 @@
       "description": "TODO: Description",
       "properties": {
         "in": {
-          "description": "TODO: Description",
+          "description": "The name of the input table or tables. Which match the name of the data source. If no table name is specified, it assumes the output of the previous operation.",
           "type": "string"
         },
         "kde": {
@@ -1089,7 +1198,7 @@
           "type": "object"
         },
         "out": {
-          "description": "TODO: Description",
+          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
           "type": "string"
         }
       },
@@ -1135,14 +1244,14 @@
       "description": "TODO: Description",
       "properties": {
         "in": {
-          "description": "TODO: Description",
+          "description": "The name of the input table or tables. Which match the name of the data source. If no table name is specified, it assumes the output of the previous operation.",
           "type": "string"
         },
         "orderby": {
           "type": "string"
         },
         "out": {
-          "description": "TODO: Description",
+          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
           "type": "string"
         }
       },
@@ -1257,7 +1366,7 @@
           "type": "string"
         },
         "out": {
-          "description": "TODO: Description",
+          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
           "type": "string"
         },
         "rollup": {
