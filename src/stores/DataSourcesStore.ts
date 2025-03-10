@@ -257,6 +257,11 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     switch (aggFunc.op) {
       case 'count':
         return op.count();
+      case 'sum':
+        if (!aggFunc.field) {
+          throw new Error('Field is required for sum operation');
+        }
+        return op.sum(aggFunc.field);
       case 'min':
         if (!aggFunc.field) {
           throw new Error('Field is required for min operation');

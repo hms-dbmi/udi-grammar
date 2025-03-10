@@ -187,7 +187,7 @@ export interface Filter extends DataTransformationBase {
 /**
  * TODO: Description
  */
-export type FilterExpression = string;
+export type FilterExpression = string | FilterDataSelection;
 
 export interface FilterDataSelection {
   name: string;
@@ -218,7 +218,7 @@ export interface AggregateFunction {
   /**
    * TODO: Description
    */
-  op: 'count' | 'mean' | 'min' | 'max' | 'median' | 'frequency';
+  op: 'count' | 'sum' | 'mean' | 'min' | 'max' | 'median' | 'frequency';
 
   /**
    * TODO: Description
