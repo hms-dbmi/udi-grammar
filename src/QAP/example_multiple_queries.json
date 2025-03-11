@@ -1,0 +1,353 @@
+{
+  "datasets": [
+    {
+      "name": "donor",
+      "path": "./data/donor.csv",
+      "description": "A collection of attributes of individual donor.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "nominal",
+          "description": "The ID of the donor."
+        },
+        {
+          "name": "height",
+          "type": "quantitative",
+          "description": "The height of donor, in centimeters."
+        },
+        {
+          "name": "weight",
+          "type": "quantitative",
+          "description": "The weigh of donor, in kilograms."
+        },
+        {
+          "name": "age",
+          "type": "quantitative",
+          "description": "The age of donor, in years."
+        },
+        {
+          "name": "sex",
+          "type": "nominal",
+          "description": "The sex of donor."
+        },
+        {
+          "name": "race",
+          "type": "nominal",
+          "description": "The race of the donor."
+        }
+      ]
+    },
+    {
+      "name": "samples",
+      "path": "./data/samples.csv",
+      "description": "A collection of attributes of individual biological samples.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "nominal",
+          "description": "The ID of the sample."
+        },
+        {
+          "name": "donor_id",
+          "type": "nominal",
+          "description": "The ID of the donor."
+        },
+        {
+          "name": "organ",
+          "type": "nominal",
+          "description": "The source organ of the sample."
+        },
+        {
+          "name": "cell_type",
+          "type": "nominal",
+          "description": "The cell type of the sample."
+        },
+        {
+          "name": "disease",
+          "type": "nominal",
+          "description": "The disease status of the sample."
+        }
+      ]
+    },
+    {
+      "name": "datasets",
+      "path": "./data/datasets.csv",
+      "description": "A collection of attributes of individual datasets.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "nominal",
+          "description": "The ID of the dataset."
+        },
+        {
+          "name": "sample_id",
+          "type": "nominal",
+          "description": "The ID of the sample."
+        },
+        {
+          "name": "assay_type",
+          "type": "nominal",
+          "description": "The assay type of the dataset."
+        }
+      ]
+    }
+  ],
+  "entityRelationships": [
+    {
+      "type": "one-to-many",
+      "source": "donor",
+      "target": "samples",
+      "source_key": "id",
+      "target_key": "donor_id"
+    },
+    {
+      "type": "one-to-many",
+      "source": "samples",
+      "target": "datasets",
+      "source_key": "id",
+      "target_key": "sample_id"
+    }
+  ],
+  "availableTools": [
+    {
+      "name": "renderVisualization",
+      "description": "Render a visualization of the data.",
+      "parameters": { "spec": "UDI_SCHEMA..." }
+    },
+    {
+      "name": "summarizeDatasets",
+      "description": "Provides a summary of all the available datasets."
+    },
+    {
+      "name": "summarizeFields",
+      "description": "Provides a summary of all the available fields / columns for a single dataset.",
+      "parameters": {
+        "dataset": "SIMPLE_STRING_SCHEMA... (donors | samples | datasets)"
+      }
+    }
+  ],
+  "conversation": [
+    {
+      "role": "system",
+      "content": "Welcome to the Universal Discovery Interface (UDI), this interface allows you to interact with the data in a more intuitive way. You can ask questions, visualize data, and summarize datasets. These are the available dataset.",
+      "tool_calls": [
+        {
+          "name": "summarizeDatasets",
+          "arguments": {}
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Tell me more about the samples and datasets."
+    },
+    {
+      "role": "system",
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "summarizeFields",
+          "arguments": {
+            "dataset": "samples"
+          }
+        },
+        {
+          "name": "summarizeFields",
+          "arguments": {
+            "dataset": "datasets"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "How many datasets are there for each organ?"
+    },
+    {
+      "role": "system",
+      "content": "",
+      "tool_calls": [
+        {
+          "source": [
+            {
+              "name": "datasets",
+              "source": "./data/datasets.csv"
+            },
+            {
+              "name": "samples",
+              "source": "./data/samples.csv"
+            }
+          ],
+          "transformation": [
+            {
+              "in": ["datasets", "samples"],
+              "join": {
+                "on": ["sample_id", "id"]
+              },
+              "out": "donor_sample_combined"
+            },
+            {
+              "groupby": "organ"
+            },
+            {
+              "rollup": {
+                "sample count": {
+                  "op": "count"
+                }
+              }
+            }
+          ],
+          "representation": {
+            "mark": "bar",
+            "mapping": [
+              {
+                "encoding": "y",
+                "field": "organ",
+                "type": "nominal"
+              },
+              {
+                "encoding": "x",
+                "field": "sample count",
+                "type": "quantitative"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "role": "action",
+      "state": {
+        "old": {},
+        "new": {
+          "selection": {
+            "organ": "NULL"
+          }
+        }
+      }
+    },
+    {
+      "role": "user",
+      "content": "Remove this selection."
+    },
+    {
+      "role": "system",
+      "content": "",
+      "tool_calls": [
+        {
+          "source": [
+            {
+              "name": "datasets",
+              "source": "./data/datasets.csv"
+            },
+            {
+              "name": "samples",
+              "source": "./data/samples.csv"
+            }
+          ],
+          "transformation": [
+            {
+              "in": ["datasets", "samples"],
+              "join": {
+                "on": ["sample_id", "id"]
+              },
+              "out": "donor_sample_combined"
+            },
+            {
+              "filter": "d.organ !== NULL"
+            },
+            {
+              "groupby": "organ"
+            },
+            {
+              "rollup": {
+                "sample count": {
+                  "op": "count"
+                }
+              }
+            }
+          ],
+          "representation": {
+            "mark": "bar",
+            "mapping": [
+              {
+                "encoding": "y",
+                "field": "organ",
+                "type": "nominal"
+              },
+              {
+                "encoding": "x",
+                "field": "sample count",
+                "type": "quantitative"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Break this down further by assay."
+    },
+    {
+      "role": "system",
+      "content": "",
+      "tool_calls": [
+        {
+          "source": [
+            {
+              "name": "datasets",
+              "source": "./data/datasets.csv"
+            },
+            {
+              "name": "samples",
+              "source": "./data/samples.csv"
+            }
+          ],
+          "transformation": [
+            {
+              "in": ["datasets", "samples"],
+              "join": {
+                "on": ["sample_id", "id"]
+              },
+              "out": "donor_sample_combined"
+            },
+            {
+              "filter": "d.organ !== NULL"
+            },
+            {
+              "groupby": ["organ", "assay_type"]
+            },
+            {
+              "rollup": {
+                "sample count": {
+                  "op": "count"
+                }
+              }
+            }
+          ],
+          "representation": {
+            "mark": "bar",
+            "mapping": [
+              {
+                "encoding": "y",
+                "field": "organ",
+                "type": "nominal"
+              },
+              {
+                "encoding": "x",
+                "field": "sample count",
+                "type": "quantitative"
+              },
+              {
+                "encoding": "color",
+                "field": "assay_type",
+                "type": "nominal"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
