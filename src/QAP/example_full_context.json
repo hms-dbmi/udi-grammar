@@ -1,0 +1,176 @@
+{
+  "datasets": [
+    {
+      "name": "donor",
+      "path": "./data/donor.csv",
+      "description": "A collection of attributes of individual donor.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "nominal",
+          "description": "The ID of the donor."
+        },
+        {
+          "name": "height",
+          "type": "quantitative",
+          "description": "The height of donor, in centimeters."
+        },
+        {
+          "name": "weight",
+          "type": "quantitative",
+          "description": "The weigh of donor, in kilograms."
+        },
+        {
+          "name": "age",
+          "type": "quantitative",
+          "description": "The age of donor, in years."
+        },
+        {
+          "name": "sex",
+          "type": "nominal",
+          "description": "The sex of donor."
+        },
+        {
+          "name": "race",
+          "type": "nominal",
+          "description": "The race of the donor."
+        }
+      ]
+    },
+    {
+      "name": "samples",
+      "path": "./data/samples.csv",
+      "description": "A collection of attributes of individual biological samples.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "nominal",
+          "description": "The ID of the sample."
+        },
+        {
+          "name": "donor_id",
+          "type": "nominal",
+          "description": "The ID of the donor."
+        },
+        {
+          "name": "organ",
+          "type": "nominal",
+          "description": "The source organ of the sample."
+        },
+        {
+          "name": "cell_type",
+          "type": "nominal",
+          "description": "The cell type of the sample."
+        },
+        {
+          "name": "disease",
+          "type": "nominal",
+          "description": "The disease status of the sample."
+        }
+      ]
+    },
+    {
+      "name": "datasets",
+      "path": "./data/datasets.csv",
+      "description": "A collection of attributes of individual datasets.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "nominal",
+          "description": "The ID of the dataset."
+        },
+        {
+          "name": "sample_id",
+          "type": "nominal",
+          "description": "The ID of the sample."
+        },
+        {
+          "name": "assay_type",
+          "type": "nominal",
+          "description": "The assay type of the dataset."
+        }
+      ]
+    }
+  ],
+  "entityRelationships": [
+    {
+      "type": "one-to-many",
+      "source": "donor",
+      "target": "samples",
+      "source_key": "id",
+      "target_key": "donor_id"
+    },
+    {
+      "type": "one-to-many",
+      "source": "samples",
+      "target": "datasets",
+      "source_key": "id",
+      "target_key": "sample_id"
+    }
+  ],
+  "availableTools": [
+    {
+      "name": "renderVisualization",
+      "description": "Render a visualization of the data.",
+      "parameters": { "spec": "UDI_SCHEMA" }
+    },
+    {
+      "name": "summarizeDatasets",
+      "description": "Provides a summary of all the available datasets."
+    },
+    {
+      "name": "summarizeFields",
+      "description": "Provides a summary of all the available fields / columns for a single dataset.",
+      "parameters": {
+        "dataset": "SIMPLE_STRING_SCHEMA (donors | samples | datasets)"
+      }
+    }
+  ],
+  "conversation": [
+    {
+      "role": "user",
+      "content": "What is the distribution of donor height?"
+    },
+    {
+      "role": "system",
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "renderVisualization",
+          "arguments": {
+            "spec": {
+              "source": {
+                "name": "donor",
+                "source": "./data/donor.csv"
+              },
+              "transformation": {
+                "kde": {
+                  "field": "height",
+                  "output": {
+                    "density": "density",
+                    "sample": "height"
+                  }
+                }
+              },
+              "representation": {
+                "mark": "bar",
+                "mapping": [
+                  {
+                    "encoding": "x",
+                    "field": "height",
+                    "type": "quantitative"
+                  },
+                  {
+                    "encoding": "y",
+                    "field": "density",
+                    "type": "quantitative"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

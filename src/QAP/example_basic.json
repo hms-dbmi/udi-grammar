@@ -31,6 +31,12 @@
       }
     ]
   },
+  "available_tools": [
+    {
+      "name": "renderVisualization",
+      "description": "Render a visualization of the data."
+    }
+  ],
   "tool_call": {
     "name": "renderVisualization",
     "arguments": {
