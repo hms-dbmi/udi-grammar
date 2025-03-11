@@ -189,7 +189,6 @@ export const Layering = {
   },
 };
 
-// List of encodings, column as a mark
 export const TableExample = {
   args: {
     spec: {
@@ -229,7 +228,7 @@ export const TableDefault = {
       },
       representation: {
         mark: 'row',
-        mapping: [{ mark: 'text', field: '*', encoding: 'text' }],
+        mapping: { mark: 'text', field: '*', encoding: 'text' },
       },
     },
   },
@@ -245,13 +244,16 @@ export const LayeredTableExample1 = {
       representation: [
         {
           mark: 'row',
-          mapping: [{ mark: 'rect', field: '*', encoding: 'color' }],
+          mapping: { mark: 'rect', field: '*', encoding: 'color' },
         },
         {
           mark: 'row',
-          mapping: [
-            { mark: 'text', field: '*', value: 'white', encoding: 'color' },
-          ],
+          mapping: {
+            mark: 'text',
+            field: '*',
+            value: 'white',
+            encoding: 'color',
+          },
         },
       ],
     },
