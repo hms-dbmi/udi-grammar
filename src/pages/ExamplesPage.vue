@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { compressToEncodedURIComponent } from 'lz-string';
 // import { ref } from 'vue';
 import type { UDIGrammar } from '../stores/GrammarTypes';
+import { useEditorStore } from 'src/stores/EditorStore';
+
+const editorStore = useEditorStore();
 
 interface ExampleGroup {
   name: string;
@@ -715,12 +717,6 @@ const exampleGroups: ExampleGroup[] = [
     ],
   },
 ];
-
-function getUrlWithSpec(spec: UDIGrammar): string {
-  const stringified = JSON.stringify(spec, null, 2);
-  const compressed = compressToEncodedURIComponent(stringified);
-  return `/Editor?spec=${compressed}`;
-}
 </script>
 <template>
   <q-page class="column items-center justify-start q-ma-md">
@@ -754,7 +750,7 @@ function getUrlWithSpec(spec: UDIGrammar): string {
               rounded
               no-caps
               icon-right="open_in_new"
-              :to="getUrlWithSpec(example.spec)"
+              :to="editorStore.getUrlWithSpec(example.spec)"
               :label="example.name"
             ></q-btn>
           </q-card-actions>

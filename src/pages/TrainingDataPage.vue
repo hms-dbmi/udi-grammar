@@ -1,22 +1,47 @@
 <script setup lang="ts">
 import ParserComponent from 'src/components/ParserComponent.vue';
 import { ref, computed } from 'vue';
+import { useEditorStore } from 'src/stores/EditorStore';
+const editorStore = useEditorStore();
+import { useTrainingStore } from 'src/stores/TrainingStore';
+const trainingStore = useTrainingStore();
 
 const trainingData = ref<TrainingData[]>();
 
-const index = ref<number>(0);
+// const index = ref<number>(0);
 
-function right() {
-  index.value = index.value + 1;
-  if (trainingData.value && index.value >= trainingData.value.length) {
-    index.value = 0;
+function prev() {
+  trainingStore.index = trainingStore.index - 1;
+  if (trainingStore.index < 0) {
+    trainingStore.index = trainingData.value
+      ? trainingData.value.length - 1
+      : 0;
   }
 }
 
-function left() {
-  index.value = index.value - 1;
-  if (index.value < 0) {
-    index.value = trainingData.value ? trainingData.value.length - 1 : 0;
+function next() {
+  trainingStore.index = trainingStore.index + 1;
+  if (trainingData.value && trainingStore.index >= trainingData.value.length) {
+    trainingStore.index = 0;
+  }
+}
+function prevTemplate() {
+  if (!trainingData.value || !currrentExample.value) {
+    return;
+  }
+  const currentTemplate = currrentExample.value.spec_template;
+  while (currentTemplate == currrentExample.value.spec_template) {
+    prev();
+  }
+}
+
+function nextTemplate() {
+  if (!trainingData.value || !currrentExample.value) {
+    return;
+  }
+  const currentTemplate = currrentExample.value.spec_template;
+  while (currentTemplate == currrentExample.value.spec_template) {
+    next();
   }
 }
 
@@ -24,7 +49,7 @@ const currrentExample = computed<TrainingData | null>(() => {
   if (!trainingData.value) {
     return null;
   }
-  return trainingData.value[index.value] ?? null;
+  return trainingData.value[trainingStore.index] ?? null;
 });
 
 interface TrainingData {
@@ -64,12 +89,6 @@ const spec = computed(() => {
   return JSON.parse(currrentExample.value?.spec ?? '');
 });
 
-const leftDrawerOpen = ref<boolean>(false);
-
-function toggleDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
-
 function prettyPrintJson(json?: string): string {
   if (!json) {
     return '';
@@ -78,7 +97,7 @@ function prettyPrintJson(json?: string): string {
 }
 </script>
 <template>
-  <q-drawer v-model="leftDrawerOpen" bordered :width="400">
+  <q-drawer v-model="trainingStore.leftDrawerOpen" bordered :width="400">
     <q-list separator>
       <q-item>
         <q-item-section>
@@ -154,11 +173,27 @@ function prettyPrintJson(json?: string): string {
   </q-drawer>
   <q-page class="column items-center justify-start q-ma-md">
     <q-toolbar class="text-primary">
-      <q-btn @click="toggleDrawer" flat round dense icon="menu" />
-      <span>{{ index + 1 }} / {{ trainingData?.length ?? 0 }}</span>
-      <q-btn @click="left" flat label="Prev" />
-      <q-btn @click="right" flat label="Next" />
-      <q-btn @click="right" flat label="Open in Editor" />
+      <q-btn
+        class="q-mr-lg"
+        @click="trainingStore.toggleDrawer"
+        flat
+        round
+        dense
+        icon="menu"
+      />
+      <span class="q-mr-md"
+        >{{ trainingStore.index + 1 }} / {{ trainingData?.length ?? 0 }}</span
+      >
+      <q-btn @click="prev" flat label="Prev" />
+      <q-btn @click="next" flat label="Next" />
+      <q-btn @click="prevTemplate" flat label="Prev Template" />
+      <q-btn @click="nextTemplate" flat label="Next Template" />
+      <q-btn
+        v-if="validSpec"
+        :to="editorStore.getUrlWithSpec(spec)"
+        flat
+        label="Open in Editor"
+      />
     </q-toolbar>
     <div class="q-mt-lg q-ml-lg q-mr-lg">
       <template v-if="currrentExample">
