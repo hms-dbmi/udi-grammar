@@ -348,6 +348,22 @@
           }
         }
       ]
+    },
+    {
+      "role": "user",
+      "content": "Actually, instead of assay break it down by filetype?"
+    },
+    {
+      "role": "system",
+      "content": "Unfortunately filetype is not included in the datasets. Would you like to break it down by another field?",
+      "tool_calls": [
+        {
+          "name": "summarizeFields",
+          "arguments": {
+            "dataset": "datasets"
+          }
+        }
+      ]
     }
   ]
 }
