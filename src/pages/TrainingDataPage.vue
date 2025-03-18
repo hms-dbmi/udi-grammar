@@ -4,6 +4,7 @@ import { ref, computed } from 'vue';
 import { useEditorStore } from 'src/stores/EditorStore';
 const editorStore = useEditorStore();
 import { useTrainingStore } from 'src/stores/TrainingStore';
+import { isEqual } from 'lodash';
 const trainingStore = useTrainingStore();
 
 const trainingData = ref<TrainingData[]>();
@@ -30,7 +31,12 @@ function prevTemplate() {
     return;
   }
   const currentTemplate = currrentExample.value.spec_template;
-  while (currentTemplate == currrentExample.value.spec_template) {
+  const currentConstraints = currrentExample.value.constraints;
+
+  while (
+    currentTemplate == currrentExample.value.spec_template &&
+    isEqual(currentConstraints, currrentExample.value.constraints)
+  ) {
     prev();
   }
 }
@@ -40,7 +46,11 @@ function nextTemplate() {
     return;
   }
   const currentTemplate = currrentExample.value.spec_template;
-  while (currentTemplate == currrentExample.value.spec_template) {
+  const currentConstraints = currrentExample.value.constraints;
+  while (
+    currentTemplate == currrentExample.value.spec_template &&
+    isEqual(currentConstraints, currrentExample.value.constraints)
+  ) {
     next();
   }
 }
