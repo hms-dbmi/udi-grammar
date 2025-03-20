@@ -129,7 +129,9 @@ function prettyPrintJson(json?: string): string {
       </q-item>
       <q-item>
         <q-item-section>
-          <q-item-label>{{ currrentExample?.constraints }}</q-item-label>
+          <q-item-label class="code-display">{{
+            currrentExample?.constraints
+          }}</q-item-label>
           <q-item-label caption>constraints</q-item-label>
         </q-item-section>
       </q-item>
@@ -165,7 +167,7 @@ function prettyPrintJson(json?: string): string {
       </q-item>
       <q-item>
         <q-item-section>
-          <q-item-label class="json-container">{{
+          <q-item-label class="code-display">{{
             prettyPrintJson(currrentExample?.spec_template)
           }}</q-item-label>
           <q-item-label caption>spec_template</q-item-label>
@@ -173,7 +175,7 @@ function prettyPrintJson(json?: string): string {
       </q-item>
       <q-item>
         <q-item-section>
-          <q-item-label class="json-container">{{
+          <q-item-label class="code-display">{{
             prettyPrintJson(currrentExample?.spec)
           }}</q-item-label>
           <q-item-label caption>spec</q-item-label>
@@ -217,7 +219,7 @@ function prettyPrintJson(json?: string): string {
 </template>
 
 <style scoped>
-.json-container {
+.code-display {
   white-space: pre-wrap;
   font-family: monospace;
 }
