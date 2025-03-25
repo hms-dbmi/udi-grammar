@@ -4,16 +4,17 @@
   "definitions": {
     "AggregateFunction": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "An aggregate function for summarizing data.",
       "properties": {
         "field": {
-          "description": "TODO: Description",
+          "description": "The field to aggregate. Optional.",
           "type": "string"
         },
         "op": {
-          "description": "TODO: Description",
+          "description": "The operation to apply (e.g., count, sum, mean, etc.).",
           "enum": [
             "count",
+            "sum",
             "mean",
             "min",
             "max",
@@ -29,7 +30,7 @@
       "type": "object"
     },
     "ArcEncodingOptions": {
-      "description": "TODO: Description",
+      "description": "Encoding options for arc marks.",
       "enum": [
         "theta",
         "theta2",
@@ -41,11 +42,11 @@
     },
     "ArcFieldMapping": {
       "$ref": "#/definitions/GenericFieldMapping%3CArcEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A field mapping for arc marks."
     },
     "ArcLayer": {
       "$ref": "#/definitions/GenericLayer%3C%22arc%22%2CArcMapping%3E",
-      "description": "TODO: Description"
+      "description": "A layer for rendering arc marks."
     },
     "ArcMapping": {
       "anyOf": [
@@ -56,14 +57,14 @@
           "$ref": "#/definitions/ArcValueMapping"
         }
       ],
-      "description": "TODO: Description"
+      "description": "The mapping for arc marks."
     },
     "ArcValueMapping": {
       "$ref": "#/definitions/GenericValueMapping%3CArcEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A value mapping for arc marks."
     },
     "AreaEncodingOptions": {
-      "description": "TODO: Description",
+      "description": "Encoding options for area marks.",
       "enum": [
         "x",
         "y",
@@ -76,11 +77,11 @@
     },
     "AreaFieldMapping": {
       "$ref": "#/definitions/GenericFieldMapping%3CAreaEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A field mapping for area marks."
     },
     "AreaLayer": {
       "$ref": "#/definitions/GenericLayer%3C%22area%22%2CAreaMapping%3E",
-      "description": "TODO: Description"
+      "description": "A layer for rendering area marks."
     },
     "AreaMapping": {
       "anyOf": [
@@ -91,14 +92,14 @@
           "$ref": "#/definitions/AreaValueMapping"
         }
       ],
-      "description": "TODO: Description"
+      "description": "The mapping for area marks."
     },
     "AreaValueMapping": {
       "$ref": "#/definitions/GenericValueMapping%3CAreaEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A value mapping for area marks."
     },
     "BarEncodingOptions": {
-      "description": "TODO: Description",
+      "description": "Encoding options for bar marks.",
       "enum": [
         "x",
         "x2",
@@ -112,11 +113,11 @@
     },
     "BarFieldMapping": {
       "$ref": "#/definitions/GenericFieldMapping%3CBarEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A field mapping for bar marks."
     },
     "BarLayer": {
       "$ref": "#/definitions/GenericLayer%3C%22bar%22%2CBarMapping%3E",
-      "description": "TODO: Description"
+      "description": "A layer for rendering bar marks."
     },
     "BarMapping": {
       "anyOf": [
@@ -127,30 +128,35 @@
           "$ref": "#/definitions/BarValueMapping"
         }
       ],
-      "description": "TODO: Description"
+      "description": "The mapping for bar marks."
     },
     "BarValueMapping": {
       "$ref": "#/definitions/GenericValueMapping%3CBarEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A value mapping for bar marks."
     },
     "BinBy": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "Bins data into intervals for a specified field.",
       "properties": {
         "binby": {
           "additionalProperties": false,
+          "description": "Configuration for binning the data.",
           "properties": {
             "bins": {
+              "description": "The number of bins to create. Optional.",
               "type": "number"
             },
             "field": {
+              "description": "The field to bin.",
               "type": "string"
             },
             "nice": {
+              "description": "Whether to use \"nice\" bin boundaries. Optional.",
               "type": "boolean"
             },
             "output": {
               "additionalProperties": false,
+              "description": "Output field names for the bin start and end. Optional.",
               "properties": {
                 "bin_end": {
                   "type": "string"
@@ -168,11 +174,11 @@
           "type": "object"
         },
         "in": {
-          "description": "The name of the input table or tables. Which match the name of the data source. If no table name is specified, it assumes the output of the previous operation.",
+          "description": "The name of the input table. If not specified, it assumes the output of the previous operation.",
           "type": "string"
         },
         "out": {
-          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
+          "description": "The name of the output table. If not specified, it overwrites the name of the previous table.",
           "type": "string"
         }
       },
@@ -183,6 +189,7 @@
     },
     "DataSelection": {
       "additionalProperties": false,
+      "description": "Configuration for data selection in visualizations or tables.",
       "properties": {
         "fields": {
           "anyOf": [
@@ -210,6 +217,7 @@
           "description": "How the data is selected in the visualization / table."
         },
         "name": {
+          "description": "The name of the data selection.",
           "type": "string"
         }
       },
@@ -221,8 +229,10 @@
     },
     "DataSelectionInterval": {
       "additionalProperties": false,
+      "description": "Configuration for interval-based data selection.",
       "properties": {
         "on": {
+          "description": "The axis or axes to apply the selection on ('x', 'y', or both ('xy')).",
           "enum": [
             "x",
             "y",
@@ -232,6 +242,7 @@
         },
         "type": {
           "const": "interval",
+          "description": "The type of selection (interval).",
           "type": "string"
         }
       },
@@ -243,9 +254,11 @@
     },
     "DataSelectionPoint": {
       "additionalProperties": false,
+      "description": "Configuration for point-based data selection.",
       "properties": {
         "type": {
           "const": "point",
+          "description": "The type of selection (point).",
           "type": "string"
         }
       },
@@ -256,7 +269,7 @@
     },
     "DataSource": {
       "additionalProperties": false,
-      "description": "A single tabular data source. Currently only csv files are accepted.",
+      "description": "A single tabular data source. Currently, only CSV files are supported.",
       "properties": {
         "name": {
           "description": "The unique name of the data source.",
@@ -300,10 +313,10 @@
           "$ref": "#/definitions/KDE"
         }
       ],
-      "description": "The possible data transformations."
+      "description": "The possible data transformations. These include operations like grouping, filtering, joining, and more."
     },
     "DataTypes": {
-      "description": "TODO: Description",
+      "description": "The possible data types for fields.",
       "enum": [
         "quantitative",
         "ordinal",
@@ -313,21 +326,21 @@
     },
     "Derive": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "Derives new fields based on expressions.",
       "properties": {
         "derive": {
           "additionalProperties": {
             "$ref": "#/definitions/DeriveExpression"
           },
-          "description": "TODO: Description",
+          "description": "A mapping of output field names to derive expressions.",
           "type": "object"
         },
         "in": {
-          "description": "TODO: Description",
+          "description": "The name of the input table. If not specified, it assumes the output of the previous operation.",
           "type": "string"
         },
         "out": {
-          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
+          "description": "The name of the output table. If not specified, it overwrites the name of the previous table.",
           "type": "string"
         }
       },
@@ -344,22 +357,23 @@
         {
           "$ref": "#/definitions/RollingDeriveExpression"
         }
-      ]
+      ],
+      "description": "A derive expression, which can be a string or a rolling derive expression."
     },
     "Filter": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "Filters data based on a specified condition or selection.",
       "properties": {
         "filter": {
           "$ref": "#/definitions/FilterExpression",
-          "description": "TODO: Description"
+          "description": "The filter condition or selection."
         },
         "in": {
-          "description": "TODO: Description",
+          "description": "The name of the input table. If not specified, it assumes the output of the previous operation.",
           "type": "string"
         },
         "out": {
-          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
+          "description": "The name of the output table. If not specified, it overwrites the name of the previous table.",
           "type": "string"
         }
       },
@@ -368,25 +382,54 @@
       ],
       "type": "object"
     },
+    "FilterDataSelection": {
+      "additionalProperties": false,
+      "description": "A data selection used for filtering.",
+      "properties": {
+        "match": {
+          "description": "Specifies whether to use 'all' or 'any' of the selected data in a 1-to-many mapping. Default is 'any'.",
+          "enum": [
+            "all",
+            "any"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the selection.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
     "FilterExpression": {
-      "description": "TODO: Description",
-      "type": "string"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/definitions/FilterDataSelection"
+        }
+      ],
+      "description": "A filter expression, which can be a string or a data selection."
     },
     "GenericFieldMapping<ArcEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic field mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/ArcEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "field": {
-          "description": "TODO: Description",
+          "description": "The field to map to the encoding.",
           "type": "string"
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
-          "description": "TODO: Description"
+          "description": "The data type of the field (e.g., quantitative, ordinal, nominal)."
         }
       },
       "required": [
@@ -398,19 +441,19 @@
     },
     "GenericFieldMapping<AreaEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic field mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/AreaEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "field": {
-          "description": "TODO: Description",
+          "description": "The field to map to the encoding.",
           "type": "string"
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
-          "description": "TODO: Description"
+          "description": "The data type of the field (e.g., quantitative, ordinal, nominal)."
         }
       },
       "required": [
@@ -422,19 +465,19 @@
     },
     "GenericFieldMapping<BarEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic field mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/BarEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "field": {
-          "description": "TODO: Description",
+          "description": "The field to map to the encoding.",
           "type": "string"
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
-          "description": "TODO: Description"
+          "description": "The data type of the field (e.g., quantitative, ordinal, nominal)."
         }
       },
       "required": [
@@ -446,19 +489,19 @@
     },
     "GenericFieldMapping<GeometryEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic field mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/GeometryEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "field": {
-          "description": "TODO: Description",
+          "description": "The field to map to the encoding.",
           "type": "string"
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
-          "description": "TODO: Description"
+          "description": "The data type of the field (e.g., quantitative, ordinal, nominal)."
         }
       },
       "required": [
@@ -470,19 +513,19 @@
     },
     "GenericFieldMapping<LineEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic field mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/LineEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "field": {
-          "description": "TODO: Description",
+          "description": "The field to map to the encoding.",
           "type": "string"
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
-          "description": "TODO: Description"
+          "description": "The data type of the field (e.g., quantitative, ordinal, nominal)."
         }
       },
       "required": [
@@ -494,19 +537,19 @@
     },
     "GenericFieldMapping<PointEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic field mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/PointEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "field": {
-          "description": "TODO: Description",
+          "description": "The field to map to the encoding.",
           "type": "string"
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
-          "description": "TODO: Description"
+          "description": "The data type of the field (e.g., quantitative, ordinal, nominal)."
         }
       },
       "required": [
@@ -518,19 +561,19 @@
     },
     "GenericFieldMapping<RectEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic field mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/RectEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "field": {
-          "description": "TODO: Description",
+          "description": "The field to map to the encoding.",
           "type": "string"
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
-          "description": "TODO: Description"
+          "description": "The data type of the field (e.g., quantitative, ordinal, nominal)."
         }
       },
       "required": [
@@ -542,19 +585,19 @@
     },
     "GenericFieldMapping<TextEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic field mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/TextEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "field": {
-          "description": "TODO: Description",
+          "description": "The field to map to the encoding.",
           "type": "string"
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
-          "description": "TODO: Description"
+          "description": "The data type of the field (e.g., quantitative, ordinal, nominal)."
         }
       },
       "required": [
@@ -566,7 +609,7 @@
     },
     "GenericLayer<\"arc\",ArcMapping>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic layer for visualizing data.",
       "properties": {
         "mapping": {
           "anyOf": [
@@ -580,16 +623,16 @@
               "type": "array"
             }
           ],
-          "description": "TODO: Description"
+          "description": "The mapping of data fields or values to visual encodings."
         },
         "mark": {
           "const": "arc",
-          "description": "TODO: Description",
+          "description": "The type of mark used in the layer.",
           "type": "string"
         },
         "select": {
           "$ref": "#/definitions/DataSelection",
-          "description": "TODO: Description"
+          "description": "The data selection configuration for the layer. Optional."
         }
       },
       "required": [
@@ -600,7 +643,7 @@
     },
     "GenericLayer<\"area\",AreaMapping>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic layer for visualizing data.",
       "properties": {
         "mapping": {
           "anyOf": [
@@ -614,16 +657,16 @@
               "type": "array"
             }
           ],
-          "description": "TODO: Description"
+          "description": "The mapping of data fields or values to visual encodings."
         },
         "mark": {
           "const": "area",
-          "description": "TODO: Description",
+          "description": "The type of mark used in the layer.",
           "type": "string"
         },
         "select": {
           "$ref": "#/definitions/DataSelection",
-          "description": "TODO: Description"
+          "description": "The data selection configuration for the layer. Optional."
         }
       },
       "required": [
@@ -634,7 +677,7 @@
     },
     "GenericLayer<\"bar\",BarMapping>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic layer for visualizing data.",
       "properties": {
         "mapping": {
           "anyOf": [
@@ -648,16 +691,16 @@
               "type": "array"
             }
           ],
-          "description": "TODO: Description"
+          "description": "The mapping of data fields or values to visual encodings."
         },
         "mark": {
           "const": "bar",
-          "description": "TODO: Description",
+          "description": "The type of mark used in the layer.",
           "type": "string"
         },
         "select": {
           "$ref": "#/definitions/DataSelection",
-          "description": "TODO: Description"
+          "description": "The data selection configuration for the layer. Optional."
         }
       },
       "required": [
@@ -668,7 +711,7 @@
     },
     "GenericLayer<\"geometry\",GeometryMapping>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic layer for visualizing data.",
       "properties": {
         "mapping": {
           "anyOf": [
@@ -682,16 +725,16 @@
               "type": "array"
             }
           ],
-          "description": "TODO: Description"
+          "description": "The mapping of data fields or values to visual encodings."
         },
         "mark": {
           "const": "geometry",
-          "description": "TODO: Description",
+          "description": "The type of mark used in the layer.",
           "type": "string"
         },
         "select": {
           "$ref": "#/definitions/DataSelection",
-          "description": "TODO: Description"
+          "description": "The data selection configuration for the layer. Optional."
         }
       },
       "required": [
@@ -702,7 +745,7 @@
     },
     "GenericLayer<\"line\",LineMapping>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic layer for visualizing data.",
       "properties": {
         "mapping": {
           "anyOf": [
@@ -716,16 +759,16 @@
               "type": "array"
             }
           ],
-          "description": "TODO: Description"
+          "description": "The mapping of data fields or values to visual encodings."
         },
         "mark": {
           "const": "line",
-          "description": "TODO: Description",
+          "description": "The type of mark used in the layer.",
           "type": "string"
         },
         "select": {
           "$ref": "#/definitions/DataSelection",
-          "description": "TODO: Description"
+          "description": "The data selection configuration for the layer. Optional."
         }
       },
       "required": [
@@ -736,7 +779,7 @@
     },
     "GenericLayer<\"point\",PointMapping>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic layer for visualizing data.",
       "properties": {
         "mapping": {
           "anyOf": [
@@ -750,16 +793,16 @@
               "type": "array"
             }
           ],
-          "description": "TODO: Description"
+          "description": "The mapping of data fields or values to visual encodings."
         },
         "mark": {
           "const": "point",
-          "description": "TODO: Description",
+          "description": "The type of mark used in the layer.",
           "type": "string"
         },
         "select": {
           "$ref": "#/definitions/DataSelection",
-          "description": "TODO: Description"
+          "description": "The data selection configuration for the layer. Optional."
         }
       },
       "required": [
@@ -770,7 +813,7 @@
     },
     "GenericLayer<\"rect\",RectMapping>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic layer for visualizing data.",
       "properties": {
         "mapping": {
           "anyOf": [
@@ -784,16 +827,16 @@
               "type": "array"
             }
           ],
-          "description": "TODO: Description"
+          "description": "The mapping of data fields or values to visual encodings."
         },
         "mark": {
           "const": "rect",
-          "description": "TODO: Description",
+          "description": "The type of mark used in the layer.",
           "type": "string"
         },
         "select": {
           "$ref": "#/definitions/DataSelection",
-          "description": "TODO: Description"
+          "description": "The data selection configuration for the layer. Optional."
         }
       },
       "required": [
@@ -804,7 +847,7 @@
     },
     "GenericLayer<\"row\",RowMapping>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic layer for visualizing data.",
       "properties": {
         "mapping": {
           "anyOf": [
@@ -818,16 +861,16 @@
               "type": "array"
             }
           ],
-          "description": "TODO: Description"
+          "description": "The mapping of data fields or values to visual encodings."
         },
         "mark": {
           "const": "row",
-          "description": "TODO: Description",
+          "description": "The type of mark used in the layer.",
           "type": "string"
         },
         "select": {
           "$ref": "#/definitions/DataSelection",
-          "description": "TODO: Description"
+          "description": "The data selection configuration for the layer. Optional."
         }
       },
       "required": [
@@ -838,7 +881,7 @@
     },
     "GenericLayer<\"text\",TextMapping>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic layer for visualizing data.",
       "properties": {
         "mapping": {
           "anyOf": [
@@ -852,16 +895,16 @@
               "type": "array"
             }
           ],
-          "description": "TODO: Description"
+          "description": "The mapping of data fields or values to visual encodings."
         },
         "mark": {
           "const": "text",
-          "description": "TODO: Description",
+          "description": "The type of mark used in the layer.",
           "type": "string"
         },
         "select": {
           "$ref": "#/definitions/DataSelection",
-          "description": "TODO: Description"
+          "description": "The data selection configuration for the layer. Optional."
         }
       },
       "required": [
@@ -872,14 +915,14 @@
     },
     "GenericValueMapping<ArcEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic value mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/ArcEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "value": {
-          "description": "TODO: Description",
+          "description": "The value to map to the encoding.",
           "type": [
             "string",
             "number"
@@ -894,14 +937,14 @@
     },
     "GenericValueMapping<AreaEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic value mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/AreaEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "value": {
-          "description": "TODO: Description",
+          "description": "The value to map to the encoding.",
           "type": [
             "string",
             "number"
@@ -916,14 +959,14 @@
     },
     "GenericValueMapping<BarEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic value mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/BarEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "value": {
-          "description": "TODO: Description",
+          "description": "The value to map to the encoding.",
           "type": [
             "string",
             "number"
@@ -938,14 +981,14 @@
     },
     "GenericValueMapping<GeometryEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic value mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/GeometryEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "value": {
-          "description": "TODO: Description",
+          "description": "The value to map to the encoding.",
           "type": [
             "string",
             "number"
@@ -960,14 +1003,14 @@
     },
     "GenericValueMapping<LineEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic value mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/LineEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "value": {
-          "description": "TODO: Description",
+          "description": "The value to map to the encoding.",
           "type": [
             "string",
             "number"
@@ -982,14 +1025,14 @@
     },
     "GenericValueMapping<PointEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic value mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/PointEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "value": {
-          "description": "TODO: Description",
+          "description": "The value to map to the encoding.",
           "type": [
             "string",
             "number"
@@ -1004,14 +1047,14 @@
     },
     "GenericValueMapping<RectEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic value mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/RectEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "value": {
-          "description": "TODO: Description",
+          "description": "The value to map to the encoding.",
           "type": [
             "string",
             "number"
@@ -1026,14 +1069,14 @@
     },
     "GenericValueMapping<TextEncodingOptions>": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A generic value mapping for visual encodings.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/TextEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "value": {
-          "description": "TODO: Description",
+          "description": "The value to map to the encoding.",
           "type": [
             "string",
             "number"
@@ -1047,7 +1090,7 @@
       "type": "object"
     },
     "GeometryEncodingOptions": {
-      "description": "TODO: Description",
+      "description": "Encoding options for geometry marks.",
       "enum": [
         "color",
         "stroke",
@@ -1057,11 +1100,11 @@
     },
     "GeometryFieldMapping": {
       "$ref": "#/definitions/GenericFieldMapping%3CGeometryEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A field mapping for geometry marks."
     },
     "GeometryLayer": {
       "$ref": "#/definitions/GenericLayer%3C%22geometry%22%2CGeometryMapping%3E",
-      "description": "TODO: Description"
+      "description": "A layer for rendering geometry marks."
     },
     "GeometryMapping": {
       "anyOf": [
@@ -1072,15 +1115,15 @@
           "$ref": "#/definitions/GeometryValueMapping"
         }
       ],
-      "description": "TODO: Description"
+      "description": "The mapping for geometry marks."
     },
     "GeometryValueMapping": {
       "$ref": "#/definitions/GenericValueMapping%3CGeometryEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A value mapping for geometry marks."
     },
     "GroupBy": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "Groups data by specified fields.",
       "properties": {
         "groupby": {
           "anyOf": [
@@ -1094,14 +1137,14 @@
               "type": "array"
             }
           ],
-          "description": "TODO: Description"
+          "description": "The field(s) to group by."
         },
         "in": {
-          "description": "TODO: Description",
+          "description": "The name of the input table. If not specified, it assumes the output of the previous operation.",
           "type": "string"
         },
         "out": {
-          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
+          "description": "The name of the output table. If not specified, it overwrites the name of the previous table.",
           "type": "string"
         }
       },
@@ -1112,10 +1155,10 @@
     },
     "Join": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "Joins two tables based on a specified condition.",
       "properties": {
         "in": {
-          "description": "TODO: Description",
+          "description": "The names of the two input tables to join.",
           "items": {
             "type": "string"
           },
@@ -1125,7 +1168,7 @@
         },
         "join": {
           "additionalProperties": false,
-          "description": "TODO: Description",
+          "description": "Configuration for the join operation.",
           "properties": {
             "on": {
               "anyOf": [
@@ -1140,7 +1183,8 @@
                   "minItems": 2,
                   "type": "array"
                 }
-              ]
+              ],
+              "description": "The field(s) to join on. If one field is specified, it's assumed to be the same in both tables. If two fields are specified, the first field is from the first table and the second field is from the second table."
             }
           },
           "required": [
@@ -1149,7 +1193,7 @@
           "type": "object"
         },
         "out": {
-          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
+          "description": "The name of the output table. If not specified, it overwrites the name of the previous table.",
           "type": "string"
         }
       },
@@ -1161,23 +1205,27 @@
     },
     "KDE": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "Applies Kernel Density Estimation (KDE) to a specified field.",
       "properties": {
         "in": {
-          "description": "The name of the input table or tables. Which match the name of the data source. If no table name is specified, it assumes the output of the previous operation.",
+          "description": "The name of the input table. If not specified, it assumes the output of the previous operation.",
           "type": "string"
         },
         "kde": {
           "additionalProperties": false,
+          "description": "Configuration for the KDE operation.",
           "properties": {
             "bandwidth": {
+              "description": "The bandwidth for the KDE. Optional.",
               "type": "number"
             },
             "field": {
+              "description": "The field to apply KDE to.",
               "type": "string"
             },
             "output": {
               "additionalProperties": false,
+              "description": "Output field names for the KDE results. Optional.",
               "properties": {
                 "density": {
                   "type": "string"
@@ -1189,6 +1237,7 @@
               "type": "object"
             },
             "samples": {
+              "description": "The number of samples to generate. Optional.",
               "type": "number"
             }
           },
@@ -1198,7 +1247,7 @@
           "type": "object"
         },
         "out": {
-          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
+          "description": "The name of the output table. If not specified, it overwrites the name of the previous table.",
           "type": "string"
         }
       },
@@ -1208,7 +1257,7 @@
       "type": "object"
     },
     "LineEncodingOptions": {
-      "description": "TODO: Description",
+      "description": "Encoding options for line marks.",
       "enum": [
         "x",
         "y",
@@ -1218,11 +1267,11 @@
     },
     "LineFieldMapping": {
       "$ref": "#/definitions/GenericFieldMapping%3CLineEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A field mapping for line marks."
     },
     "LineLayer": {
       "$ref": "#/definitions/GenericLayer%3C%22line%22%2CLineMapping%3E",
-      "description": "TODO: Description"
+      "description": "A layer for rendering line marks."
     },
     "LineMapping": {
       "anyOf": [
@@ -1233,25 +1282,26 @@
           "$ref": "#/definitions/LineValueMapping"
         }
       ],
-      "description": "TODO: Description"
+      "description": "The mapping for line marks."
     },
     "LineValueMapping": {
       "$ref": "#/definitions/GenericValueMapping%3CLineEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A value mapping for line marks."
     },
     "OrderBy": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "Orders data by a specified field or fields.",
       "properties": {
         "in": {
-          "description": "The name of the input table or tables. Which match the name of the data source. If no table name is specified, it assumes the output of the previous operation.",
+          "description": "The name of the input table. If not specified, it assumes the output of the previous operation.",
           "type": "string"
         },
         "orderby": {
+          "description": "The field to order by.",
           "type": "string"
         },
         "out": {
-          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
+          "description": "The name of the output table. If not specified, it overwrites the name of the previous table.",
           "type": "string"
         }
       },
@@ -1261,7 +1311,7 @@
       "type": "object"
     },
     "PointEncodingOptions": {
-      "description": "TODO: Description",
+      "description": "Encoding options for point marks.",
       "enum": [
         "x",
         "y",
@@ -1275,10 +1325,11 @@
     },
     "PointFieldMapping": {
       "$ref": "#/definitions/GenericFieldMapping%3CPointEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A field mapping for point marks."
     },
     "PointLayer": {
-      "$ref": "#/definitions/GenericLayer%3C%22point%22%2CPointMapping%3E"
+      "$ref": "#/definitions/GenericLayer%3C%22point%22%2CPointMapping%3E",
+      "description": "A layer for rendering point marks."
     },
     "PointMapping": {
       "anyOf": [
@@ -1289,14 +1340,14 @@
           "$ref": "#/definitions/PointValueMapping"
         }
       ],
-      "description": "TODO: Description"
+      "description": "The mapping for point marks."
     },
     "PointValueMapping": {
       "$ref": "#/definitions/GenericValueMapping%3CPointEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A value mapping for point marks."
     },
     "RectEncodingOptions": {
-      "description": "TODO: Description",
+      "description": "Encoding options for rect marks.",
       "enum": [
         "x",
         "x2",
@@ -1308,11 +1359,11 @@
     },
     "RectFieldMapping": {
       "$ref": "#/definitions/GenericFieldMapping%3CRectEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A field mapping for rect marks."
     },
     "RectLayer": {
       "$ref": "#/definitions/GenericLayer%3C%22rect%22%2CRectMapping%3E",
-      "description": "TODO: Description"
+      "description": "A layer for rendering rect marks."
     },
     "RectMapping": {
       "anyOf": [
@@ -1323,11 +1374,11 @@
           "$ref": "#/definitions/RectValueMapping"
         }
       ],
-      "description": "TODO: Description"
+      "description": "The mapping for rect marks."
     },
     "RectValueMapping": {
       "$ref": "#/definitions/GenericValueMapping%3CRectEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A value mapping for rect marks."
     },
     "Representation": {
       "anyOf": [
@@ -1338,7 +1389,7 @@
           "$ref": "#/definitions/RowLayer"
         }
       ],
-      "description": "TODO: Description"
+      "description": "A visual representation of the data, such as a chart or table."
     },
     "Representations": {
       "anyOf": [
@@ -1355,25 +1406,25 @@
           "type": "array"
         }
       ],
-      "description": "TODO: Description"
+      "description": "A list of visual representations. Charts and tables cannot be intermixed."
     },
     "RollUp": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "Aggregates data by applying specified functions to groups.",
       "properties": {
         "in": {
-          "description": "TODO: Description",
+          "description": "The name of the input table. If not specified, it assumes the output of the previous operation.",
           "type": "string"
         },
         "out": {
-          "description": "The output name of the table. If no name is specified, it uses the name of the previous table, overwriting it.",
+          "description": "The name of the output table. If not specified, it overwrites the name of the previous table.",
           "type": "string"
         },
         "rollup": {
           "additionalProperties": {
             "$ref": "#/definitions/AggregateFunction"
           },
-          "description": "TODO: Description",
+          "description": "A mapping of output field names to aggregate functions.",
           "type": "object"
         }
       },
@@ -1384,15 +1435,18 @@
     },
     "RollingDeriveExpression": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "A rolling derive expression for creating new fields based on a rolling window.",
       "properties": {
         "rolling": {
           "additionalProperties": false,
+          "description": "Configuration for the rolling derive expression.",
           "properties": {
             "expression": {
+              "description": "The expression to apply.",
               "type": "string"
             },
             "window": {
+              "description": "The rolling window size. Optional.",
               "items": {
                 "type": "number"
               },
@@ -1413,7 +1467,7 @@
       "type": "object"
     },
     "RowEncodingOptions": {
-      "description": "TODO: Description",
+      "description": "Encoding options for row marks.",
       "enum": [
         "text",
         "x",
@@ -1428,27 +1482,27 @@
     },
     "RowLayer": {
       "$ref": "#/definitions/GenericLayer%3C%22row%22%2CRowMapping%3E",
-      "description": "TODO: Description"
+      "description": "A layer for rendering row marks."
     },
     "RowMapping": {
       "additionalProperties": false,
-      "description": "TODO: Description",
+      "description": "The mapping for row marks.",
       "properties": {
         "encoding": {
           "$ref": "#/definitions/RowEncodingOptions",
-          "description": "TODO: Description"
+          "description": "The encoding type (e.g., x, y, color)."
         },
         "field": {
-          "description": "TODO: Description",
+          "description": "The field to map to the encoding.",
           "type": "string"
         },
         "mark": {
           "$ref": "#/definitions/RowMarkOptions",
-          "description": "TODO: Description"
+          "description": "The type of mark used in the row layer."
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
-          "description": "TODO: Description"
+          "description": "The data type of the field (e.g., quantitative, ordinal, nominal)."
         }
       },
       "required": [
@@ -1460,7 +1514,7 @@
       "type": "object"
     },
     "RowMarkOptions": {
-      "description": "TODO: Description",
+      "description": "Mark options for row layers.",
       "enum": [
         "select",
         "text",
@@ -1473,7 +1527,7 @@
       "type": "string"
     },
     "TextEncodingOptions": {
-      "description": "TODO: Description",
+      "description": "Encoding options for text marks.",
       "enum": [
         "x",
         "y",
@@ -1487,11 +1541,11 @@
     },
     "TextFieldMapping": {
       "$ref": "#/definitions/GenericFieldMapping%3CTextEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A field mapping for text marks."
     },
     "TextLayer": {
       "$ref": "#/definitions/GenericLayer%3C%22text%22%2CTextMapping%3E",
-      "description": "TODO: Description"
+      "description": "A layer for rendering text marks."
     },
     "TextMapping": {
       "anyOf": [
@@ -1502,11 +1556,11 @@
           "$ref": "#/definitions/TextValueMapping"
         }
       ],
-      "description": "TODO: Description"
+      "description": "The mapping for text marks."
     },
     "TextValueMapping": {
       "$ref": "#/definitions/GenericValueMapping%3CTextEncodingOptions%3E",
-      "description": "TODO: Description"
+      "description": "A value mapping for text marks."
     },
     "UDIGrammar": {
       "additionalProperties": false,
@@ -1535,7 +1589,7 @@
               "type": "array"
             }
           ],
-          "description": "The data source or data sources. Typically this is a path to a single csv file or a list of csv files."
+          "description": "The data source or data sources. This can be a single CSV file or a list of CSV files."
         },
         "transformation": {
           "description": "The data transformations applied to the source data before displaying the data.",
@@ -1578,7 +1632,7 @@
           "$ref": "#/definitions/ArcLayer"
         }
       ],
-      "description": "TODO: Description"
+      "description": "A visualization layer for rendering data. This can include various types of marks such as lines, bars, points, etc."
     }
   }
 }

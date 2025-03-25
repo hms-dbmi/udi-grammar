@@ -4,7 +4,7 @@
 export interface UDIGrammar {
   /**
    * The data source or data sources.
-   * Typically, this is a path to a single CSV file or a list of CSV files.
+   * This can be a single CSV file or a list of CSV files.
    */
   source: DataSource | DataSource[];
 
@@ -21,7 +21,7 @@ export interface UDIGrammar {
 }
 
 /**
- * A single tabular data source. Currently, only CSV files are accepted.
+ * A single tabular data source. Currently, only CSV files are supported.
  */
 export interface DataSource {
   /**
@@ -37,7 +37,7 @@ export interface DataSource {
 
 /**
  * The possible data transformations.
- * These transformations include operations like grouping, filtering, joining, and more.
+ * These include operations like grouping, filtering, joining, and more.
  */
 export type DataTransformation =
   | GroupBy
@@ -51,18 +51,18 @@ export type DataTransformation =
 
 /**
  * Base interface for all data transformations.
- * All data transformations have one or two input tables and one output table.
+ * All transformations operate on one or two input tables and produce one output table.
  */
 interface DataTransformationBase {
   /**
-   * The name of the input table or tables that match the name of the data source.
-   * If no table name is specified, it assumes the output of the previous operation.
+   * The name of the input table(s) that match the data source name.
+   * If not specified, it assumes the output of the previous operation.
    */
   in?: string | [string, string];
 
   /**
-   * The output name of the table. If no name is specified,
-   * it uses the name of the previous table, overwriting it.
+   * The name of the output table.
+   * If not specified, it overwrites the name of the previous table.
    */
   out?: string;
 }
@@ -72,13 +72,13 @@ interface DataTransformationBase {
  */
 export interface GroupBy extends DataTransformationBase {
   /**
-   * The name of the input table that matches the name of the data source.
-   * If no table name is specified, it assumes the output of the previous operation.
+   * The name of the input table.
+   * If not specified, it assumes the output of the previous operation.
    */
   in?: string;
 
   /**
-   * The field or fields to group by.
+   * The field(s) to group by.
    */
   groupby: string | string[];
 }
@@ -88,8 +88,8 @@ export interface GroupBy extends DataTransformationBase {
  */
 export interface BinBy extends DataTransformationBase {
   /**
-   * The name of the input table that matches the name of the data source.
-   * If no table name is specified, it assumes the output of the previous operation.
+   * The name of the input table.
+   * If not specified, it assumes the output of the previous operation.
    */
   in?: string;
 
@@ -127,8 +127,8 @@ export interface BinBy extends DataTransformationBase {
  */
 export interface RollUp extends DataTransformationBase {
   /**
-   * The name of the input table that matches the name of the data source.
-   * If no table name is specified, it assumes the output of the previous operation.
+   * The name of the input table.
+   * If not specified, it assumes the output of the previous operation.
    */
   in?: string;
 
@@ -145,15 +145,15 @@ export interface RollUp extends DataTransformationBase {
  */
 export interface OrderBy extends DataTransformationBase {
   /**
-   * The name of the input table that matches the name of the data source.
-   * If no table name is specified, it assumes the output of the previous operation.
+   * The name of the input table.
+   * If not specified, it assumes the output of the previous operation.
    */
   in?: string;
 
   /**
-   * The field or fields to order by.
+   * The field to order by.
    */
-  orderby: string; // TODO: probably should support list of strings
+  orderby: string; // TODO: Extend to support a list of strings
 }
 
 /**
@@ -170,7 +170,8 @@ export interface Join extends DataTransformationBase {
    */
   join: {
     /**
-     * The field or fields to join on.
+     * The field(s) to join on. If one field is specified, it's assumed to be the same in both tables.
+     * If two fields are specified, the first field is from the first table and the second field is from the second table.
      */
     on: string | [string, string];
   };
@@ -181,8 +182,8 @@ export interface Join extends DataTransformationBase {
  */
 export interface KDE extends DataTransformationBase {
   /**
-   * The name of the input table that matches the name of the data source.
-   * If no table name is specified, it assumes the output of the previous operation.
+   * The name of the input table.
+   * If not specified, it assumes the output of the previous operation.
    */
   in?: string;
 
@@ -220,8 +221,8 @@ export interface KDE extends DataTransformationBase {
  */
 export interface Derive extends DataTransformationBase {
   /**
-   * The name of the input table that matches the name of the data source.
-   * If no table name is specified, it assumes the output of the previous operation.
+   * The name of the input table.
+   * If not specified, it assumes the output of the previous operation.
    */
   in?: string;
 
@@ -238,8 +239,8 @@ export interface Derive extends DataTransformationBase {
  */
 export interface Filter extends DataTransformationBase {
   /**
-   * The name of the input table that matches the name of the data source.
-   * If no table name is specified, it assumes the output of the previous operation.
+   * The name of the input table.
+   * If not specified, it assumes the output of the previous operation.
    */
   in?: string;
 
@@ -264,8 +265,7 @@ export interface FilterDataSelection {
   name: string;
 
   /**
-   * In the case where the selection is applied across a 1-to-many mapping,
-   * this specifies if filter should use 'all' or 'any' of the selected data.
+   * Specifies whether to use 'all' or 'any' of the selected data in a 1-to-many mapping.
    * Default is 'any'.
    */
   match?: 'all' | 'any';
@@ -317,7 +317,8 @@ export interface AggregateFunction {
 export type Representation = VisualizationLayer | RowLayer;
 
 /**
- * A list of visual representations, charts and tables cannot be intermixed.
+ * A list of visual representations.
+ * Charts and tables cannot be intermixed.
  */
 export type Representations = VisualizationLayer[] | RowLayer[];
 
@@ -349,46 +350,45 @@ export interface GenericLayer<Mark, Mapping> {
 }
 
 /**
- * TODO: Description
+ * A generic field mapping for visual encodings.
+ * @template Encoding - The type of encodings supported (e.g., x, y, color).
  */
 export interface GenericFieldMapping<Encoding> {
   /**
-   * TODO: Description
+   * The encoding type (e.g., x, y, color).
    */
   encoding: Encoding;
 
   /**
-   * TODO: Description
+   * The field to map to the encoding.
    */
   field: string;
 
   /**
-   * TODO: Description
+   * The data type of the field (e.g., quantitative, ordinal, nominal).
    */
   type: DataTypes;
-
-  /**
-   * TODO: Description
-   */
 }
 
 /**
- * TODO: Description
+ * A generic value mapping for visual encodings.
+ * @template Encoding - The type of encoding (e.g., x, y, color).
  */
 export interface GenericValueMapping<Encoding> {
   /**
-   * TODO: Description
+   * The encoding type (e.g., x, y, color).
    */
   encoding: Encoding;
 
   /**
-   * TODO: Description
+   * The value to map to the encoding.
    */
   value: string | number;
 }
 
 /**
- * TODO: Description
+ * A visualization layer for rendering data.
+ * This can include various types of marks such as lines, bars, points, etc.
  */
 export type VisualizationLayer =
   | LineLayer
@@ -400,10 +400,8 @@ export type VisualizationLayer =
   | TextLayer
   | ArcLayer;
 
-// Mark = arc
-
 /**
- * TODO: Description
+ * Encoding options for arc marks.
  */
 export type ArcEncodingOptions =
   | 'theta'
@@ -413,28 +411,27 @@ export type ArcEncodingOptions =
   | 'color';
 
 /**
- * TODO: Description
+ * A layer for rendering arc marks.
  */
 export type ArcLayer = GenericLayer<'arc', ArcMapping>;
 
 /**
- * TODO: Description
+ * The mapping for arc marks.
  */
 export type ArcMapping = ArcFieldMapping | ArcValueMapping;
 
 /**
- * TODO: Description
+ * A field mapping for arc marks.
  */
 export type ArcFieldMapping = GenericFieldMapping<ArcEncodingOptions>;
 
 /**
- * TODO: Description
+ * A value mapping for arc marks.
  */
 export type ArcValueMapping = GenericValueMapping<ArcEncodingOptions>;
-// Mark = text
 
 /**
- * TODO: Description
+ * Encoding options for text marks.
  */
 export type TextEncodingOptions =
   | 'x'
@@ -446,62 +443,52 @@ export type TextEncodingOptions =
   | 'radius';
 
 /**
- * TODO: Description
+ * A layer for rendering text marks.
  */
 export type TextLayer = GenericLayer<'text', TextMapping>;
 
 /**
- * TODO: Description
+ * The mapping for text marks.
  */
 export type TextMapping = TextFieldMapping | TextValueMapping;
 
 /**
- * TODO: Description
+ * A field mapping for text marks.
  */
 export type TextFieldMapping = GenericFieldMapping<TextEncodingOptions>;
 
 /**
- * TODO: Description
+ * A value mapping for text marks.
  */
 export type TextValueMapping = GenericValueMapping<TextEncodingOptions>;
 
 /**
- * TODO: Description
- */
-// Mark = line
-
-/**
- * TODO: Description
+ * Encoding options for line marks.
  */
 export type LineEncodingOptions = 'x' | 'y' | 'color';
 
 /**
- * TODO: Description
+ * A layer for rendering line marks.
  */
 export type LineLayer = GenericLayer<'line', LineMapping>;
 
 /**
- * TODO: Description
+ * The mapping for line marks.
  */
 export type LineMapping = LineFieldMapping | LineValueMapping;
 
 /**
- * TODO: Description
+ * A field mapping for line marks.
  */
 export type LineFieldMapping = GenericFieldMapping<LineEncodingOptions>;
 
 /**
- * TODO: Description
+ * A value mapping for line marks.
  */
 export type LineValueMapping = GenericValueMapping<LineEncodingOptions>;
 
 /**
- * TODO: Description
- */
-// Mark = area
-
-/**
- * TODO: Description
+ * Encoding options for area marks.
  */
 export type AreaEncodingOptions =
   | 'x'
@@ -512,83 +499,77 @@ export type AreaEncodingOptions =
   | 'opacity';
 
 /**
- * TODO: Description
+ * A layer for rendering area marks.
  */
 export type AreaLayer = GenericLayer<'area', AreaMapping>;
 
 /**
- * TODO: Description
+ * The mapping for area marks.
  */
 export type AreaMapping = AreaFieldMapping | AreaValueMapping;
 
 /**
- * TODO: Description
+ * A field mapping for area marks.
  */
 export type AreaFieldMapping = GenericFieldMapping<AreaEncodingOptions>;
 
 /**
- * TODO: Description
+ * A value mapping for area marks.
  */
 export type AreaValueMapping = GenericValueMapping<AreaEncodingOptions>;
-// Mark = geometry
 
 /**
- * TODO: Description
+ * Encoding options for geometry marks.
  */
 export type GeometryEncodingOptions = 'color' | 'stroke' | 'strokeWidth';
 
 /**
- * TODO: Description
+ * A layer for rendering geometry marks.
  */
 export type GeometryLayer = GenericLayer<'geometry', GeometryMapping>;
 
 /**
- * TODO: Description
+ * The mapping for geometry marks.
  */
 export type GeometryMapping = GeometryFieldMapping | GeometryValueMapping;
 
 /**
- * TODO: Description
+ * A field mapping for geometry marks.
  */
 export type GeometryFieldMapping = GenericFieldMapping<GeometryEncodingOptions>;
 
 /**
- * TODO: Description
+ * A value mapping for geometry marks.
  */
 export type GeometryValueMapping = GenericValueMapping<GeometryEncodingOptions>;
-// Mark = rect
 
 /**
- * TODO: Description
- */
-/**
- * TODO: Description
+ * Encoding options for rect marks.
  */
 export type RectEncodingOptions = 'x' | 'x2' | 'y' | 'y2' | 'color';
 
 /**
- * TODO: Description
+ * A layer for rendering rect marks.
  */
 export type RectLayer = GenericLayer<'rect', RectMapping>;
 
 /**
- * TODO: Description
+ * The mapping for rect marks.
  */
 export type RectMapping = RectFieldMapping | RectValueMapping;
 
 /**
- * TODO: Description
+ * A field mapping for rect marks.
  */
 export type RectFieldMapping = GenericFieldMapping<RectEncodingOptions>;
 
 /**
- * TODO: Description
+ * A value mapping for rect marks.
  */
 export type RectValueMapping = GenericValueMapping<RectEncodingOptions>;
-// Mark = bar
 
 /**
- * TODO: Description
+ * Encoding options for bar marks.
  */
 export type BarEncodingOptions =
   | 'x'
@@ -600,28 +581,27 @@ export type BarEncodingOptions =
   | 'color';
 
 /**
- * TODO: Description
+ * A layer for rendering bar marks.
  */
 export type BarLayer = GenericLayer<'bar', BarMapping>;
 
 /**
- * TODO: Description
+ * The mapping for bar marks.
  */
 export type BarMapping = BarFieldMapping | BarValueMapping;
 
 /**
- * TODO: Description
+ * A field mapping for bar marks.
  */
 export type BarFieldMapping = GenericFieldMapping<BarEncodingOptions>;
 
 /**
- * TODO: Description
+ * A value mapping for bar marks.
  */
 export type BarValueMapping = GenericValueMapping<BarEncodingOptions>;
-// Mark = point
 
 /**
- * TODO: Description
+ * Encoding options for point marks.
  */
 export type PointEncodingOptions =
   | 'x'
@@ -631,28 +611,29 @@ export type PointEncodingOptions =
   | 'color'
   | 'size'
   | 'shape';
+
+/**
+ * A layer for rendering point marks.
+ */
 export type PointLayer = GenericLayer<'point', PointMapping>;
 
 /**
- * TODO: Description
+ * The mapping for point marks.
  */
 export type PointMapping = PointFieldMapping | PointValueMapping;
 
 /**
- * TODO: Description
+ * A field mapping for point marks.
  */
 export type PointFieldMapping = GenericFieldMapping<PointEncodingOptions>;
 
 /**
- * TODO: Description
+ * A value mapping for point marks.
  */
 export type PointValueMapping = GenericValueMapping<PointEncodingOptions>;
 
-// Mark = row
-// The pattern for Rows is intentionally different from other marks
-
 /**
- * TODO: Description
+ * Encoding options for row marks.
  */
 export type RowEncodingOptions =
   | 'text'
@@ -665,7 +646,7 @@ export type RowEncodingOptions =
   | 'shape';
 
 /**
- * TODO: Description
+ * Mark options for row layers.
  */
 export type RowMarkOptions =
   | 'select'
@@ -675,40 +656,64 @@ export type RowMarkOptions =
   | 'bar'
   | 'rect'
   | 'line';
-// TODO: there are some invalid mark/encoding combinations here. Maybe that's ok though.
 
 /**
- * TODO: Description
+ * A layer for rendering row marks.
  */
 export type RowLayer = GenericLayer<'row', RowMapping>;
 
 /**
- * TODO: Description
+ * The mapping for row marks.
  */
 export interface RowMapping extends GenericFieldMapping<RowEncodingOptions> {
   /**
-   * TODO: Description
+   * The type of mark used in the row layer.
    */
   mark: RowMarkOptions;
 }
-//
+
+/**
+ * Configuration for data selection in visualizations or tables.
+ */
 export interface DataSelection {
+  /**
+   * The name of the data selection.
+   */
   name: string;
+
   /**
    * How the data is selected in the visualization / table.
    */
   how: DataSelectionInterval | DataSelectionPoint;
+
   /**
-   * The fields selected from the data points. If not specified, all fields are selected.
+   * The fields selected from the data points.
+   * If not specified, all fields are selected.
    */
   fields?: string | string[];
 }
 
+/**
+ * Configuration for interval-based data selection.
+ */
 export interface DataSelectionInterval {
+  /**
+   * The type of selection (interval).
+   */
   type: 'interval';
+
+  /**
+   * The axis or axes to apply the selection on ('x', 'y', or both ('xy')).
+   */
   on: 'x' | 'y' | 'xy';
 }
 
+/**
+ * Configuration for point-based data selection.
+ */
 export interface DataSelectionPoint {
+  /**
+   * The type of selection (point).
+   */
   type: 'point';
 }
