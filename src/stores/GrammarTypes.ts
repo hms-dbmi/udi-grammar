@@ -4,7 +4,7 @@
 export interface UDIGrammar {
   /**
    * The data source or data sources.
-   * Typically this is a path to a single csv file or a list of csv files.
+   * Typically, this is a path to a single CSV file or a list of CSV files.
    */
   source: DataSource | DataSource[];
 
@@ -21,7 +21,7 @@ export interface UDIGrammar {
 }
 
 /**
- * A single tabular data source. Currently only csv files are accepted.
+ * A single tabular data source. Currently, only CSV files are accepted.
  */
 export interface DataSource {
   /**
@@ -37,6 +37,7 @@ export interface DataSource {
 
 /**
  * The possible data transformations.
+ * These transformations include operations like grouping, filtering, joining, and more.
  */
 export type DataTransformation =
   | GroupBy
@@ -49,11 +50,12 @@ export type DataTransformation =
   | KDE;
 
 /**
+ * Base interface for all data transformations.
  * All data transformations have one or two input tables and one output table.
  */
 interface DataTransformationBase {
   /**
-   * The name of the input table or tables. Which match the name of the data source.
+   * The name of the input table or tables that match the name of the data source.
    * If no table name is specified, it assumes the output of the previous operation.
    */
   in?: string | [string, string];
@@ -64,29 +66,55 @@ interface DataTransformationBase {
    */
   out?: string;
 }
+
 /**
- * TODO: Description
+ * Groups data by specified fields.
  */
 export interface GroupBy extends DataTransformationBase {
   /**
-   * TODO: Description
+   * The name of the input table that matches the name of the data source.
+   * If no table name is specified, it assumes the output of the previous operation.
    */
   in?: string;
 
   /**
-   * TODO: Description
+   * The field or fields to group by.
    */
   groupby: string | string[];
 }
+
 /**
- * TODO: Description
+ * Bins data into intervals for a specified field.
  */
 export interface BinBy extends DataTransformationBase {
+  /**
+   * The name of the input table that matches the name of the data source.
+   * If no table name is specified, it assumes the output of the previous operation.
+   */
   in?: string;
+
+  /**
+   * Configuration for binning the data.
+   */
   binby: {
+    /**
+     * The field to bin.
+     */
     field: string;
+
+    /**
+     * The number of bins to create. Optional.
+     */
     bins?: number;
+
+    /**
+     * Whether to use "nice" bin boundaries. Optional.
+     */
     nice?: boolean;
+
+    /**
+     * Output field names for the bin start and end. Optional.
+     */
     output?: {
       bin_start?: string;
       bin_end?: string;
@@ -95,16 +123,17 @@ export interface BinBy extends DataTransformationBase {
 }
 
 /**
- * TODO: Description
+ * Aggregates data by applying specified functions to groups.
  */
 export interface RollUp extends DataTransformationBase {
   /**
-   * TODO: Description
+   * The name of the input table that matches the name of the data source.
+   * If no table name is specified, it assumes the output of the previous operation.
    */
   in?: string;
 
   /**
-   * TODO: Description
+   * A mapping of output field names to aggregate functions.
    */
   rollup: {
     [outputName: string]: AggregateFunction;
@@ -112,39 +141,73 @@ export interface RollUp extends DataTransformationBase {
 }
 
 /**
- * TODO: Description
+ * Orders data by a specified field or fields.
  */
 export interface OrderBy extends DataTransformationBase {
+  /**
+   * The name of the input table that matches the name of the data source.
+   * If no table name is specified, it assumes the output of the previous operation.
+   */
   in?: string;
+
+  /**
+   * The field or fields to order by.
+   */
   orderby: string; // TODO: probably should support list of strings
 }
 
 /**
- * TODO: Description
+ * Joins two tables based on a specified condition.
  */
 export interface Join extends DataTransformationBase {
   /**
-   * TODO: Description
+   * The names of the two input tables to join.
    */
   in: [string, string];
 
   /**
-   * TODO: Description
+   * Configuration for the join operation.
    */
   join: {
+    /**
+     * The field or fields to join on.
+     */
     on: string | [string, string];
   };
 }
 
 /**
- * TODO: Description
+ * Applies Kernel Density Estimation (KDE) to a specified field.
  */
 export interface KDE extends DataTransformationBase {
+  /**
+   * The name of the input table that matches the name of the data source.
+   * If no table name is specified, it assumes the output of the previous operation.
+   */
   in?: string;
+
+  /**
+   * Configuration for the KDE operation.
+   */
   kde: {
+    /**
+     * The field to apply KDE to.
+     */
     field: string;
+
+    /**
+     * The bandwidth for the KDE. Optional.
+     */
     bandwidth?: number;
+
+    /**
+     * The number of samples to generate. Optional.
+     */
     samples?: number;
+
+    /**
+     * Output field names for the KDE results. Optional.
+     */
     output?: {
       sample?: string;
       density?: string;
@@ -153,16 +216,17 @@ export interface KDE extends DataTransformationBase {
 }
 
 /**
- * TODO: Description
+ * Derives new fields based on expressions.
  */
 export interface Derive extends DataTransformationBase {
   /**
-   * TODO: Description
+   * The name of the input table that matches the name of the data source.
+   * If no table name is specified, it assumes the output of the previous operation.
    */
   in?: string;
 
   /**
-   * TODO: Description
+   * A mapping of output field names to derive expressions.
    */
   derive: {
     [outputName: string]: DeriveExpression;
@@ -170,27 +234,35 @@ export interface Derive extends DataTransformationBase {
 }
 
 /**
- * TODO: Description
+ * Filters data based on a specified condition or selection.
  */
 export interface Filter extends DataTransformationBase {
   /**
-   * TODO: Description
+   * The name of the input table that matches the name of the data source.
+   * If no table name is specified, it assumes the output of the previous operation.
    */
   in?: string;
 
   /**
-   * TODO: Description
+   * The filter condition or selection.
    */
   filter: FilterExpression;
 }
 
 /**
- * TODO: Description
+ * A filter expression, which can be a string or a data selection.
  */
 export type FilterExpression = string | FilterDataSelection;
 
+/**
+ * A data selection used for filtering.
+ */
 export interface FilterDataSelection {
+  /**
+   * The name of the selection.
+   */
   name: string;
+
   /**
    * In the case where the selection is applied across a 1-to-many mapping,
    * this specifies if filter should use 'all' or 'any' of the selected data.
@@ -199,64 +271,79 @@ export interface FilterDataSelection {
   match?: 'all' | 'any';
 }
 
+/**
+ * A derive expression, which can be a string or a rolling derive expression.
+ */
 export type DeriveExpression = string | RollingDeriveExpression;
 
 /**
- * TODO: Description
+ * A rolling derive expression for creating new fields based on a rolling window.
  */
 export interface RollingDeriveExpression {
+  /**
+   * Configuration for the rolling derive expression.
+   */
   rolling: {
+    /**
+     * The expression to apply.
+     */
     expression: string;
+
+    /**
+     * The rolling window size. Optional.
+     */
     window?: [number, number];
   };
 }
 
 /**
- * TODO: Description
+ * An aggregate function for summarizing data.
  */
 export interface AggregateFunction {
   /**
-   * TODO: Description
+   * The operation to apply (e.g., count, sum, mean, etc.).
    */
   op: 'count' | 'sum' | 'mean' | 'min' | 'max' | 'median' | 'frequency';
 
   /**
-   * TODO: Description
+   * The field to aggregate. Optional.
    */
   field?: string;
 }
 
 /**
- * TODO: Description
+ * A visual representation of the data, such as a chart or table.
  */
 export type Representation = VisualizationLayer | RowLayer;
 
 /**
- * TODO: Description
+ * A list of visual representations, charts and tables cannot be intermixed.
  */
 export type Representations = VisualizationLayer[] | RowLayer[];
 
 /**
- * TODO: Description
+ * The possible data types for fields.
  */
 export type DataTypes = 'quantitative' | 'ordinal' | 'nominal';
 
 /**
- * TODO: Description
+ * A generic layer for visualizing data.
+ * @template Mark - The type of mark (e.g., line, bar, point).
+ * @template Mapping - The type of mapping for the layer.
  */
 export interface GenericLayer<Mark, Mapping> {
   /**
-   * TODO: Description
+   * The type of mark used in the layer.
    */
   mark: Mark;
 
   /**
-   * TODO: Description
+   * The mapping of data fields or values to visual encodings.
    */
   mapping: Mapping | Mapping[];
 
   /**
-   * TODO: Description
+   * The data selection configuration for the layer. Optional.
    */
   select?: DataSelection;
 }
