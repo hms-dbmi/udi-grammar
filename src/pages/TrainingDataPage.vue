@@ -68,6 +68,7 @@ interface TrainingData {
   constraints: string;
   creation_method: string;
   dataset_schema: string;
+  solution: string;
   expertise: number;
   formality: number;
   query_base: string;
@@ -139,6 +140,14 @@ function prettyPrintJson(json?: string): string {
         <q-item-section>
           <q-item-label>{{ currrentExample?.dataset_schema }}</q-item-label>
           <q-item-label caption>dataset_schema</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section>
+          <q-item-label class="code-display">{{
+            currrentExample?.solution
+          }}</q-item-label>
+          <q-item-label caption>solution</q-item-label>
         </q-item-section>
       </q-item>
       <q-item>
