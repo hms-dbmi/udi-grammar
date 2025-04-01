@@ -66,6 +66,8 @@ function isVegaLiteCompatible(spec: ParsedUDIGrammar): boolean {
   return !spec.representation.map((x) => x.mark).includes('row');
 }
 
+const transformError = ref();
+
 function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const vegaSpec: any = {
@@ -76,13 +78,16 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
 
   // add data
   try {
+    transformError.value = null;
     vegaSpec.data!.values = dataSourcesStore.getDataObject(
       spec.source.map((x) => x.name),
       spec.transformation,
     );
   } catch (error) {
     console.error('Failed to complete data transformation', error);
+    transformError.value = error;
   }
+
   debugVegaData.value = vegaSpec.data.values;
   // console.log(vegaSpec);
   // TODO: perform transformations
@@ -137,7 +142,10 @@ const debugVegaData = ref();
 
 <template>
   <template v-if="!dataSourcesStore.loading">
-    <VegaLite v-if="isVegaLiteComponent" :spec="vegaLiteSpec" />
+    <div class="error-message" v-if="transformError">
+      {{ transformError.message }}
+    </div>
+    <VegaLite v-else-if="isVegaLiteComponent" :spec="vegaLiteSpec" />
     <TableComponent v-else />
     <!-- <hr />
     <pre
@@ -149,4 +157,9 @@ const debugVegaData = ref();
   </template>
 </template>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.error-message {
+  color: $negative;
+  margin: 6px;
+}
+</style>
