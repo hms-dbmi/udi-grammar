@@ -2,7 +2,7 @@
 
 This repository contains the current type definitions for the Universal Discovery Interface (UDI) Grammar.
 
-The Grammar is defined with TypeScript typings in [GrammarTypes.ts](./src/stores/GrammarTypes.ts).
+The Grammar is defined with TypeScript typings in [GrammarTypes.ts](./src/components/GrammarTypes.ts).
 
 The Grammar maps variables to visual encodings. For instance, to create a scatterplot of height and weight we can map `height_value` to `x` and `weight_value` to `y` from the example `donors.csv` file.
 

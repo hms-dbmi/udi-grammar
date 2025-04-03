@@ -15,7 +15,7 @@
     "postinstall": "quasar prepare",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "build-schema": "./node_modules/.bin/ts-json-schema-generator --path './src/stores/GrammarTypes.ts' --type 'UDIGrammar' --tsconfig ./tsconfig.json >  UDIGrammarSchema.json"
+    "build-schema": "./node_modules/.bin/ts-json-schema-generator --path './src/components/GrammarTypes.ts' --type 'UDIGrammar' --tsconfig ./tsconfig.json >  UDIGrammarSchema.json"
   },
   "dependencies": {
     "@guolao/vue-monaco-editor": "^1.5.4",
