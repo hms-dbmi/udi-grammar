@@ -1,6 +1,6 @@
 // import { fn } from '@storybook/test'
 
-import ParserComponent from './ParserComponent.vue';
+import UDIVis from './UDIVis.vue';
 
 // export const ActionsData = {
 //   onPinTask: fn(),
@@ -8,7 +8,7 @@ import ParserComponent from './ParserComponent.vue';
 // }
 
 export default {
-  component: ParserComponent,
+  component: UDIVis,
   tags: ['autodocs'],
   title: 'Bar Chart',
   //👇 Our exports that end in "Data" are not stories.

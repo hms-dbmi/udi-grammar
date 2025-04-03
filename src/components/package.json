@@ -1,8 +1,8 @@
 {
-  "name": "udi-grammar-component",
+  "name": "udi-toolkit",
   "version": "0.0.1",
-  "description": "Universal Discovery Interface Grammar",
-  "productName": "Universal Discovery Interface Grammar",
+  "description": "Universal Discovery Interface Toolkit",
+  "productName": "Universal Discovery Interface Toolkit",
   "author": "dev-lan <devinscottlange@gmail.com>",
   "type": "module",
   "private": true,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ParserComponent from 'src/components/ParserComponent.vue';
+import UDIVis from 'src/components/UDIVis.vue';
 import { ref, computed, shallowRef } from 'vue';
 import { useRoute } from 'vue-router';
 import { decompressFromEncodedURIComponent } from 'lz-string';
@@ -90,7 +90,7 @@ const validSpec = computed(() => {
         />
       </template>
       <template v-slot:after>
-        <parser-component v-if="validSpec" :spec="spec"></parser-component>
+        <UDIVis v-if="validSpec" :spec="spec"></UDIVis>
         <div v-else>{{ errorMessage }}</div>
       </template>
     </q-splitter>

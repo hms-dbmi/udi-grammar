@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: './index.ts',
-      name: 'ParserComponent',
+      name: 'UDIVis',
       fileName: 'index',
       formats: ['es', 'cjs', 'umd'],
       // fileName: (format) => `udi-grammar.${format}.js`,

@@ -5,13 +5,13 @@ import { type Preview, setup } from '@storybook/vue3';
 import { type App } from 'vue';
 
 import { createPinia } from 'pinia';
-import ParserComponent from '../src/components/ParserComponent.vue';
+import UDIVis from '../src/components/UDIVis.vue';
 import TableComponent from '../src/components/TableComponent.vue';
 
 setup((app: App) => {
   app
     .use(createPinia())
-    .component('ParserComponent', ParserComponent)
+    .component('UDIVis', UDIVis)
     .component('TableComponent', TableComponent);
 });
 

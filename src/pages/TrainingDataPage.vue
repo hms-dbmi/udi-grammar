@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ParserComponent from 'src/components/ParserComponent.vue';
+import UDIVis from 'src/components/UDIVis.vue';
 import { ref, computed } from 'vue';
 import { useEditorStore } from 'src/stores/EditorStore';
 const editorStore = useEditorStore();
@@ -221,7 +221,7 @@ function prettyPrintJson(json?: string): string {
         <p class="text-h5">
           {{ currrentExample.query }}
         </p>
-        <parser-component v-if="validSpec" :spec="spec"></parser-component>
+        <UDIVis v-if="validSpec" :spec="spec"></UDIVis>
       </template>
     </div>
   </q-page>
