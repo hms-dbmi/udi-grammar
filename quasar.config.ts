@@ -42,7 +42,14 @@ export default defineConfig((/* ctx */) => {
       typescript: {
         strict: true,
         vueShim: true,
-        // extendTsConfig (tsConfig) {}
+        extendTsConfig(tsConfig) {
+          tsConfig.exclude = [
+            ...(tsConfig.exclude || []), // Keep the existing exclusions if any
+            './../src/components/dist',
+            './../src/components/node_modules',
+            './../src/components/index.ts',
+          ];
+        },
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'

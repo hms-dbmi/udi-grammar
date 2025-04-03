@@ -1,6 +1,6 @@
 // import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
-import type { UDIGrammar } from './GrammarTypes';
+import type { UDIGrammar } from 'src/components/GrammarTypes';
 import { compressToEncodedURIComponent } from 'lz-string';
 
 export const useEditorStore = defineStore('EditorStore', () => {

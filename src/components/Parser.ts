@@ -3,7 +3,7 @@ import type {
   DataSource,
   DataTransformation,
   Representations,
-} from '../stores/GrammarTypes';
+} from './GrammarTypes';
 
 export interface ParsedUDIGrammar {
   source: DataSource[];

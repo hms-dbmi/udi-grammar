@@ -15,7 +15,11 @@ export default [
      *
      * ESLint requires "ignores" key to be the only one in this object
      */
-    // ignores: []
+    ignores: [
+      'src/components/index.ts',
+      'src/components/dist',
+      'src/components/node_modules',
+    ],
   },
 
   ...pluginQuasar.configs.recommended(),

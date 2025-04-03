@@ -3,8 +3,8 @@ import { ref, watch, onMounted } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
-import type { UDIGrammar, VisualizationLayer } from 'src/stores/GrammarTypes';
-import { useDataSourcesStore } from 'src/stores/DataSourcesStore';
+import type { UDIGrammar, VisualizationLayer } from './GrammarTypes';
+import { useDataSourcesStore } from './DataSourcesStore';
 import { storeToRefs } from 'pinia';
 
 const dataSourcesStore = useDataSourcesStore();
@@ -159,7 +159,7 @@ const debugVegaData = ref();
 
 <style lang="scss" scoped>
 .error-message {
-  color: $negative;
+  color: #e53935; // $negative, but don't want quasar vars in component
   margin: 6px;
 }
 </style>

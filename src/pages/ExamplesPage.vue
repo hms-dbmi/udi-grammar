@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // import { ref } from 'vue';
-import type { UDIGrammar } from '../stores/GrammarTypes';
+import type { UDIGrammar } from 'src/components/GrammarTypes';
 import { useEditorStore } from 'src/stores/EditorStore';
 
 const editorStore = useEditorStore();
