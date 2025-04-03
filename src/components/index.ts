@@ -4,8 +4,6 @@ import VegaLite from './VegaLite.vue';
 
 export { ParserComponent, TableComponent, VegaLite };
 
-// export * from './Parser';
-
 export function install(app: any) {
   app.component('ParserComponent', ParserComponent);
   app.component('TableComponent', TableComponent);
