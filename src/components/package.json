@@ -1,13 +1,13 @@
 {
   "name": "udi-toolkit",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Universal Discovery Interface Toolkit",
-  "productName": "Universal Discovery Interface Toolkit",
   "author": "dev-lan <devinscottlange@gmail.com>",
   "type": "module",
-  "private": true,
-  "main": "dist/index.umd.cjs",
+  "private": false,
+  "main": "dist/index.cjs",
   "module": "dist/index.js",
+  "umd": "dist/index.umd.cjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
@@ -16,7 +16,8 @@
     "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
-    "build": "vite build"
+    "build": "vite build",
+    "publish": "npm publish --access public"
   },
   "dependencies": {
     "arquero": "^8.0.1",
@@ -55,6 +56,14 @@
     "vite-plugin-dts": "^4.5.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vue-tsc": "^2.0.29"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hms-dbmi/udi-grammar"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
   },
   "engines": {
     "node": "^28 || ^26 || ^24 || ^22 || ^20 || ^18",
