@@ -6,6 +6,7 @@
   "type": "module",
   "private": false,
   "main": "dist/index.cjs",
+  "homepage": "https://hms-dbmi.github.io/udi-grammar",
   "module": "dist/index.js",
   "umd": "dist/index.umd.cjs",
   "types": "dist/index.d.ts",
