@@ -1,6 +1,6 @@
 {
   "name": "udi-toolkit",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "Universal Discovery Interface Toolkit",
   "author": "dev-lan <devinscottlange@gmail.com>",
   "type": "module",
@@ -17,7 +17,7 @@
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "build": "vite build",
-    "publish": "npm publish --access public"
+    "npm-publish": "npm publish --access public"
   },
   "dependencies": {
     "arquero": "^8.0.1",
