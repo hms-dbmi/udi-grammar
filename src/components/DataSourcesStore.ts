@@ -271,6 +271,11 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           throw new Error('Field is required for min operation');
         }
         return op.min(aggFunc.field);
+      case 'median':
+        if (!aggFunc.field) {
+          throw new Error('Field is required for median operation');
+        }
+        return op.median(aggFunc.field);
       case 'max':
         if (!aggFunc.field) {
           throw new Error('Field is required for max operation');
