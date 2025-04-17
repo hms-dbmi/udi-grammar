@@ -56,7 +56,11 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
   async function initDataSource(dataSource: DataSource): Promise<void> {
     if (getDataSource(dataSource.name)) return;
-    const dest: ColumnTable = await loadCSV(dataSource.source);
+    let delimiter = ',';
+    if (dataSource.source.endsWith('.tsv')) {
+      delimiter = '\t';
+    }
+    const dest: ColumnTable = await loadCSV(dataSource.source, { delimiter });
     dataSources.value[dataSource.name] = { source: dataSource, dest };
   }
 
