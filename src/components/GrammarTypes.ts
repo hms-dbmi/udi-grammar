@@ -173,7 +173,7 @@ export interface Join extends DataTransformationBase {
      * The field(s) to join on. If one field is specified, it's assumed to be the same in both tables.
      * If two fields are specified, the first field is from the first table and the second field is from the second table.
      */
-    on: string | [string, string];
+    on: string | [string, string] | [string[], string[]];
   };
 }
 

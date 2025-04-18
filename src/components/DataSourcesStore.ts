@@ -193,7 +193,48 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         if (!leftTable || !rightTable) {
           throw new Error('join table not found');
         }
-        currentTable.table = leftTable.join(rightTable, transform.join.on);
+        if (
+          typeof transform.join.on === 'string' ||
+          transform.join.on.every((x) => typeof x === 'string')
+        ) {
+          currentTable.table = leftTable.join(rightTable, transform.join.on);
+        } else {
+          const [leftMultiKeys, rightMultiKeys] = transform.join.on;
+          if (leftMultiKeys.length !== rightMultiKeys.length) {
+            throw new Error(
+              'left and right multi keys must be the same length',
+            );
+          }
+          // multi key join. I first tried passing an anonymous function to arquero's
+          // join method, but the limitations wrt closure made it difficult/impossible
+          // to implement. So I am using a derived column to create a unique key for each
+          // row in each table, and then joining on that.
+          currentTable.table = leftTable
+            .params({
+              leftMultiKeys: transform.join.on[0],
+            })
+            .derive({
+              udi_internal_multi_key_join: escape(
+                (d: { [x: string]: unknown }, $: { leftMultiKeys: string[] }) =>
+                  $.leftMultiKeys.map((k) => d[k]).join('¶'),
+              ),
+            })
+            .join(
+              rightTable
+                .params({
+                  rightMultiKeys: transform.join.on[1],
+                })
+                .derive({
+                  udi_internal_multi_key_join: escape(
+                    (
+                      d: { [x: string]: unknown },
+                      $: { rightMultiKeys: string[] },
+                    ) => $.rightMultiKeys.map((k) => d[k]).join('¶'),
+                  ),
+                }),
+              'udi_internal_multi_key_join',
+            );
+        }
       } else if ('kde' in transform) {
         const inTable = getInTable(transform.in);
         const { field, samples } = transform.kde;
