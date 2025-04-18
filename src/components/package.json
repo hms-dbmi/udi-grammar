@@ -1,6 +1,6 @@
 {
   "name": "udi-toolkit",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Universal Discovery Interface Toolkit",
   "author": "dev-lan <devinscottlange@gmail.com>",
   "type": "module",
