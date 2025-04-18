@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { density1d, nrd } from 'fast-kde';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import type {
   AggregateFunction,
   DataSource,
@@ -55,7 +55,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   }
 
   async function initDataSource(dataSource: DataSource): Promise<void> {
-    if (getDataSource(dataSource.name)) return;
+    const currentSource = getDataSource(dataSource.name);
+    if (currentSource && isEqual(currentSource.source, dataSource)) return;
     let delimiter = ',';
     if (dataSource.source.endsWith('.tsv')) {
       delimiter = '\t';
