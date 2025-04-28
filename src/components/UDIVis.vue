@@ -113,8 +113,10 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
           value: map.value,
         };
       } else {
+        // escape "." in field names. e.g. "species.name" becomes "species\\.name"
+        const escapedField = map.field.replace(/\./g, '\\.');
         vegaEncoding[encoding] = {
-          field: map.field,
+          field: escapedField,
           type: map.type,
         };
       }
