@@ -153,7 +153,7 @@ export interface OrderBy extends DataTransformationBase {
   /**
    * The field to order by.
    */
-  orderby: string; // TODO: Extend to support a list of strings
+  orderby: string; // TODO: Extend to support a list of strings, and support ascending/descending order
 }
 
 /**
