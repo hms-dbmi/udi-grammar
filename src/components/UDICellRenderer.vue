@@ -3,20 +3,20 @@ import type { CSSProperties } from 'vue';
 import { ref, computed, watch, onMounted, onBeforeMount } from 'vue';
 import type { ICellRendererParams } from 'ag-grid-community';
 import type { RowMapping, RowMarkOptions } from './GrammarTypes';
-import { scaleLinear } from 'd3-scale';
-import { scale } from 'vega';
-import { map } from 'lodash';
+import { scaleLinear, scaleSequential } from 'd3-scale';
+import { defaultRange, type RowMappingWithDomain } from './TableUtil';
+import { interpolateYlOrRd } from 'd3-scale-chromatic';
 
 // Define props
+
+export interface UDICellRendererParams<TData, TValue, TContext>
+  extends ICellRendererParams<TData, TValue, TContext> {
+  udiColumnMapping: RowMappingWithDomain[];
+}
 
 interface CellRendererProps {
   params: UDICellRendererParams<any, any, any>;
   // https://www.ag-grid.com/vue-data-grid/component-cell-renderer/#custom-components
-}
-
-export interface UDICellRendererParams<TData, TValue, TContext>
-  extends ICellRendererParams<TData, TValue, TContext> {
-  udiColumnMapping: RowMapping[];
 }
 
 const props = defineProps<CellRendererProps>();
@@ -40,16 +40,16 @@ const marks = computed(() => {
   return uniqueMarks;
 });
 
-const markMapping = computed<Partial<Record<RowMarkOptions, RowMapping[]>>>(
-  () => {
-    if (!props.params.udiColumnMapping) return {};
-    const markEndodings = Object.groupBy(
-      props.params.udiColumnMapping,
-      (m) => m.mark,
-    );
-    return markEndodings;
-  },
-);
+const markMapping = computed<
+  Partial<Record<RowMarkOptions, RowMappingWithDomain[]>>
+>(() => {
+  if (!props.params.udiColumnMapping) return {};
+  const markEndodings = Object.groupBy(
+    props.params.udiColumnMapping,
+    (m) => m.mark,
+  );
+  return markEndodings;
+});
 
 function getTextValue() {
   if (!props.params.udiColumnMapping) return null;
@@ -67,12 +67,23 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
   const styleProps: CSSProperties = {};
   for (const mapping of rowMapping) {
     const data = props.params.data[mapping.field];
+    const domain = mapping.domain;
+    let numberDomain: [number, number] = [0, 1];
+    let stringDomain: string[] = ['unknown'];
+    if ('min' in domain && 'max' in domain) {
+      numberDomain = [domain.min, domain.max];
+    } else {
+      stringDomain = domain.values;
+    }
+
     switch (mapping.encoding) {
       case 'color': {
-        const color = scaleLinear<string, string>()
-          .domain([2700, 6300])
-          .range(['red', 'blue'])
-          .unknown('white')(data);
+        const color = scaleSequential<string, string>(
+          defaultRange.quantitativeColor,
+        )
+          .domain(numberDomain)
+          .unknown(defaultRange.unknownColor)(data);
+
         if (mapping.mark === 'text') {
           styleProps.color = color;
         } else if (mapping.mark === 'line') {
@@ -84,8 +95,8 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
       }
       case 'x': {
         const xPos = scaleLinear()
-          .domain([2700, 6300])
-          .range([0, 1])
+          .domain(numberDomain)
+          .range(defaultRange.quantitative)
           .unknown(0)(data);
         const percent = xPos * 100;
         if (mapping.mark === 'text') {
@@ -106,8 +117,8 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
       }
       case 'y': {
         const yPos = scaleLinear()
-          .domain([2700, 6300])
-          .range([0, 1])
+          .domain(numberDomain)
+          .range(defaultRange.quantitative)
           .unknown(0)(data);
         const percent = yPos * 100;
         if (mapping.mark === 'text') {
@@ -126,22 +137,22 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
       }
       case 'yOffset': {
         const yOffsetPos = scaleLinear()
-          .domain([2700, 6300])
-          .range([0, 1])
+          .domain(numberDomain)
+          .range(defaultRange.quantitative)
           .unknown(0)(data);
         break;
       }
       case 'xOffset': {
         const xOffsetPos = scaleLinear()
-          .domain([2700, 6300])
-          .range([0, 1])
+          .domain(numberDomain)
+          .range(defaultRange.quantitative)
           .unknown(0)(data);
         break;
       }
       case 'size': {
         const size = scaleLinear()
-          .domain([2700, 6300])
-          .range([0, 1])
+          .domain(numberDomain)
+          .range(defaultRange.quantitative)
           .unknown(0)(data);
         if (mapping.mark === 'rect') {
           styleProps.width = `${size * 100}%`;

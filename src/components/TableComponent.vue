@@ -3,13 +3,20 @@ import { ref, computed, watch, onMounted, defineProps } from 'vue';
 import { cloneDeep } from 'lodash';
 import type { ColDef } from 'ag-grid-community';
 import { type ParsedUDIGrammar } from './Parser';
+import type {
+  Domain,
+  NumberDomain,
+  RowMappingWithDomain,
+  StringDomain,
+} from './TableUtil';
+import { getDomainLookupKey } from './TableUtil';
 import UDICellRenderer from './UDICellRenderer.vue';
 defineExpose({
   UDICellRenderer,
 });
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridVue } from 'ag-grid-vue3'; // Vue Data Grid Component
-import type { RowLayer } from './GrammarTypes';
+import type { RowLayer, RowMapping } from './GrammarTypes';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -77,21 +84,84 @@ const columnMapping = computed(() => {
   return columnMapping;
 });
 
-const colDefs = computed(() => {
+function getNumberDomain(
+  data: Record<string, any>[],
+  field: string,
+): NumberDomain {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const d of data) {
+    const value = d[field];
+    if (value === null || value === undefined) {
+      continue;
+    }
+    if (value < min) {
+      min = value;
+    }
+    if (value > max) {
+      max = value;
+    }
+  }
+  return { min, max };
+}
+
+function getStringDomain(
+  data: Record<string, any>[],
+  field: string,
+): StringDomain {
+  const valueList = data.map((d) => d[field]);
+  const values = new Set<string>(valueList);
+  return { values: Array.from(values) };
+}
+const fieldDomains = computed<Map<string, Domain>>(() => {
+  const domainMap = new Map<string, Domain>();
+  if (!columnMapping.value) return domainMap;
+  if (!props.data) return domainMap;
+  if (props.data.length === 0) return domainMap;
+
+  for (const mapping of columnMapping.value) {
+    const field = mapping.field;
+    const type = mapping.type;
+    const k = getDomainLookupKey(mapping);
+    if (domainMap.has(k)) {
+      continue;
+    }
+    if (type === 'quantitative') {
+      const domain = getNumberDomain(props.data, field);
+      domainMap.set(k, domain);
+    } else if (type === 'nominal' || type === 'ordinal') {
+      const domain = getStringDomain(props.data, field);
+      domainMap.set(k, domain);
+    }
+  }
+  return domainMap;
+});
+
+const colDefs = computed<ColDef[]>(() => {
   if (columnMapping.value.length === 0) {
     return [];
   }
 
-  // group the column mapping by the column name
-  const groupedMapping = columnMapping.value.reduce(
-    (acc, part) => {
-      if (!acc[part.column!]) {
-        acc[part.column!] = [];
+  const mappingWithDomains: RowMappingWithDomain[] = columnMapping.value.map(
+    (mapping) => {
+      const k = getDomainLookupKey(mapping);
+      if (fieldDomains.value.has(k)) {
+        const domain = fieldDomains.value.get(k);
+        return {
+          ...mapping,
+          domain: domain,
+        } as RowMappingWithDomain;
       }
-      acc[part.column!]!.push(part);
-      return acc;
+      throw new Error(
+        `Domain not found for mapping ${JSON.stringify(mapping)}`,
+      );
     },
-    {} as Record<string, typeof columnMapping.value>,
+  );
+
+  // group the column mapping by the column name
+  const groupedMapping = Object.groupBy(
+    mappingWithDomains,
+    (mapping) => mapping.column!,
   );
 
   const keys = Object.keys(groupedMapping);

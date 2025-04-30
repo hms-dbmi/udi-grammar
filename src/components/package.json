@@ -22,9 +22,11 @@
   },
   "dependencies": {
     "@types/d3-scale": "^4.0.9",
+    "@types/d3-scale-chromatic": "^3.1.0",
     "ag-grid-vue3": "^33.2.4",
     "arquero": "^8.0.1",
     "d3-scale": "^4.0.2",
+    "d3-scale-chromatic": "^3.1.0",
     "fast-kde": "^0.2.2",
     "lodash": "^4.17.21",
     "pinia": "^3.0.1",
