@@ -3,7 +3,12 @@ import type { CSSProperties } from 'vue';
 import { ref, computed, watch, onMounted, onBeforeMount } from 'vue';
 import type { ICellRendererParams } from 'ag-grid-community';
 import type { RowMapping, RowMarkOptions } from './GrammarTypes';
-import { scaleLinear, scaleSequential } from 'd3-scale';
+import {
+  scaleLinear,
+  scaleOrdinal,
+  scaleSequential,
+  scaleBand,
+} from 'd3-scale';
 import { defaultRange, type RowMappingWithDomain } from './TableUtil';
 import { interpolateYlOrRd } from 'd3-scale-chromatic';
 
@@ -78,11 +83,20 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
 
     switch (mapping.encoding) {
       case 'color': {
-        const color = scaleSequential<string, string>(
-          defaultRange.quantitativeColor,
-        )
-          .domain(numberDomain)
-          .unknown(defaultRange.unknownColor)(data);
+        let colorScale;
+        if (mapping.type === 'quantitative') {
+          colorScale = scaleSequential<string, string>(
+            defaultRange.quantitativeColor,
+          )
+            .domain(numberDomain)
+            .unknown(defaultRange.unknownColor);
+        } else {
+          colorScale = scaleOrdinal<string, string>(defaultRange.nominalColor)
+            .domain(stringDomain)
+            .range(defaultRange.nominalColor)
+            .unknown(defaultRange.unknownColor);
+        }
+        const color = colorScale(data);
 
         if (mapping.mark === 'text') {
           styleProps.color = color;
@@ -97,13 +111,14 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
         const xPos = scaleLinear()
           .domain(numberDomain)
           .range(defaultRange.quantitative)
-          .unknown(0)(data);
-        const percent = xPos * 100;
+          .unknown(defaultRange.unknownQuantitative)(data);
+        let percent = xPos * 100;
+        if (percent < 0) percent = 0;
         if (mapping.mark === 'text') {
           styleProps.left = `${percent}%`;
           styleProps.transform = `translate(-${percent}%, -50%)`;
         } else if (mapping.mark === 'bar') {
-          styleProps.width = `${xPos * 100}%`;
+          styleProps.width = `${percent}%`;
         } else if (mapping.mark === 'point') {
           styleProps.left = `${percent}%`;
         } else if (mapping.mark === 'line') {
@@ -119,7 +134,7 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
         const yPos = scaleLinear()
           .domain(numberDomain)
           .range(defaultRange.quantitative)
-          .unknown(0)(data);
+          .unknown(defaultRange.unknownQuantitative)(data);
         const percent = yPos * 100;
         if (mapping.mark === 'text') {
           styleProps.top = `${100 - percent}%`;
@@ -136,31 +151,55 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
         break;
       }
       case 'yOffset': {
-        const yOffsetPos = scaleLinear()
-          .domain(numberDomain)
-          .range(defaultRange.quantitative)
-          .unknown(0)(data);
+        const yOffsetPos =
+          scaleBand().domain(stringDomain).range(defaultRange.quantitative)(
+            data,
+          ) ?? 0;
+        const height = 1 / stringDomain.length;
+        if (mapping.mark === 'bar') {
+          styleProps.bottom = `${yOffsetPos * 100}%`;
+          styleProps.height = `${height * 100}%`;
+        } else if (mapping.mark === 'line') {
+          styleProps.top = `${100 - (yOffsetPos + height / 2) * 100}%`;
+          styleProps.height = 0;
+          styleProps.borderLeftWidth = 0;
+          styleProps.borderRightWidth = 0;
+        }
         break;
       }
       case 'xOffset': {
-        const xOffsetPos = scaleLinear()
-          .domain(numberDomain)
-          .range(defaultRange.quantitative)
-          .unknown(0)(data);
+        const xOffsetPos =
+          scaleBand().domain(stringDomain).range(defaultRange.quantitative)(
+            data,
+          ) ?? 0;
+        const width = 1 / stringDomain.length;
+        if (mapping.mark === 'bar') {
+          styleProps.left = `${xOffsetPos * 100}%`;
+          styleProps.width = `${width * 100}%`;
+        } else if (mapping.mark === 'line') {
+          styleProps.height = `100%`;
+          styleProps.left = `${(xOffsetPos + width / 2) * 100}%`;
+          styleProps.width = 0;
+          styleProps.borderTopWidth = 0;
+          styleProps.borderBottomWidth = 0;
+        }
         break;
       }
       case 'size': {
         const size = scaleLinear()
           .domain(numberDomain)
           .range(defaultRange.quantitative)
-          .unknown(0)(data);
+          .unknown(defaultRange.unknownQuantitative)(data);
         if (mapping.mark === 'rect') {
           styleProps.width = `${size * 100}%`;
           styleProps.height = `${size * 100}%`;
           styleProps.left = `${(1 - size) * 50}%`;
           styleProps.bottom = `${(1 - size) * 50}%`;
         } else if (mapping.mark === 'point') {
-          const rootSize = Math.sqrt(size);
+          let rootSize = 0;
+          if (size > 0) {
+            rootSize = Math.sqrt(size);
+          }
           const maxSize = 30;
           styleProps.width = `${rootSize * maxSize}px`;
           styleProps.height = `${rootSize * maxSize}px`;
@@ -171,35 +210,8 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
         break;
       }
     }
-
-    // if (mapping.encoding === 'color') {
-    //   const colorData = props.params.data[mapping.field];
-    //   const color = scaleLinear<string, string>()
-    //     .domain([2700, 6300])
-    //     .range(['red', 'blue'])(colorData);
-    //   if (mapping.mark === 'text') {
-    //     styleProps.color = color;
-    //   } else {
-    //     styleProps.backgroundColor = color;
-    //   }
-    // }
   }
   return styleProps;
-
-  // if (!rowMapping) return null;
-  // const styleMapping = rowMapping.find((m) => m.encoding === 'style');
-  // if (!styleMapping) return null;
-  // const styleData = props.params.data[styleMapping.field];
-
-  // return {
-  //   color: getColor(rowMapping),
-  //   // backgroundColor: getColor(rowMapping),
-  //   // width: '100%',
-  //   // height: '100%',
-  //   // top: 0,
-  //   // left: 0,
-  //   // position: 'absolute',
-  // };
 }
 </script>
 

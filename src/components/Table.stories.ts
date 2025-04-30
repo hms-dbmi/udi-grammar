@@ -175,6 +175,18 @@ export const MultipleFields = {
             encoding: 'color',
             type: 'nominal',
           },
+          {
+            field: 'body_mass_g',
+            encoding: 'text',
+            mark: 'text',
+            type: 'quantitative',
+          },
+          {
+            field: 'sex',
+            encoding: 'text',
+            mark: 'text',
+            type: 'quantitative',
+          },
         ],
       },
     },
@@ -303,6 +315,13 @@ export const BarEncodingNominal = {
       representation: {
         mark: 'row',
         mapping: [
+          {
+            column: 'reference',
+            mark: 'text',
+            field: 'species',
+            encoding: 'text',
+            type: 'nominal',
+          },
           {
             column: 'xOffset',
             mark: 'bar',
