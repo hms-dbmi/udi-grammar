@@ -645,6 +645,8 @@ export type RowEncodingOptions =
   | 'size'
   | 'shape';
 
+// should add x2, y2, textAnchor, maybe theta?
+
 /**
  * Mark options for row layers.
  */
@@ -670,6 +672,15 @@ export interface RowMapping extends GenericFieldMapping<RowEncodingOptions> {
    * The type of mark used in the row layer.
    */
   mark: RowMarkOptions;
+
+  /**
+   * The target display column. If empty, the target column is based on the
+   * field name. This is needed so that you can construct columns that map multiple
+   * fields to the same mark within the column. E.g. a bar where the width is based
+   * on a quantitative field and the color is if based on a derived boolean field
+   * if the value is positive or negative.
+   */
+  column?: string;
 }
 
 /**
