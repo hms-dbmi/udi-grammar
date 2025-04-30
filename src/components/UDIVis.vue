@@ -55,10 +55,16 @@ function buildVisualization(): void {
   // for (const dataSource of parsedSpec.value.dataSource) {
   //   dataSourcesStore.initDataSource(dataSource);
   // }
+  performDataTransformation(parsedSpec.value);
+  if (transformedData.value == null) {
+    return;
+  }
 
   if (isVegaLiteCompatible(parsedSpec.value)) {
     vegaLiteSpec.value = convertToVegaSpec(parsedSpec.value);
     isVegaLiteComponent.value = true;
+  } else {
+    isVegaLiteComponent.value = false;
   }
 }
 
@@ -67,6 +73,23 @@ function isVegaLiteCompatible(spec: ParsedUDIGrammar): boolean {
 }
 
 const transformError = ref();
+
+const transformedData = ref<object[] | null>(null);
+
+function performDataTransformation(spec: ParsedUDIGrammar) {
+  transformedData.value = null;
+  try {
+    transformError.value = null;
+    transformedData.value = dataSourcesStore.getDataObject(
+      spec.source.map((x) => x.name),
+      spec.transformation,
+    );
+  } catch (error) {
+    console.error('Failed to complete data transformation', error);
+    transformError.value = error;
+  }
+  return;
+}
 
 function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,10 +102,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   // add data
   try {
     transformError.value = null;
-    vegaSpec.data!.values = dataSourcesStore.getDataObject(
-      spec.source.map((x) => x.name),
-      spec.transformation,
-    );
+    vegaSpec.data!.values = transformedData.value;
   } catch (error) {
     console.error('Failed to complete data transformation', error);
     transformError.value = error;
@@ -148,7 +168,7 @@ const debugVegaData = ref();
       {{ transformError.message }}
     </div>
     <VegaLite v-else-if="isVegaLiteComponent" :spec="vegaLiteSpec" />
-    <TableComponent v-else />
+    <TableComponent :data="transformedData" :spec="parsedSpec" v-else />
     <!-- <hr />
     <pre
       >{{ debugVegaData }}
