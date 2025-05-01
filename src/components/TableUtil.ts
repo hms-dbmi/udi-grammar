@@ -1,5 +1,5 @@
 import type { RowMapping } from './GrammarTypes';
-import { interpolateYlOrRd, schemeCategory10 } from 'd3-scale-chromatic';
+import { interpolateYlOrRd, schemeSet3 } from 'd3-scale-chromatic';
 
 export function getDomainLookupKey(mapping: RowMapping): string {
   const { field, type } = mapping;
@@ -24,5 +24,5 @@ export const defaultRange = {
   unknownQuantitative: -10,
   quantitativeColor: (t: number) => interpolateYlOrRd((t + 0.15) / 1.15),
   unknownColor: '#EB10E0',
-  nominalColor: schemeCategory10,
+  nominalColor: schemeSet3,
 };
