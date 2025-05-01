@@ -576,4 +576,94 @@ export const LineEncodingNominal = {
   },
 };
 
+export const PenguinsDemo = {
+  args: {
+    spec: {
+      source: {
+        name: 'penguins',
+        source: './data/penguins.csv',
+      },
+      representation: {
+        mark: 'row',
+        mapping: [
+          {
+            field: 'species',
+            encoding: 'color',
+            mark: 'rect',
+            type: 'nominal',
+          },
+
+          {
+            field: 'island',
+            encoding: 'color',
+            mark: 'rect',
+            type: 'nominal',
+          },
+
+          {
+            field: 'bill_length_mm',
+            encoding: 'x',
+            mark: 'bar',
+            type: 'quantitative',
+          },
+          {
+            field: 'bill_length_mm',
+            encoding: 'x',
+            mark: 'text',
+            type: 'quantitative',
+          },
+
+          {
+            field: 'bill_depth_mm',
+            encoding: 'x',
+            mark: 'bar',
+            type: 'quantitative',
+          },
+          {
+            field: 'bill_depth_mm',
+            encoding: 'x',
+            mark: 'text',
+            type: 'quantitative',
+          },
+
+          {
+            field: 'flipper_length_mm',
+            encoding: 'x',
+            mark: 'bar',
+            type: 'quantitative',
+          },
+          {
+            field: 'flipper_length_mm',
+            encoding: 'x',
+            mark: 'text',
+            type: 'quantitative',
+          },
+
+          {
+            field: 'body_mass_g',
+            encoding: 'x',
+            mark: 'bar',
+            type: 'quantitative',
+          },
+          {
+            field: 'body_mass_g',
+            encoding: 'x',
+            mark: 'text',
+            type: 'quantitative',
+          },
+
+          {
+            field: 'sex',
+            encoding: 'color',
+            mark: 'rect',
+            type: 'nominal',
+          },
+
+          { mark: 'text', field: '*', encoding: 'text', type: 'quantitative' },
+        ],
+      },
+    },
+  },
+};
+
 // TODO:  geometry, select, and more x2,y2, point nominal shape, could maybe map size to more things, e.g. line/bar width
