@@ -3,6 +3,11 @@ import UDIVis from 'src/components/UDIVis.vue';
 import { ref, computed, shallowRef } from 'vue';
 import { useRoute } from 'vue-router';
 import { decompressFromEncodedURIComponent } from 'lz-string';
+// import { useQuasar } from 'quasar';
+import { useEditorStore } from 'src/stores/EditorStore';
+const editorStore = useEditorStore();
+
+// const $q = useQuasar();
 
 const MONACO_EDITOR_OPTIONS = {
   automaticLayout: true,
@@ -75,10 +80,62 @@ const validSpec = computed(() => {
     return false;
   }
 });
+
+const showEncodingUrl = ref(false);
+const encodedUrl = computed(() => {
+  return editorStore.getUrlWithCode(code.value, true);
+});
+
+// const clipboardSupported = computed(() => {
+//   return navigator.clipboard && navigator.clipboard.writeText;
+// });
+
+// function copyToClipboard(): void {
+//   const text = 'alsdkjfalskdf';
+//   navigator.clipboard.writeText(text);
+//   $q.notify({
+//     message: `Copied "${text}" to clipboard.`,
+//     position: 'bottom',
+//     icon: 'content_copy',
+//     timeout: 2500,
+//   });
+// }
 </script>
 <template>
+  <q-toolbar dense flat
+    ><q-btn
+      dense
+      flat
+      no-caps
+      @click="showEncodingUrl = true"
+      icon="share"
+      label="Share"
+    ></q-btn>
+    <q-dialog v-model="showEncodingUrl">
+      <q-card style="width: 100%">
+        <q-card-section>
+          <div class="text-h6">Copy Link To Example</div>
+          <q-input
+            v-model="encodedUrl"
+            readonly
+            filled
+            class="q-mt-md"
+          ></q-input>
+        </q-card-section>
+        <q-card-actions align="right">
+          <!-- <q-btn
+            v-if="clipboardSupported"
+            flat
+            label="Copy"
+            @click="copyToClipboard()"
+          /> -->
+          <q-btn flat label="Close" @click="showEncodingUrl = false" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </q-toolbar>
+  <q-separator />
   <q-page class="flex row">
-    <!-- <q-toolbar dense flat><q-btn dense flat>Run</q-btn></q-toolbar> -->
     <q-splitter v-model="splitterModel" class="flex-grow-1 q-mt-lg">
       <template v-slot:before>
         <vue-monaco-editor
