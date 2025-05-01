@@ -1002,6 +1002,23 @@
   resolved "https://registry.npmjs.org/@types/cordova/-/cordova-11.0.3.tgz"
   integrity sha512-kyuRQ40/NWQVhqGIHq78Ehu2Bf9Mlg0LhmSmis6ZFJK7z933FRfYi8tHe/k/0fB+PGfCf95rJC6TO7dopaFvAg==
 
+"@types/d3-scale-chromatic@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/d3-scale-chromatic/-/d3-scale-chromatic-3.1.0.tgz#dc6d4f9a98376f18ea50bad6c39537f1b5463c39"
+  integrity sha512-iWMJgwkK7yTRmWqRB5plb1kadXyQ5Sj8V/zYlFGMUBbIPKQScw+Dku9cAAMgJG+z5GYDoMjWGLVOvjghDEFnKQ==
+
+"@types/d3-scale@^4.0.9":
+  version "4.0.9"
+  resolved "https://registry.yarnpkg.com/@types/d3-scale/-/d3-scale-4.0.9.tgz#57a2f707242e6fe1de81ad7bfcccaaf606179afb"
+  integrity sha512-dLmtwB8zkAeO/juAMfnV+sItKjlsw2lKdZVVy6LRr0cBmegxSABiLEpGVmSJJ8O08i4+sGR6qQtb6WtuwJdvVw==
+  dependencies:
+    "@types/d3-time" "*"
+
+"@types/d3-time@*":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@types/d3-time/-/d3-time-3.0.4.tgz#8472feecd639691450dd8000eb33edd444e1323f"
+  integrity sha512-yuzZug1nkAAaBlBBikKZTgzCeA+k1uy4ZFwWANOfKw5z5LRhV0gNA7gNkKm7HoK+HRN0wX3EkxGk0fpbWhmB7g==
+
 "@types/estree@1.0.6", "@types/estree@^1.0.0", "@types/estree@^1.0.6":
   version "1.0.6"
   resolved "https://registry.npmjs.org/@types/estree/-/estree-1.0.6.tgz"
@@ -1504,6 +1521,25 @@ acorn@^8.14.0, acorn@^8.8.2, acorn@^8.9.0:
   version "8.14.0"
   resolved "https://registry.npmjs.org/acorn/-/acorn-8.14.0.tgz"
   integrity sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==
+
+ag-charts-types@11.2.4:
+  version "11.2.4"
+  resolved "https://registry.yarnpkg.com/ag-charts-types/-/ag-charts-types-11.2.4.tgz#8e234c67044aaa838298844a8a71f900af187be5"
+  integrity sha512-a1aQjtQ9ZH+J8BF3YcWAIHUt9ZLiL9IVZ8R5h7z2CkTNu2TPq5UlsCcF0/YZKc1M8CM0CdSNLSGQuWUwDNxAcA==
+
+ag-grid-community@33.2.4:
+  version "33.2.4"
+  resolved "https://registry.yarnpkg.com/ag-grid-community/-/ag-grid-community-33.2.4.tgz#fd9dee76605001e9d65a8c7816fcf68edf5078b5"
+  integrity sha512-7XT1+wxmMlMVXB27BJOzlft9ATB0C5HOJcCGMc8dCO2W17JXbNknVEEDGTBKoSvA4Cei8sARrRDxmPgY8mWopQ==
+  dependencies:
+    ag-charts-types "11.2.4"
+
+ag-grid-vue3@^33.2.4:
+  version "33.2.4"
+  resolved "https://registry.yarnpkg.com/ag-grid-vue3/-/ag-grid-vue3-33.2.4.tgz#8e4af7765886b881042b7b52124e19f5ade656cf"
+  integrity sha512-U5m4A9sc+jpoENwwl/AZ7r0053tbRvI39nRh55pYMJt6rrnotgUyJVHZfqJ6cExcSM3tqeW+vg1tMXGqoR4PNA==
+  dependencies:
+    ag-grid-community "33.2.4"
 
 ajv@^6.12.4:
   version "6.12.6"
