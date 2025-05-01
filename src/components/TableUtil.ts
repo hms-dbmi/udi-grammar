@@ -6,8 +6,9 @@ export function getDomainLookupKey(mapping: RowMapping): string {
   return `${field}¶${type}`;
 }
 
-export interface RowMappingWithDomain extends RowMapping {
+export interface ExtendedRowMapping extends RowMapping {
   domain: Domain;
+  layer: string;
 }
 
 export interface NumberDomain {

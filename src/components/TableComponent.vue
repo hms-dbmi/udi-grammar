@@ -5,8 +5,8 @@ import type { ColDef } from 'ag-grid-community';
 import { type ParsedUDIGrammar } from './Parser';
 import type {
   Domain,
+  ExtendedRowMapping,
   NumberDomain,
-  RowMappingWithDomain,
   StringDomain,
 } from './TableUtil';
 import { getDomainLookupKey } from './TableUtil';
@@ -16,7 +16,7 @@ defineExpose({
 });
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridVue } from 'ag-grid-vue3'; // Vue Data Grid Component
-import type { RowLayer } from './GrammarTypes';
+import type { RowLayer, RowMapping } from './GrammarTypes';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -28,24 +28,19 @@ interface TableComponentProps {
 
 const props = defineProps<TableComponentProps>();
 
-const representation = computed<RowLayer | null>(() => {
+const representations = computed<RowLayer[] | null>(() => {
   if (!props.spec) return null;
   if (props.spec.representation.length === 0) {
     return null;
   }
-  if (props.spec.representation.length === 1) {
-    const representation = props.spec.representation[0];
-    if (representation?.mark !== 'row') {
+  for (const representation of props.spec.representation) {
+    if (representation.mark !== 'row') {
       throw new Error(
-        'The representation must be a row layer in the table component',
+        'The representation must be a row layer in the table component for every layer',
       );
     }
-    return representation;
   }
-  throw new Error(
-    'Multiple representations are not supported in the table component',
-  );
-  // TODO: should also update the spec to reflect this.
+  return props.spec.representation as RowLayer[];
 });
 
 const allFields = computed(() => {
@@ -57,32 +52,56 @@ const allFields = computed(() => {
   return keys;
 });
 
-const columnMapping = computed(() => {
+const columnMappingLayers = computed<RowMapping[][]>(() => {
   // This will expand fields: "*" to include every possible field
   // and will populated empty column attributes with value from vield.
+  if (!representations.value) return [];
   const columnMapping = [];
-  if (!representation.value) return [];
-  let mapping = cloneDeep(representation.value.mapping);
-  if (!Array.isArray(mapping)) {
-    mapping = [mapping];
+  for (const representation of representations.value) {
+    const columnMappingLayer = [];
+    if (!representation.mapping) {
+      throw new Error('Mapping is required for the table component');
+    }
+    let mapping = cloneDeep(representation.mapping);
+    if (!Array.isArray(mapping)) {
+      mapping = [mapping];
+    }
+    for (const part of mapping) {
+      if (part.field === '*') {
+        for (const field of allFields.value) {
+          columnMappingLayer.push({
+            ...part,
+            field: field,
+            column: field,
+          });
+        }
+      } else {
+        if (!part.column) {
+          part.column = part.field;
+        }
+        columnMappingLayer.push(part);
+      }
+    }
+    columnMapping.push(columnMappingLayer);
   }
-  for (const part of mapping) {
-    if (part.field === '*') {
-      for (const field of allFields.value) {
-        columnMapping.push({
-          ...part,
-          field: field,
-          column: field,
-        });
-      }
-    } else {
-      if (!part.column) {
-        part.column = part.field;
-      }
-      columnMapping.push(part);
+
+  return columnMapping;
+});
+
+interface LayeredRowMapping extends RowMapping {
+  layer: string;
+}
+
+const flatColumnMapping = computed<LayeredRowMapping[]>(() => {
+  if (columnMappingLayers.value.length === 0) return [];
+  const flatColumnMapping: LayeredRowMapping[] = [];
+  for (let i = 0; i < columnMappingLayers.value.length; i++) {
+    const columnMappingLayer = columnMappingLayers.value[i];
+    for (const columnMapping of columnMappingLayer!) {
+      flatColumnMapping.push({ layer: i.toString(), ...columnMapping });
     }
   }
-  return columnMapping;
+  return flatColumnMapping;
 });
 
 function getNumberDomain(
@@ -128,11 +147,11 @@ function getStringDomain(
 }
 const fieldDomains = computed<Map<string, Domain>>(() => {
   const domainMap = new Map<string, Domain>();
-  if (!columnMapping.value) return domainMap;
+  if (!flatColumnMapping.value) return domainMap;
   if (!props.data) return domainMap;
   if (props.data.length === 0) return domainMap;
 
-  for (const mapping of columnMapping.value) {
+  for (const mapping of flatColumnMapping.value) {
     const field = mapping.field;
     const type = mapping.type;
     const k = getDomainLookupKey(mapping);
@@ -151,11 +170,11 @@ const fieldDomains = computed<Map<string, Domain>>(() => {
 });
 
 const colDefs = computed<ColDef[]>(() => {
-  if (columnMapping.value.length === 0) {
+  if (flatColumnMapping.value.length === 0) {
     return [];
   }
 
-  const mappingWithDomains: RowMappingWithDomain[] = columnMapping.value.map(
+  const mappingWithDomains: ExtendedRowMapping[] = flatColumnMapping.value.map(
     (mapping) => {
       const k = getDomainLookupKey(mapping);
       if (fieldDomains.value.has(k)) {
@@ -163,7 +182,7 @@ const colDefs = computed<ColDef[]>(() => {
         return {
           ...mapping,
           domain: domain,
-        } as RowMappingWithDomain;
+        } as ExtendedRowMapping;
       }
       throw new Error(
         `Domain not found for mapping ${JSON.stringify(mapping)}`,

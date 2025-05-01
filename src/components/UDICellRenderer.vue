@@ -9,13 +9,13 @@ import {
   scaleSequential,
   scaleBand,
 } from 'd3-scale';
-import { defaultRange, type RowMappingWithDomain } from './TableUtil';
+import { defaultRange, type ExtendedRowMapping } from './TableUtil';
 
 // Define props
 
 export interface UDICellRendererParams<TData, TValue, TContext>
   extends ICellRendererParams<TData, TValue, TContext> {
-  udiColumnMapping: RowMappingWithDomain[];
+  udiColumnMapping: ExtendedRowMapping[];
 }
 
 interface CellRendererProps {
@@ -26,43 +26,84 @@ interface CellRendererProps {
 
 const props = defineProps<CellRendererProps>();
 
-const marks = computed(() => {
+// const marks = computed(() => {
+//   if (!props.params.udiColumnMapping) return [];
+//   const marks = props.params.udiColumnMapping
+//     .filter((m) => {
+//       const d = props.params.data?.[m.field];
+//       return d !== null && typeof d !== 'undefined';
+//     })
+//     .map((m) => m.mark);
+//   // console.log({ marks });
+//   const uniqueMarks = [...new Set(marks)];
+//   // console.log({ uniqueMarks });
+//   return uniqueMarks;
+// });
+
+const layeredMarks = computed(() => {
   if (!props.params.udiColumnMapping) return [];
-  const marks = props.params.udiColumnMapping
-    .filter((m) => {
-      const d = props.params.data?.[m.field];
-      return d !== null && typeof d !== 'undefined';
-    })
-    .map((m) => m.mark);
-  // console.log({ marks });
-  const uniqueMarks = [...new Set(marks)];
-  // console.log({ uniqueMarks });
-  return uniqueMarks;
+  const layers = props.params.udiColumnMapping.map((m) => m.layer);
+  const uniqueLayers = [...new Set(layers)];
+
+  const marks = uniqueLayers.map((layer) => {
+    const layerMarks = props.params.udiColumnMapping
+      .filter((m) => m.layer === layer)
+      .filter((m) => {
+        const d = props.params.data?.[m.field];
+        return d !== null && typeof d !== 'undefined';
+      });
+    const marks = layerMarks.map((m) => m.mark);
+    const uniqueMarks = [...new Set(marks)];
+    return {
+      layer,
+      marks: uniqueMarks,
+    };
+  });
+
+  // flatten
+  const flatMarks: { layer: string; mark: string }[] = [];
+  for (const mark of marks) {
+    for (const m of mark.marks) {
+      flatMarks.push({
+        layer: mark.layer,
+        mark: m,
+      });
+    }
+  }
+  return flatMarks;
 });
 
 const markMapping = computed<
-  Partial<Record<RowMarkOptions, RowMappingWithDomain[]>>
+  Record<string, Partial<Record<RowMarkOptions, ExtendedRowMapping[]>>>
 >(() => {
   if (!props.params.udiColumnMapping) return {};
-  const markEndodings = Object.groupBy(
-    props.params.udiColumnMapping,
-    (m) => m.mark,
-  );
-  return markEndodings;
+  const layers = Object.groupBy(props.params.udiColumnMapping, (m) => m.layer);
+  const outLayers: Record<
+    string,
+    Partial<Record<RowMarkOptions, ExtendedRowMapping[]>>
+  > = {};
+  for (const layer of Object.keys(layers)) {
+    const layerMarks = layers[layer];
+    if (!layerMarks) continue;
+    const marks = Object.groupBy(layerMarks, (m) => m.mark);
+
+    outLayers[layer] = marks;
+  }
+  return outLayers;
 });
 
-function getTextValue() {
+function getTextValue(layer: string) {
   if (!props.params.udiColumnMapping) return null;
-  const rowMapping = markMapping.value['text'];
+  const rowMapping = markMapping.value[layer]?.['text'];
   if (!rowMapping) return null;
   const textMapping = rowMapping.find((m) => m.encoding === 'text');
   if (!textMapping) return null;
   return props.params.data?.[textMapping.field];
 }
 
-function getStyle(mark: RowMarkOptions): CSSProperties | null {
+function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
   if (!props.params.udiColumnMapping) return null;
-  const rowMapping = markMapping.value[mark];
+  const rowMapping = markMapping.value[layer]?.[mark];
   if (!rowMapping) return null;
   const styleProps: CSSProperties = {};
   for (const mapping of rowMapping) {
@@ -223,36 +264,36 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
 
 <template>
   <div class="cell-container">
-    <template v-for="mark in marks" :key="mark">
+    <template v-for="{ layer, mark } in layeredMarks" :key="mark">
       <div
         v-if="mark === 'text'"
-        :style="getStyle(mark)"
+        :style="getStyle(layer, mark)"
         class="pos-absolute text"
       >
-        {{ getTextValue() }}
+        {{ getTextValue(layer) }}
       </div>
       <div
         v-else-if="mark === 'bar'"
-        :style="getStyle(mark)"
+        :style="getStyle(layer, mark)"
         class="pos-absolute bar"
       ></div>
       <div
         v-else-if="mark === 'rect'"
-        :style="getStyle(mark)"
+        :style="getStyle(layer, mark)"
         class="pos-absolute rect"
       ></div>
       <div
         v-else-if="mark === 'point'"
-        :style="getStyle(mark)"
+        :style="getStyle(layer, mark)"
         class="pos-absolute point"
       ></div>
       <div
         v-else-if="mark === 'line'"
-        :style="getStyle(mark)"
+        :style="getStyle(layer, mark)"
         class="pos-absolute line"
       ></div>
     </template>
-    <template v-if="marks.length === 0">
+    <template v-if="layeredMarks.length === 0">
       <div class="empty-cell pos-absolute">∅</div>
     </template>
   </div>

@@ -123,6 +123,75 @@ export const MultipleMarks = {
   },
 };
 
+export const MultipleOfSameMarks = {
+  args: {
+    spec: {
+      source: {
+        name: 'penguins',
+        source: './data/penguins.csv',
+      },
+      transformation: [
+        {
+          derive: {
+            ratio: 'd.bill_length_mm / d.bill_depth_mm',
+            difference: 'd.bill_length_mm - d.bill_depth_mm',
+          },
+        },
+      ],
+      representation: [
+        {
+          mark: 'row',
+          mapping: [
+            {
+              mark: 'text',
+              field: 'bill_depth_mm',
+              encoding: 'text',
+              type: 'quantitative',
+            },
+            {
+              column: 'Bill Size',
+              mark: 'point',
+              field: 'bill_length_mm',
+              encoding: 'x',
+              type: 'quantitative',
+            },
+          ],
+        },
+        {
+          mark: 'row',
+          mapping: [
+            {
+              column: 'Bill Size',
+              mark: 'point',
+              field: 'bill_depth_mm',
+              encoding: 'x',
+              type: 'quantitative',
+            },
+            {
+              mark: 'text',
+              field: 'bill_length_mm',
+              encoding: 'text',
+              type: 'quantitative',
+            },
+            {
+              mark: 'text',
+              field: 'ratio',
+              encoding: 'text',
+              type: 'quantitative',
+            },
+            {
+              mark: 'text',
+              field: 'difference',
+              encoding: 'text',
+              type: 'quantitative',
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
 export const MultipleEncodings = {
   args: {
     spec: {
