@@ -209,7 +209,7 @@ const colDefs = computed<ColDef[]>(() => {
     :rowData="props.data"
     :columnDefs="colDefs"
     style="height: 500px"
-    :rowHeight="40"
+    :rowHeight="20"
   >
   </ag-grid-vue>
 </template>

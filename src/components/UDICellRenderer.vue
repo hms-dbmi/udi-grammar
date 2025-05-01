@@ -205,7 +205,7 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
           if (size > 0) {
             rootSize = Math.sqrt(size);
           }
-          const maxSize = 30;
+          const maxSize = 16;
           styleProps.width = `${rootSize * maxSize}px`;
           styleProps.height = `${rootSize * maxSize}px`;
         }
@@ -258,12 +258,12 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
 </template>
 
 <style scoped lang="scss">
+$default-color: rgb(198, 207, 216);
 .pos-absolute {
   position: absolute;
 }
-$default-color: rgb(198, 207, 216);
 
-$container-margin-top: 5px;
+$container-margin-top: 2px;
 .cell-container {
   width: 100%;
   height: calc(100% - #{$container-margin-top * 2});
