@@ -249,7 +249,7 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
 .overlap {
   position: absolute;
 }
-$default-color: slategray;
+$default-color: rgb(198, 207, 216);
 
 $container-margin-top: 5px;
 .cell-container {
