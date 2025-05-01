@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, defineProps } from 'vue';
+import { computed, defineProps } from 'vue';
 import { cloneDeep } from 'lodash';
 import type { ColDef } from 'ag-grid-community';
 import { type ParsedUDIGrammar } from './Parser';
@@ -16,13 +16,14 @@ defineExpose({
 });
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridVue } from 'ag-grid-vue3'; // Vue Data Grid Component
-import type { RowLayer, RowMapping } from './GrammarTypes';
+import type { RowLayer } from './GrammarTypes';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 interface TableComponentProps {
-  spec: ParsedUDIGrammar;
-  data: object[];
+  spec: ParsedUDIGrammar | null;
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
+  data: Record<string, any>[] | null;
 }
 
 const props = defineProps<TableComponentProps>();
@@ -85,7 +86,7 @@ const columnMapping = computed(() => {
 });
 
 function getNumberDomain(
-  data: Record<string, any>[],
+  data: Record<string, unknown>[],
   field: string,
 ): NumberDomain {
   let min = Infinity;
@@ -95,24 +96,34 @@ function getNumberDomain(
     if (value === null || value === undefined) {
       continue;
     }
-    if (value < min) {
-      min = value;
+    let numberValue: number = 0;
+    if (typeof value !== 'number') {
+      numberValue = +value;
+      console.warn(
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
+        `Value for field ${field} is not a number: ${value}. Converting to number.`,
+      );
+    } else {
+      numberValue = value;
     }
-    if (value > max) {
-      max = value;
+    if (numberValue < min) {
+      min = numberValue;
+    }
+    if (numberValue > max) {
+      max = numberValue;
     }
   }
   return { min, max };
 }
 
 function getStringDomain(
-  data: Record<string, any>[],
+  data: Record<string, string>[],
   field: string,
 ): StringDomain {
-  const valueList = data.map((d) => d[field]);
+  const valueList = data
+    .filter((d) => d[field] !== null && typeof d[field] !== 'undefined')
+    .map((d) => d[field]) as string[];
   const values = new Set<string>(valueList);
-  values.delete(null as unknown as string);
-  values.delete(undefined as unknown as string);
   return { values: Array.from(values) };
 }
 const fieldDomains = computed<Map<string, Domain>>(() => {
@@ -176,6 +187,7 @@ const colDefs = computed<ColDef[]>(() => {
         // pass the representation to the cell renderer
         udiColumnMapping: groupedMapping[key],
       },
+      /* eslint-disable  @typescript-eslint/no-explicit-any */
       valueGetter: (params: any) => {
         // get the value from the data object
         const columnMapping = groupedMapping[key];

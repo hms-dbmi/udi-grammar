@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue';
-import { ref, computed, watch, onMounted, onBeforeMount } from 'vue';
+import { computed } from 'vue';
 import type { ICellRendererParams } from 'ag-grid-community';
-import type { RowMapping, RowMarkOptions } from './GrammarTypes';
+import type { RowMarkOptions } from './GrammarTypes';
 import {
   scaleLinear,
   scaleOrdinal,
@@ -10,7 +10,6 @@ import {
   scaleBand,
 } from 'd3-scale';
 import { defaultRange, type RowMappingWithDomain } from './TableUtil';
-import { interpolateYlOrRd } from 'd3-scale-chromatic';
 
 // Define props
 
@@ -20,27 +19,18 @@ export interface UDICellRendererParams<TData, TValue, TContext>
 }
 
 interface CellRendererProps {
-  params: UDICellRendererParams<any, any, any>;
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
+  params: UDICellRendererParams<Record<string, unknown>, any, any>;
   // https://www.ag-grid.com/vue-data-grid/component-cell-renderer/#custom-components
 }
 
 const props = defineProps<CellRendererProps>();
 
-const cellValue = ref(null);
-
-onBeforeMount(() => {
-  // cellValue.value = props.params.value;
-  // console.log(props.params.udiColumnMapping);
-  // console.log(props.params);
-  // cellValue.value = props.params.column?.getId() + ': ' + props.params.value;
-  cellValue.value = props.params.value;
-});
-
 const marks = computed(() => {
   if (!props.params.udiColumnMapping) return [];
   const marks = props.params.udiColumnMapping
     .filter((m) => {
-      const d = props.params.data[m.field];
+      const d = props.params.data?.[m.field];
       return d !== null && typeof d !== 'undefined';
     })
     .map((m) => m.mark);
@@ -67,7 +57,7 @@ function getTextValue() {
   if (!rowMapping) return null;
   const textMapping = rowMapping.find((m) => m.encoding === 'text');
   if (!textMapping) return null;
-  return props.params.data[textMapping.field];
+  return props.params.data?.[textMapping.field];
 }
 
 function getStyle(mark: RowMarkOptions): CSSProperties | null {
@@ -76,7 +66,18 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
   if (!rowMapping) return null;
   const styleProps: CSSProperties = {};
   for (const mapping of rowMapping) {
-    const data = props.params.data[mapping.field];
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
+    const data = props.params.data?.[mapping.field] as any;
+    if (
+      typeof data !== 'number' &&
+      typeof data !== 'string' &&
+      data !== null &&
+      typeof data !== 'undefined'
+    ) {
+      throw new Error(
+        `Invalid data type for field ${mapping.field}: ${typeof data}`,
+      );
+    }
     const domain = mapping.domain;
     let numberDomain: [number, number] = [0, 1];
     let stringDomain: string[] = ['unknown'];
