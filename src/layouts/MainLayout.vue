@@ -19,7 +19,6 @@
           />
           <q-route-tab no-caps to="/Examples" label="Examples" />
           <q-route-tab no-caps to="/Editor" label="Editor" />
-          <q-route-tab no-caps to="/Training" label="Training Data" />
         </q-tabs>
         <q-space />
         <!-- github -->
