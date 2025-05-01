@@ -666,4 +666,105 @@ export const PenguinsDemo = {
   },
 };
 
+export const Lollipop = {
+  args: {
+    spec: {
+      source: {
+        name: 'penguins',
+        source: './data/penguins.csv',
+      },
+      representation: {
+        mark: 'row',
+        mapping: [
+          {
+            column: 'Species',
+            mark: 'bar',
+            field: 'species',
+            encoding: 'color',
+            type: 'nominal',
+          },
+          {
+            column: 'Species',
+            mark: 'bar',
+            field: 'species',
+            encoding: 'xOffset',
+            type: 'nominal',
+          },
+          {
+            column: 'Size',
+            mark: 'line',
+            field: 'flipper_length_mm',
+            encoding: 'color',
+            type: 'quantitative',
+          },
+
+          {
+            column: 'Sex',
+            mark: 'bar',
+            field: 'sex',
+            encoding: 'color',
+            type: 'ordinal',
+          },
+          {
+            column: 'Sex',
+            mark: 'bar',
+            field: 'sex',
+            encoding: 'yOffset',
+            type: 'ordinal',
+          },
+          {
+            column: 'Flipper Length (line color)',
+            mark: 'text',
+            field: 'flipper_length_mm',
+            encoding: 'text',
+            type: 'quantitative',
+          },
+          {
+            column: 'Size',
+            mark: 'point',
+            field: 'bill_length_mm',
+            encoding: 'x',
+            type: 'quantitative',
+          },
+          {
+            column: 'Bill Length (x)',
+            mark: 'text',
+            field: 'bill_length_mm',
+            encoding: 'text',
+            type: 'quantitative',
+          },
+          {
+            column: 'Size',
+            mark: 'point',
+            field: 'bill_depth_mm',
+            encoding: 'size',
+            type: 'quantitative',
+          },
+          {
+            column: 'Bill Depth (point size)',
+            mark: 'text',
+            field: 'bill_depth_mm',
+            encoding: 'text',
+            type: 'quantitative',
+          },
+          {
+            column: 'Size',
+            mark: 'point',
+            field: 'body_mass_g',
+            encoding: 'color',
+            type: 'quantitative',
+          },
+          {
+            column: 'Body Mass (point color)',
+            mark: 'text',
+            field: 'body_mass_g',
+            encoding: 'text',
+            type: 'quantitative',
+          },
+        ],
+      },
+    },
+  },
+};
+
 // TODO:  geometry, select, and more x2,y2, point nominal shape, could maybe map size to more things, e.g. line/bar width
