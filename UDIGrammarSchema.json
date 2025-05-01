@@ -1499,6 +1499,10 @@
       "additionalProperties": false,
       "description": "The mapping for row marks.",
       "properties": {
+        "column": {
+          "description": "The target display column. If empty, the target column is based on the field name. This is needed so that you can construct columns that map multiple fields to the same mark within the column. E.g. a bar where the width is based on a quantitative field and the color is if based on a derived boolean field if the value is positive or negative.",
+          "type": "string"
+        },
         "encoding": {
           "$ref": "#/definitions/RowEncodingOptions",
           "description": "The encoding type (e.g., x, y, color)."
