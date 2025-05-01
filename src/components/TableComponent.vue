@@ -111,6 +111,8 @@ function getStringDomain(
 ): StringDomain {
   const valueList = data.map((d) => d[field]);
   const values = new Set<string>(valueList);
+  values.delete(null as unknown as string);
+  values.delete(undefined as unknown as string);
   return { values: Array.from(values) };
 }
 const fieldDomains = computed<Map<string, Domain>>(() => {

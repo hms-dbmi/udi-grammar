@@ -38,7 +38,12 @@ onBeforeMount(() => {
 
 const marks = computed(() => {
   if (!props.params.udiColumnMapping) return [];
-  const marks = props.params.udiColumnMapping.map((m) => m.mark);
+  const marks = props.params.udiColumnMapping
+    .filter((m) => {
+      const d = props.params.data[m.field];
+      return d !== null && typeof d !== 'undefined';
+    })
+    .map((m) => m.mark);
   // console.log({ marks });
   const uniqueMarks = [...new Set(marks)];
   // console.log({ uniqueMarks });
@@ -218,35 +223,42 @@ function getStyle(mark: RowMarkOptions): CSSProperties | null {
 <template>
   <div class="cell-container">
     <template v-for="mark in marks" :key="mark">
-      <div v-if="mark === 'text'" :style="getStyle(mark)" class="overlap text">
+      <div
+        v-if="mark === 'text'"
+        :style="getStyle(mark)"
+        class="pos-absolute text"
+      >
         {{ getTextValue() }}
       </div>
       <div
         v-else-if="mark === 'bar'"
         :style="getStyle(mark)"
-        class="overlap bar"
+        class="pos-absolute bar"
       ></div>
       <div
         v-else-if="mark === 'rect'"
         :style="getStyle(mark)"
-        class="overlap rect"
+        class="pos-absolute rect"
       ></div>
       <div
         v-else-if="mark === 'point'"
         :style="getStyle(mark)"
-        class="overlap point"
+        class="pos-absolute point"
       ></div>
       <div
         v-else-if="mark === 'line'"
         :style="getStyle(mark)"
-        class="overlap line"
+        class="pos-absolute line"
       ></div>
+    </template>
+    <template v-if="marks.length === 0">
+      <div class="empty-cell pos-absolute">∅</div>
     </template>
   </div>
 </template>
 
 <style scoped lang="scss">
-.overlap {
+.pos-absolute {
   position: absolute;
 }
 $default-color: rgb(198, 207, 216);
@@ -301,5 +313,13 @@ $container-margin-top: 5px;
   top: 50%;
   border-width: 1px;
   transform: translateY(-50%);
+}
+
+.empty-cell {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  line-height: 1;
+  color: rgb(94, 94, 94);
 }
 </style>

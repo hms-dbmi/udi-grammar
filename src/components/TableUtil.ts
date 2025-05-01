@@ -21,7 +21,7 @@ export type Domain = NumberDomain | StringDomain;
 
 export const defaultRange = {
   quantitative: [0, 1],
-  unknownQuantitative: -10,
+  unknownQuantitative: 0,
   quantitativeColor: (t: number) => interpolateYlOrRd((t + 0.15) / 1.15),
   unknownColor: '#EB10E0',
   nominalColor: schemeSet3,
