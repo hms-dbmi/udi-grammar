@@ -18,6 +18,169 @@ interface Example {
 
 const exampleGroups: ExampleGroup[] = [
   {
+    name: 'Tabular Charts',
+    examples: [
+      {
+        name: 'Basic Table',
+        thumbnail: './example_thumbnails/tables/basic_table.png',
+        spec: {
+          source: [
+            {
+              name: 'samples',
+              source: './data/example_samples.csv',
+            },
+          ],
+          representation: [
+            {
+              mark: 'row',
+              mapping: [
+                {
+                  mark: 'text',
+                  encoding: 'text',
+                  field: '*',
+                  type: 'nominal',
+                },
+              ],
+            },
+          ],
+        },
+      },
+
+      {
+        name: 'Visual Table',
+        thumbnail: './example_thumbnails/tables/visual_table.png',
+        spec: {
+          source: [
+            {
+              name: 'samples',
+              source: './data/example_samples.csv',
+            },
+          ],
+          representation: [
+            {
+              mark: 'row',
+              mapping: [
+                {
+                  mark: 'rect',
+                  encoding: 'color',
+                  field: 'organ',
+                  type: 'nominal',
+                },
+                {
+                  mark: 'rect',
+                  encoding: 'color',
+                  field: 'organ_condition',
+                  type: 'nominal',
+                },
+                {
+                  mark: 'bar',
+                  encoding: 'x',
+                  field: 'weight',
+                  type: 'quantitative',
+                },
+                {
+                  mark: 'rect',
+                  encoding: 'color',
+                  field: 'sample_category',
+                  type: 'nominal',
+                },
+                {
+                  mark: 'text',
+                  encoding: 'text',
+                  field: '*',
+                  type: 'nominal',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        name: 'Multiple Fields → One Column',
+        thumbnail: './example_thumbnails/tables/multiple_fields_one_column.png',
+        spec: {
+          source: [
+            {
+              name: 'donors',
+              source: './data/example_donors.csv',
+            },
+          ],
+          transformation: [{ orderby: 'height' }],
+          representation: [
+            {
+              mark: 'row',
+              mapping: [
+                {
+                  column: 'Multiple Fields',
+                  mark: 'line',
+                  encoding: 'color',
+                  field: 'sex',
+                  type: 'nominal',
+                },
+                {
+                  column: 'Multiple Fields',
+                  mark: 'point',
+                  encoding: 'x',
+                  field: 'height',
+                  type: 'quantitative',
+                },
+                {
+                  column: 'Multiple Fields',
+                  mark: 'point',
+                  encoding: 'size',
+                  field: 'weight',
+                  type: 'quantitative',
+                },
+                {
+                  column: 'height (circle position)',
+                  mark: 'text',
+                  encoding: 'text',
+                  field: 'height',
+                  type: 'nominal',
+                },
+                {
+                  column: 'height (circle position)',
+                  mark: 'text',
+                  encoding: 'x',
+                  field: 'height',
+                  type: 'quantitative',
+                },
+                {
+                  column: 'weight (circle size)',
+                  mark: 'text',
+                  encoding: 'text',
+                  field: 'weight',
+                  type: 'quantitative',
+                },
+                {
+                  column: 'weight (circle size)',
+                  mark: 'point',
+                  encoding: 'size',
+                  field: 'weight',
+                  type: 'quantitative',
+                },
+                {
+                  column: 'sex (circle size)',
+                  mark: 'bar',
+                  encoding: 'color',
+                  field: 'sex',
+                  type: 'nominal',
+                },
+                {
+                  column: 'sex (circle size)',
+                  mark: 'text',
+                  encoding: 'text',
+                  field: 'sex',
+                  type: 'nominal',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
     name: 'Bar Charts',
     examples: [
       {
