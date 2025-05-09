@@ -21,6 +21,7 @@ import {
 import type {
   ColumnGetter,
   ExprObject,
+  OrderKey,
   TableExpr,
 } from 'arquero/dist/types/table/types';
 import { defineStore } from 'pinia';
@@ -175,13 +176,15 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         }
       } else if ('orderby' in transform) {
         const inTable = getInTable(transform.in);
-        let orderKey: any = transform.orderby;
-        if (typeof orderKey !== 'string') {
-          const dir = orderKey.order;
-          orderKey = orderKey.field;
+        let orderKey: OrderKey;
+        if (typeof transform.orderby !== 'string') {
+          const dir = transform.orderby.order;
+          orderKey = transform.orderby.field;
           if (dir === 'desc') {
             orderKey = desc(orderKey);
           }
+        } else {
+          orderKey = transform.orderby;
         }
         currentTable.table = inTable.orderby(orderKey);
       } else if ('derive' in transform) {
