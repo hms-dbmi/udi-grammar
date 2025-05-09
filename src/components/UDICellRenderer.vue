@@ -18,13 +18,13 @@ export interface UDICellRendererParams<TData, TValue, TContext>
   udiColumnMapping: ExtendedRowMapping[];
 }
 
-interface CellRendererProps {
+export interface UDICellRendererProps {
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   params: UDICellRendererParams<Record<string, unknown>, any, any>;
   // https://www.ag-grid.com/vue-data-grid/component-cell-renderer/#custom-components
 }
 
-const props = defineProps<CellRendererProps>();
+const props = defineProps<UDICellRendererProps>();
 
 // const marks = computed(() => {
 //   if (!props.params.udiColumnMapping) return [];
