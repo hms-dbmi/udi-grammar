@@ -15,6 +15,7 @@ import {
   bin,
   rolling,
   escape,
+  desc,
   type ColumnTable,
 } from 'arquero';
 import type {
@@ -174,7 +175,15 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         }
       } else if ('orderby' in transform) {
         const inTable = getInTable(transform.in);
-        currentTable.table = inTable.orderby(transform.orderby);
+        let orderKey: any = transform.orderby;
+        if (typeof orderKey !== 'string') {
+          const dir = orderKey.order;
+          orderKey = orderKey.field;
+          if (dir === 'desc') {
+            orderKey = desc(orderKey);
+          }
+        }
+        currentTable.table = inTable.orderby(orderKey);
       } else if ('derive' in transform) {
         const inTable = getInTable(transform.in);
         const derive = cloneDeep(transform.derive);

@@ -151,9 +151,9 @@ export interface OrderBy extends DataTransformationBase {
   in?: string;
 
   /**
-   * The field to order by.
+   * The field to order by, default in ascending order.
    */
-  orderby: string; // TODO: Extend to support a list of strings, and support ascending/descending order
+  orderby: string | { field: string; order: 'asc' | 'desc' };
 }
 
 /**

@@ -1308,8 +1308,32 @@
           "type": "string"
         },
         "orderby": {
-          "description": "The field to order by.",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "order": {
+                  "enum": [
+                    "asc",
+                    "desc"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field",
+                "order"
+              ],
+              "type": "object"
+            }
+          ],
+          "description": "The field to order by, default in ascending order."
         },
         "out": {
           "description": "The name of the output table. If not specified, it overwrites the name of the previous table.",
