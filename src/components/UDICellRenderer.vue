@@ -132,7 +132,16 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
     if ('min' in domain && 'max' in domain) {
       numberDomain = [domain.min, domain.max];
     } else {
-      stringDomain = domain.values;
+      stringDomain = domain;
+    }
+    let numberRange: [number, number] | null = null;
+    let stringRange: string[] | null = null;
+    if (mapping.range) {
+      if ('min' in mapping.range && 'max' in mapping.range) {
+        numberRange = [mapping.range.min, mapping.range.max];
+      } else {
+        stringRange = mapping.range;
+      }
     }
 
     switch (mapping.encoding) {
@@ -145,9 +154,10 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
             .domain(numberDomain)
             .unknown(defaultRange.unknownColor);
         } else {
+          console.log('asdlfasdfasdf');
           colorScale = scaleOrdinal<string, string>(defaultRange.nominalColor)
             .domain(stringDomain)
-            .range(defaultRange.nominalColor)
+            .range(stringRange ?? defaultRange.nominalColor)
             .unknown(defaultRange.unknownColor);
         }
         const color = colorScale(data);
@@ -164,7 +174,7 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
       case 'x': {
         const xPos = scaleLinear()
           .domain(numberDomain)
-          .range(defaultRange.quantitative)
+          .range(numberRange ?? defaultRange.quantitative)
           .unknown(defaultRange.unknownQuantitative)(data);
         let percent = xPos * 100;
         if (percent < 0) percent = 0;
@@ -187,7 +197,7 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
       case 'y': {
         const yPos = scaleLinear()
           .domain(numberDomain)
-          .range(defaultRange.quantitative)
+          .range(numberRange ?? defaultRange.quantitative)
           .unknown(defaultRange.unknownQuantitative)(data);
         const percent = yPos * 100;
         if (mapping.mark === 'text') {
@@ -206,9 +216,9 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
       }
       case 'yOffset': {
         const yOffsetPos =
-          scaleBand().domain(stringDomain).range(defaultRange.quantitative)(
-            data,
-          ) ?? 0;
+          scaleBand()
+            .domain(stringDomain)
+            .range(numberRange ?? defaultRange.quantitative)(data) ?? 0;
         const height = 1 / stringDomain.length;
         if (mapping.mark === 'bar') {
           styleProps.bottom = `${yOffsetPos * 100}%`;
@@ -223,9 +233,9 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
       }
       case 'xOffset': {
         const xOffsetPos =
-          scaleBand().domain(stringDomain).range(defaultRange.quantitative)(
-            data,
-          ) ?? 0;
+          scaleBand()
+            .domain(stringDomain)
+            .range(numberRange ?? defaultRange.quantitative)(data) ?? 0;
         const width = 1 / stringDomain.length;
         if (mapping.mark === 'bar') {
           styleProps.left = `${xOffsetPos * 100}%`;
@@ -242,7 +252,7 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
       case 'size': {
         const size = scaleLinear()
           .domain(numberDomain)
-          .range(defaultRange.quantitative)
+          .range(numberRange ?? defaultRange.quantitative)
           .unknown(defaultRange.unknownQuantitative)(data);
         if (mapping.mark === 'rect') {
           styleProps.width = `${size * 100}%`;

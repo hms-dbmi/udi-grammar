@@ -681,7 +681,26 @@ export interface RowMapping extends GenericFieldMapping<RowEncodingOptions> {
    * if the value is positive or negative.
    */
   column?: string;
+
+  /**
+   * The custom domain will change the scaling of visual encodings.
+   */
+  domain?: Domain;
+
+  /**
+   * The custom range will change the scaling of visual encodings.
+   */
+  range?: Domain;
 }
+
+export interface NumberDomain {
+  min: number;
+  max: number;
+}
+
+export type StringDomain = string[];
+
+export type Domain = NumberDomain | StringDomain;
 
 /**
  * Configuration for data selection in visualizations or tables.

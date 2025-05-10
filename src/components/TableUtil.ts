@@ -1,4 +1,4 @@
-import type { RowMapping } from './GrammarTypes';
+import type { Domain, RowMapping } from './GrammarTypes';
 import { interpolateYlOrRd, schemeSet3 } from 'd3-scale-chromatic';
 
 export function getDomainLookupKey(mapping: RowMapping): string {
@@ -10,15 +10,6 @@ export interface ExtendedRowMapping extends RowMapping {
   domain: Domain;
   layer: string;
 }
-
-export interface NumberDomain {
-  min: number;
-  max: number;
-}
-export interface StringDomain {
-  values: string[];
-}
-export type Domain = NumberDomain | StringDomain;
 
 export const defaultRange = {
   quantitative: [0, 1],

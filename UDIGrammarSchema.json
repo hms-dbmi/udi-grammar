@@ -360,6 +360,16 @@
       ],
       "description": "A derive expression, which can be a string or a rolling derive expression."
     },
+    "Domain": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/NumberDomain"
+        },
+        {
+          "$ref": "#/definitions/StringDomain"
+        }
+      ]
+    },
     "Filter": {
       "additionalProperties": false,
       "description": "Filters data based on a specified condition or selection.",
@@ -1299,6 +1309,22 @@
       "$ref": "#/definitions/GenericValueMapping%3CLineEncodingOptions%3E",
       "description": "A value mapping for line marks."
     },
+    "NumberDomain": {
+      "additionalProperties": false,
+      "properties": {
+        "max": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "type": "object"
+    },
     "OrderBy": {
       "additionalProperties": false,
       "description": "Orders data by a specified field or fields.",
@@ -1527,6 +1553,10 @@
           "description": "The target display column. If empty, the target column is based on the field name. This is needed so that you can construct columns that map multiple fields to the same mark within the column. E.g. a bar where the width is based on a quantitative field and the color is if based on a derived boolean field if the value is positive or negative.",
           "type": "string"
         },
+        "domain": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom domain will change the scaling of visual encodings."
+        },
         "encoding": {
           "$ref": "#/definitions/RowEncodingOptions",
           "description": "The encoding type (e.g., x, y, color)."
@@ -1538,6 +1568,10 @@
         "mark": {
           "$ref": "#/definitions/RowMarkOptions",
           "description": "The type of mark used in the row layer."
+        },
+        "range": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom range will change the scaling of visual encodings."
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
@@ -1564,6 +1598,12 @@
         "line"
       ],
       "type": "string"
+    },
+    "StringDomain": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
     "TextEncodingOptions": {
       "description": "Encoding options for text marks.",

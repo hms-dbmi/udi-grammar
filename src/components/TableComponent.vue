@@ -3,12 +3,7 @@ import { computed, defineProps } from 'vue';
 import { cloneDeep } from 'lodash';
 import type { ColDef } from 'ag-grid-community';
 import { type ParsedUDIGrammar } from './Parser';
-import type {
-  Domain,
-  ExtendedRowMapping,
-  NumberDomain,
-  StringDomain,
-} from './TableUtil';
+import type { ExtendedRowMapping } from './TableUtil';
 import { getDomainLookupKey } from './TableUtil';
 import UDICellRenderer from './UDICellRenderer.vue';
 defineExpose({
@@ -16,7 +11,13 @@ defineExpose({
 });
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridVue } from 'ag-grid-vue3'; // Vue Data Grid Component
-import type { RowLayer, RowMapping } from './GrammarTypes';
+import type {
+  Domain,
+  RowLayer,
+  RowMapping,
+  NumberDomain,
+  StringDomain,
+} from './GrammarTypes';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -143,7 +144,7 @@ function getStringDomain(
     .filter((d) => d[field] !== null && typeof d[field] !== 'undefined')
     .map((d) => d[field]) as string[];
   const values = new Set<string>(valueList);
-  return { values: Array.from(values) };
+  return Array.from(values);
 }
 const fieldDomains = computed<Map<string, Domain>>(() => {
   const domainMap = new Map<string, Domain>();
@@ -156,6 +157,10 @@ const fieldDomains = computed<Map<string, Domain>>(() => {
     const type = mapping.type;
     const k = getDomainLookupKey(mapping);
     if (domainMap.has(k)) {
+      continue;
+    }
+    if (mapping.domain) {
+      domainMap.set(k, mapping.domain);
       continue;
     }
     if (type === 'quantitative') {
