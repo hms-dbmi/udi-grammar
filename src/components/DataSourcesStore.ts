@@ -5,6 +5,7 @@ import type {
   AggregateFunction,
   DataSource,
   DataTransformation,
+  DirectionalOrder,
 } from './GrammarTypes';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
 import {
@@ -176,17 +177,26 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         }
       } else if ('orderby' in transform) {
         const inTable = getInTable(transform.in);
-        let orderKey: OrderKey;
-        if (typeof transform.orderby !== 'string') {
-          const dir = transform.orderby.order;
-          orderKey = transform.orderby.field;
-          if (dir === 'desc') {
-            orderKey = desc(orderKey);
-          }
+        let orderbyList: (string | DirectionalOrder)[];
+        if (!Array.isArray(transform.orderby)) {
+          orderbyList = [transform.orderby];
         } else {
-          orderKey = transform.orderby;
+          orderbyList = transform.orderby;
         }
-        currentTable.table = inTable.orderby(orderKey);
+        const orderKeys: OrderKey[] = orderbyList.map((orderby) => {
+          let orderKey: OrderKey;
+          if (typeof orderby !== 'string') {
+            const dir = orderby.order;
+            orderKey = orderby.field;
+            if (dir === 'desc') {
+              orderKey = desc(orderKey);
+            }
+          } else {
+            orderKey = orderby;
+          }
+          return orderKey;
+        });
+        currentTable.table = inTable.orderby(orderKeys);
       } else if ('derive' in transform) {
         const inTable = getInTable(transform.in);
         const derive = cloneDeep(transform.derive);

@@ -262,6 +262,109 @@ export const MultipleFields = {
   },
 };
 
+export const SortTargetEncodings = {
+  args: {
+    spec: {
+      source: {
+        name: 'penguins',
+        source: './data/penguins.csv',
+      },
+      representation: {
+        mark: 'row',
+        mapping: [
+          {
+            column: 'size (sort by xPos)',
+            mark: 'point',
+            field: 'bill_length_mm',
+            encoding: 'x',
+            type: 'quantitative',
+            orderby: 'bill_length_mm',
+          },
+          {
+            column: 'size (sort by xPos)',
+            mark: 'point',
+            field: 'bill_depth_mm',
+            encoding: 'size',
+            type: 'quantitative',
+            orderby: 'bill_length_mm',
+          },
+          {
+            column: 'size (sort by size)',
+            mark: 'point',
+            field: 'bill_length_mm',
+            encoding: 'x',
+            type: 'quantitative',
+            orderby: 'bill_depth_mm',
+          },
+          {
+            column: 'size (sort by size)',
+            mark: 'point',
+            field: 'bill_depth_mm',
+            encoding: 'size',
+            type: 'quantitative',
+            orderby: 'bill_depth_mm',
+          },
+        ],
+      },
+    },
+  },
+};
+
+export const MultiSort = {
+  args: {
+    spec: {
+      source: {
+        name: 'penguins',
+        source: './data/penguins.csv',
+      },
+      transformation: [
+        {
+          orderby: [
+            { field: 'species', order: 'asc' },
+            { field: 'island', order: 'asc' },
+            { field: 'bill_length_mm', order: 'desc' },
+          ],
+        },
+      ],
+      representation: {
+        mark: 'row',
+        mapping: [
+          {
+            mark: 'rect',
+            field: 'species',
+            encoding: 'color',
+            type: 'nominal',
+          },
+          {
+            mark: 'rect',
+            field: 'island',
+            encoding: 'color',
+            type: 'nominal',
+          },
+          {
+            mark: 'text',
+            field: 'species',
+            encoding: 'text',
+            type: 'quantitative',
+          },
+          {
+            mark: 'text',
+            field: 'island',
+            encoding: 'text',
+            type: 'quantitative',
+          },
+          {
+            mark: 'bar',
+            field: 'bill_length_mm',
+            encoding: 'x',
+            type: 'quantitative',
+          },
+        ],
+      },
+    },
+  },
+};
+
 export const TextEncoding = {
   args: {
     spec: {

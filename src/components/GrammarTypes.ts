@@ -151,9 +151,24 @@ export interface OrderBy extends DataTransformationBase {
   in?: string;
 
   /**
-   * The field to order by, default in ascending order.
+   * The field(s) to order by, default in ascending order.
    */
-  orderby: string | { field: string; order: 'asc' | 'desc' };
+  orderby: string | DirectionalOrder | (string | DirectionalOrder)[];
+}
+
+/**
+ * Defines a sorting order and a field to sort by.
+ */
+export interface DirectionalOrder {
+  /**
+   * The name of the field to be sorted.
+   */
+  field: string;
+
+  /**
+   * The sorting order for the field, either ascending ('asc') or descending ('desc').
+   */
+  order: 'asc' | 'desc';
 }
 
 /**
@@ -692,6 +707,13 @@ export interface RowMapping extends GenericFieldMapping<RowEncodingOptions> {
    * The custom range will change the scaling of visual encodings.
    */
   range?: Domain;
+
+  /**
+   * The value to use when sorting by the column in the interface. This
+   * will not affect the default sorting of the table.
+   * defaults to the field name.
+   */
+  orderby?: string;
 }
 
 /**

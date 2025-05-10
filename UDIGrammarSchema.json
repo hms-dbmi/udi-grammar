@@ -376,6 +376,29 @@
       ],
       "description": "A derive expression, which can be a string or a rolling derive expression."
     },
+    "DirectionalOrder": {
+      "additionalProperties": false,
+      "description": "Defines a sorting order and a field to sort by.",
+      "properties": {
+        "field": {
+          "description": "The name of the field to be sorted.",
+          "type": "string"
+        },
+        "order": {
+          "description": "The sorting order for the field, either ascending ('asc') or descending ('desc').",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "order"
+      ],
+      "type": "object"
+    },
     "Domain": {
       "anyOf": [
         {
@@ -1387,27 +1410,23 @@
               "type": "string"
             },
             {
-              "additionalProperties": false,
-              "properties": {
-                "field": {
-                  "type": "string"
-                },
-                "order": {
-                  "enum": [
-                    "asc",
-                    "desc"
-                  ],
-                  "type": "string"
-                }
+              "$ref": "#/definitions/DirectionalOrder"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/definitions/DirectionalOrder"
+                  }
+                ]
               },
-              "required": [
-                "field",
-                "order"
-              ],
-              "type": "object"
+              "type": "array"
             }
           ],
-          "description": "The field to order by, default in ascending order."
+          "description": "The field(s) to order by, default in ascending order."
         },
         "out": {
           "description": "The name of the output table. If not specified, it overwrites the name of the previous table.",
@@ -1617,6 +1636,10 @@
         "mark": {
           "$ref": "#/definitions/RowMarkOptions",
           "description": "The type of mark used in the row layer."
+        },
+        "orderby": {
+          "description": "The value to use when sorting by the column in the interface. This will not affect the default sorting of the table. defaults to the field name.",
+          "type": "string"
         },
         "range": {
           "$ref": "#/definitions/Domain",

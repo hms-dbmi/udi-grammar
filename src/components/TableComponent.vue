@@ -250,7 +250,8 @@ const colDefs = computed<ColDef[]>(() => {
         const columnMapping = groupedMapping[key];
         if (!columnMapping) return null;
         if (columnMapping.length === 0) return null;
-        const field = columnMapping[0]?.field ?? null;
+        const field =
+          columnMapping[0]?.orderby ?? columnMapping[0]?.field ?? null;
         if (!field) return null;
         return params.data[field];
       },
