@@ -32,7 +32,6 @@ export default defineConfig({
         },
       },
     },
-    cssCodeSplit: true,
   },
   plugins: [vue(), tsConfigPaths(), dts({ tsconfigPath: 'tsconfig.lib.json' })],
 });

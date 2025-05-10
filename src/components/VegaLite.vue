@@ -53,19 +53,21 @@ watch(() => props.spec, updateVegaChart);
 </script>
 
 <template>
-  <div ref="vegaContainer" class="vega-chart-container"></div>
-  <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <div ref="vegaContainer" class="udi-vega-chart-container"></div>
+  <div v-if="errorMessage" class="udi-vega-error-message">
+    {{ errorMessage }}
+  </div>
 </template>
 
-<style scoped>
-.vega-chart-container {
+<style>
+.udi-vega-chart-container {
   width: 100%;
   height: 100%;
   max-width: 600px;
   overflow-x: auto;
 }
 
-.error-message {
+.udi-vega-error-message {
   color: red;
 }
 </style>

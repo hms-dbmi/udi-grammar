@@ -164,7 +164,7 @@ const debugVegaData = ref();
 
 <template>
   <template v-if="!dataSourcesStore.loading">
-    <div class="error-message" v-if="transformError">
+    <div class="udi-error-message" v-if="transformError">
       {{ transformError.message }}
     </div>
     <VegaLite v-else-if="isVegaLiteComponent" :spec="vegaLiteSpec" />
@@ -179,8 +179,8 @@ const debugVegaData = ref();
   </template>
 </template>
 
-<style lang="scss" scoped>
-.error-message {
+<style lang="scss">
+.udi-error-message {
   color: #e53935; // $negative, but don't want quasar vars in component
   margin: 6px;
 }
