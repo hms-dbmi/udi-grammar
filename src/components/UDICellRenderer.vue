@@ -139,6 +139,8 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
     let stringDomain: string[] = ['unknown'];
     if ('min' in domain && 'max' in domain) {
       numberDomain = [domain.min, domain.max];
+    } else if ('numberFields' in domain || 'categoryFields' in domain) {
+      throw new Error('numberFields is not supported');
     } else {
       stringDomain = domain;
     }
@@ -147,6 +149,11 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
     if (mapping.range) {
       if ('min' in mapping.range && 'max' in mapping.range) {
         numberRange = [mapping.range.min, mapping.range.max];
+      } else if (
+        'numberFields' in mapping.range ||
+        'categoryFields' in mapping.range
+      ) {
+        throw new Error('numberFields is not supported');
       } else {
         stringRange = mapping.range;
       }
