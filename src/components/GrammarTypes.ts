@@ -693,14 +693,55 @@ export interface RowMapping extends GenericFieldMapping<RowEncodingOptions> {
   range?: Domain;
 }
 
+/**
+ * Represents a numerical domain with a minimum and maximum value.
+ */
 export interface NumberDomain {
   min: number;
   max: number;
 }
 
+/**
+ * Field Unions require a list of fields, and the domain is the
+ * union of the fields.
+ * e.g. If a.domain = [0, 10], b.domain = [5, 15],
+ * then the domain is [0, 15].
+ */
+export interface NumberFieldUnion {
+  numberFields: string[];
+}
+
+/**
+ * Field Unions require a list of fields, and the domain is the
+ * union of the fields.
+ * Or if a.domain = ['cat', 'dog'], b.domain = ['cat', 'mouse'],
+ * then the domain is ['cat', 'dog', 'mouse'].
+ */
+export interface CategoryFieldUnion {
+  categoryFields: string[];
+}
+
+/**
+ * A union of field types, which can be either numerical or categorical.
+ */
+export type FieldUnion = NumberFieldUnion | CategoryFieldUnion;
+
+/**
+ * Represents a string domain with a list of possible values.
+ */
 export type StringDomain = string[];
 
-export type Domain = NumberDomain | StringDomain;
+/**
+ * Represents a domain for visual encodings.
+ * This can be a numerical domain, a string domain, or a field union.
+ */
+export type Domain = NumberDomain | StringDomain | FieldUnion;
+
+/**
+ * Represents a range for visual encodings.
+ * This can be a numerical domain, a string domain, or a field union.
+ */
+export type Range = NumberDomain | StringDomain;
 
 /**
  * Configuration for data selection in visualizations or tables.

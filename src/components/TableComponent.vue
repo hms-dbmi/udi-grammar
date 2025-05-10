@@ -107,30 +107,40 @@ const flatColumnMapping = computed<LayeredRowMapping[]>(() => {
 
 function getNumberDomain(
   data: Record<string, unknown>[],
-  field: string,
+  fields: string | string[],
 ): NumberDomain {
+  let fieldList = fields;
+  if (typeof fields === 'string') {
+    fieldList = [fields];
+  }
+  if (fieldList.length === 0) {
+    throw new Error('Field list is empty');
+  }
+
   let min = Infinity;
   let max = -Infinity;
-  for (const d of data) {
-    const value = d[field];
-    if (value === null || value === undefined) {
-      continue;
-    }
-    let numberValue: number = 0;
-    if (typeof value !== 'number') {
-      numberValue = +value;
-      console.warn(
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
-        `Value for field ${field} is not a number: ${value}. Converting to number.`,
-      );
-    } else {
-      numberValue = value;
-    }
-    if (numberValue < min) {
-      min = numberValue;
-    }
-    if (numberValue > max) {
-      max = numberValue;
+  for (const field of fieldList) {
+    for (const d of data) {
+      const value = d[field];
+      if (value === null || value === undefined) {
+        continue;
+      }
+      let numberValue: number = 0;
+      if (typeof value !== 'number') {
+        numberValue = +value;
+        console.warn(
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
+          `Value for field ${field} is not a number: ${value}. Converting to number.`,
+        );
+      } else {
+        numberValue = value;
+      }
+      if (numberValue < min) {
+        min = numberValue;
+      }
+      if (numberValue > max) {
+        max = numberValue;
+      }
     }
   }
   return { min, max };
@@ -138,12 +148,24 @@ function getNumberDomain(
 
 function getStringDomain(
   data: Record<string, string>[],
-  field: string,
+  fields: string | string[],
 ): StringDomain {
-  const valueList = data
-    .filter((d) => d[field] !== null && typeof d[field] !== 'undefined')
-    .map((d) => d[field]) as string[];
-  const values = new Set<string>(valueList);
+  let fieldList = fields;
+  if (typeof fields === 'string') {
+    fieldList = [fields];
+  }
+  if (fieldList.length === 0) {
+    throw new Error('Field list is empty');
+  }
+  const values = new Set<string>();
+  for (const field of fieldList) {
+    const valueList = data
+      .filter((d) => d[field] !== null && typeof d[field] !== 'undefined')
+      .map((d) => d[field]) as string[];
+    for (const value of valueList) {
+      values.add(value);
+    }
+  }
   return Array.from(values);
 }
 const fieldDomains = computed<Map<string, Domain>>(() => {
@@ -160,7 +182,18 @@ const fieldDomains = computed<Map<string, Domain>>(() => {
       continue;
     }
     if (mapping.domain) {
-      domainMap.set(k, mapping.domain);
+      if ('numberFields' in mapping.domain) {
+        const domain = getNumberDomain(props.data, mapping.domain.numberFields);
+        domainMap.set(k, domain);
+      } else if ('categoryFields' in mapping.domain) {
+        const domain = getStringDomain(
+          props.data,
+          mapping.domain.categoryFields,
+        );
+        domainMap.set(k, domain);
+      } else {
+        domainMap.set(k, mapping.domain);
+      }
       continue;
     }
     if (type === 'quantitative') {
