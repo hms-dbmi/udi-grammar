@@ -63,7 +63,7 @@ watch(() => props.spec, updateVegaChart);
 .vega-chart-container {
   width: 100%;
   height: 100%;
-  max-width: 600px;
+  /* max-width: 600px; */
   overflow-x: auto;
 }
 
