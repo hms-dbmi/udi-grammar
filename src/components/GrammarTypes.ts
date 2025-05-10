@@ -638,6 +638,7 @@ export type PointValueMapping = GenericValueMapping<PointEncodingOptions>;
 export type RowEncodingOptions =
   | 'text'
   | 'x'
+  | 'x2'
   | 'y'
   | 'xOffset'
   | 'yOffset'
@@ -645,7 +646,7 @@ export type RowEncodingOptions =
   | 'size'
   | 'shape';
 
-// should add x2, y2, textAnchor, maybe theta?
+// should add x2, y2, textAnchor, maybe theta? maybe rowHeight?
 
 /**
  * Mark options for row layers.

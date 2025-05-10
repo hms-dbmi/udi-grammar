@@ -113,6 +113,8 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
   const rowMapping = markMapping.value[layer]?.[mark];
   if (!rowMapping) return null;
   const styleProps: CSSProperties = {};
+  let x1Percent = null;
+  let x2Percent = null;
   for (const mapping of rowMapping) {
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     let data = props.params.data?.[mapping.field] as any;
@@ -160,7 +162,6 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
             .domain(numberDomain)
             .unknown(defaultRange.unknownColor);
         } else {
-          console.log('asdlfasdfasdf');
           colorScale = scaleOrdinal<string, string>(defaultRange.nominalColor)
             .domain(stringDomain)
             .range(stringRange ?? defaultRange.nominalColor)
@@ -183,12 +184,18 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
           .range(numberRange ?? defaultRange.quantitative)
           .unknown(defaultRange.unknownQuantitative)(data);
         let percent = xPos * 100;
+        x1Percent = percent;
         if (percent < 0) percent = 0;
         if (mapping.mark === 'text') {
           styleProps.left = `${percent}%`;
           styleProps.transform = `translate(-${percent}%, -50%)`;
         } else if (mapping.mark === 'bar') {
-          styleProps.width = `${percent}%`;
+          if (x2Percent !== null) {
+            styleProps.left = `${Math.min(percent, x1Percent)}%`;
+            styleProps.width = `${Math.abs(x2Percent - percent)}%`;
+          } else {
+            styleProps.width = `${percent}%`;
+          }
         } else if (mapping.mark === 'point') {
           styleProps.left = `${percent}%`;
         } else if (mapping.mark === 'line') {
@@ -197,6 +204,33 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
           styleProps.width = 0;
           styleProps.borderTopWidth = 0;
           styleProps.borderBottomWidth = 0;
+        }
+        break;
+      }
+      case 'x2': {
+        const xPos = scaleLinear()
+          .domain(numberDomain)
+          .range(numberRange ?? defaultRange.quantitative)
+          .unknown(defaultRange.unknownQuantitative)(data);
+        let percent = xPos * 100;
+        x2Percent = percent;
+        if (percent < 0) percent = 0;
+        if (mapping.mark === 'bar') {
+          if (x1Percent !== null) {
+            styleProps.left = `${Math.min(percent, x1Percent)}%`;
+            styleProps.width = `${Math.abs(x1Percent - percent)}%`;
+          } else {
+            const left = 100 - percent;
+            styleProps.left = `${100 - percent}%`;
+            styleProps.width = `${100 - left}%`;
+          }
+        } else if (mapping.mark === 'line') {
+          // TODO
+          // styleProps.height = `100%`;
+          // styleProps.left = `${percent}%`;
+          // styleProps.width = 0;
+          // styleProps.borderTopWidth = 0;
+          // styleProps.borderBottomWidth = 0;
         }
         break;
       }
