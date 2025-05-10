@@ -1,4 +1,4 @@
-import{t as O,m as I}from"./monaco-DeuaQn1S.js";import"./index-6rEBIB4c.js";/*!-----------------------------------------------------------------------------
+import{t as O,m as I}from"./monaco-DYJBhQRa.js";import"./index-GQh16M6k.js";/*!-----------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Version: 0.52.2(404545bded1df6ffa41ea0af4e8ddb219018c6c1)
  * Released under the MIT license
