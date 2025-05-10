@@ -102,6 +102,9 @@ function getTextValue(layer: string) {
   if (value instanceof Date) {
     value = value.toLocaleDateString();
   }
+  if (typeof value === 'boolean') {
+    value = value.toString();
+  }
   return value;
 }
 
@@ -115,6 +118,9 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
     let data = props.params.data?.[mapping.field] as any;
     if (data instanceof Date) {
       data = data.toLocaleDateString();
+    }
+    if (typeof data === 'boolean') {
+      data = data.toString();
     }
     if (
       typeof data !== 'number' &&
