@@ -208,7 +208,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         currentTable.table = inTable.derive(derive);
       } else if ('filter' in transform) {
         const inTable = getInTable(transform.in);
-        currentTable.table = inTable.filter(transform.filter);
+        currentTable.table = inTable.filter(transform.filter).reify();
       } else if ('join' in transform) {
         const [leftKey, rightKey] = transform.in;
         const leftTable = namedTables.get(leftKey);
