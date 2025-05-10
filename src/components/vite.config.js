@@ -10,7 +10,6 @@ export default defineConfig({
       name: 'UDIVis',
       fileName: 'index',
       formats: ['es', 'cjs', 'umd'],
-      // fileName: (format) => `udi-grammar.${format}.js`,
     },
     rollupOptions: {
       external: [
@@ -33,6 +32,7 @@ export default defineConfig({
         },
       },
     },
+    cssCodeSplit: true,
   },
   plugins: [vue(), tsConfigPaths(), dts({ tsconfigPath: 'tsconfig.lib.json' })],
 });
