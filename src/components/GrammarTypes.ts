@@ -384,6 +384,21 @@ export interface GenericFieldMapping<Encoding> {
    * The data type of the field (e.g., quantitative, ordinal, nominal).
    */
   type: DataTypes;
+
+  /**
+   * The custom domain will change the scaling of visual encodings.
+   */
+  domain?: Domain;
+
+  /**
+   * The custom range will change the scaling of visual encodings.
+   */
+  range?: Domain;
+
+  /**
+   * Set to true to omit the legend for this encoding.
+   */
+  omitLegend?: boolean;
 }
 
 /**

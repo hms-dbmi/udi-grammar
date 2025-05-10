@@ -96,6 +96,8 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   const vegaSpec: any = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     // data: { url: './data/penguins.csv' },
+    width: 'container',
+    // height: 'container',
     data: { values: [] },
   };
 
@@ -141,12 +143,28 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
         };
       }
       if (encoding === 'x' || encoding === 'y' || encoding === 'size') {
-        vegaEncoding[encoding].scale = {
-          zero: false,
-        };
+        if (vegaEncoding[encoding].scale == null) {
+          vegaEncoding[encoding].scale = {};
+        }
+        vegaEncoding[encoding].scale['zero'] = false;
       }
       if (layer.mark === 'area' && encoding === 'y') {
         vegaEncoding[encoding].stack = false;
+      }
+      if ('domain' in map) {
+        if (vegaEncoding[encoding].scale == null) {
+          vegaEncoding[encoding].scale = {};
+        }
+        vegaEncoding[encoding].scale['domain'] = map.domain;
+      }
+      if ('range' in map) {
+        if (vegaEncoding[encoding].scale == null) {
+          vegaEncoding[encoding].scale = {};
+        }
+        vegaEncoding[encoding].scale['range'] = map.range;
+      }
+      if ('omitLegend' in map && map.omitLegend) {
+        vegaEncoding[encoding].legend = null;
       }
     }
     return {

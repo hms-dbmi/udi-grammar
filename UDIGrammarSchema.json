@@ -483,6 +483,10 @@
       "additionalProperties": false,
       "description": "A generic field mapping for visual encodings.",
       "properties": {
+        "domain": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom domain will change the scaling of visual encodings."
+        },
         "encoding": {
           "$ref": "#/definitions/ArcEncodingOptions",
           "description": "The encoding type (e.g., x, y, color)."
@@ -490,6 +494,14 @@
         "field": {
           "description": "The field to map to the encoding.",
           "type": "string"
+        },
+        "omitLegend": {
+          "description": "Set to true to omit the legend for this encoding.",
+          "type": "boolean"
+        },
+        "range": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom range will change the scaling of visual encodings."
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
@@ -507,6 +519,10 @@
       "additionalProperties": false,
       "description": "A generic field mapping for visual encodings.",
       "properties": {
+        "domain": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom domain will change the scaling of visual encodings."
+        },
         "encoding": {
           "$ref": "#/definitions/AreaEncodingOptions",
           "description": "The encoding type (e.g., x, y, color)."
@@ -514,6 +530,14 @@
         "field": {
           "description": "The field to map to the encoding.",
           "type": "string"
+        },
+        "omitLegend": {
+          "description": "Set to true to omit the legend for this encoding.",
+          "type": "boolean"
+        },
+        "range": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom range will change the scaling of visual encodings."
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
@@ -531,6 +555,10 @@
       "additionalProperties": false,
       "description": "A generic field mapping for visual encodings.",
       "properties": {
+        "domain": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom domain will change the scaling of visual encodings."
+        },
         "encoding": {
           "$ref": "#/definitions/BarEncodingOptions",
           "description": "The encoding type (e.g., x, y, color)."
@@ -538,6 +566,14 @@
         "field": {
           "description": "The field to map to the encoding.",
           "type": "string"
+        },
+        "omitLegend": {
+          "description": "Set to true to omit the legend for this encoding.",
+          "type": "boolean"
+        },
+        "range": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom range will change the scaling of visual encodings."
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
@@ -555,6 +591,10 @@
       "additionalProperties": false,
       "description": "A generic field mapping for visual encodings.",
       "properties": {
+        "domain": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom domain will change the scaling of visual encodings."
+        },
         "encoding": {
           "$ref": "#/definitions/GeometryEncodingOptions",
           "description": "The encoding type (e.g., x, y, color)."
@@ -562,6 +602,14 @@
         "field": {
           "description": "The field to map to the encoding.",
           "type": "string"
+        },
+        "omitLegend": {
+          "description": "Set to true to omit the legend for this encoding.",
+          "type": "boolean"
+        },
+        "range": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom range will change the scaling of visual encodings."
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
@@ -579,6 +627,10 @@
       "additionalProperties": false,
       "description": "A generic field mapping for visual encodings.",
       "properties": {
+        "domain": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom domain will change the scaling of visual encodings."
+        },
         "encoding": {
           "$ref": "#/definitions/LineEncodingOptions",
           "description": "The encoding type (e.g., x, y, color)."
@@ -586,6 +638,14 @@
         "field": {
           "description": "The field to map to the encoding.",
           "type": "string"
+        },
+        "omitLegend": {
+          "description": "Set to true to omit the legend for this encoding.",
+          "type": "boolean"
+        },
+        "range": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom range will change the scaling of visual encodings."
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
@@ -603,6 +663,10 @@
       "additionalProperties": false,
       "description": "A generic field mapping for visual encodings.",
       "properties": {
+        "domain": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom domain will change the scaling of visual encodings."
+        },
         "encoding": {
           "$ref": "#/definitions/PointEncodingOptions",
           "description": "The encoding type (e.g., x, y, color)."
@@ -610,6 +674,14 @@
         "field": {
           "description": "The field to map to the encoding.",
           "type": "string"
+        },
+        "omitLegend": {
+          "description": "Set to true to omit the legend for this encoding.",
+          "type": "boolean"
+        },
+        "range": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom range will change the scaling of visual encodings."
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
@@ -627,6 +699,10 @@
       "additionalProperties": false,
       "description": "A generic field mapping for visual encodings.",
       "properties": {
+        "domain": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom domain will change the scaling of visual encodings."
+        },
         "encoding": {
           "$ref": "#/definitions/RectEncodingOptions",
           "description": "The encoding type (e.g., x, y, color)."
@@ -634,6 +710,14 @@
         "field": {
           "description": "The field to map to the encoding.",
           "type": "string"
+        },
+        "omitLegend": {
+          "description": "Set to true to omit the legend for this encoding.",
+          "type": "boolean"
+        },
+        "range": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom range will change the scaling of visual encodings."
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
@@ -651,6 +735,10 @@
       "additionalProperties": false,
       "description": "A generic field mapping for visual encodings.",
       "properties": {
+        "domain": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom domain will change the scaling of visual encodings."
+        },
         "encoding": {
           "$ref": "#/definitions/TextEncodingOptions",
           "description": "The encoding type (e.g., x, y, color)."
@@ -658,6 +746,14 @@
         "field": {
           "description": "The field to map to the encoding.",
           "type": "string"
+        },
+        "omitLegend": {
+          "description": "Set to true to omit the legend for this encoding.",
+          "type": "boolean"
+        },
+        "range": {
+          "$ref": "#/definitions/Domain",
+          "description": "The custom range will change the scaling of visual encodings."
         },
         "type": {
           "$ref": "#/definitions/DataTypes",
@@ -1636,6 +1732,10 @@
         "mark": {
           "$ref": "#/definitions/RowMarkOptions",
           "description": "The type of mark used in the row layer."
+        },
+        "omitLegend": {
+          "description": "Set to true to omit the legend for this encoding.",
+          "type": "boolean"
         },
         "orderby": {
           "description": "The value to use when sorting by the column in the interface. This will not affect the default sorting of the table. defaults to the field name.",
