@@ -187,6 +187,22 @@
       ],
       "type": "object"
     },
+    "CategoryFieldUnion": {
+      "additionalProperties": false,
+      "description": "Field Unions require a list of fields, and the domain is the union of the fields. Or if a.domain = ['cat', 'dog'], b.domain = ['cat', 'mouse'], then the domain is ['cat', 'dog', 'mouse'].",
+      "properties": {
+        "categoryFields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "categoryFields"
+      ],
+      "type": "object"
+    },
     "DataSelection": {
       "additionalProperties": false,
       "description": "Configuration for data selection in visualizations or tables.",
@@ -367,8 +383,23 @@
         },
         {
           "$ref": "#/definitions/StringDomain"
+        },
+        {
+          "$ref": "#/definitions/FieldUnion"
         }
-      ]
+      ],
+      "description": "Represents a domain for visual encodings. This can be a numerical domain, a string domain, or a field union."
+    },
+    "FieldUnion": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/NumberFieldUnion"
+        },
+        {
+          "$ref": "#/definitions/CategoryFieldUnion"
+        }
+      ],
+      "description": "A union of field types, which can be either numerical or categorical."
     },
     "Filter": {
       "additionalProperties": false,
@@ -1311,6 +1342,7 @@
     },
     "NumberDomain": {
       "additionalProperties": false,
+      "description": "Represents a numerical domain with a minimum and maximum value.",
       "properties": {
         "max": {
           "type": "number"
@@ -1322,6 +1354,22 @@
       "required": [
         "min",
         "max"
+      ],
+      "type": "object"
+    },
+    "NumberFieldUnion": {
+      "additionalProperties": false,
+      "description": "Field Unions require a list of fields, and the domain is the union of the fields. e.g. If a.domain = [0, 10], b.domain = [5, 15], then the domain is [0, 15].",
+      "properties": {
+        "numberFields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "numberFields"
       ],
       "type": "object"
     },
@@ -1532,6 +1580,7 @@
       "enum": [
         "text",
         "x",
+        "x2",
         "y",
         "xOffset",
         "yOffset",
@@ -1600,6 +1649,7 @@
       "type": "string"
     },
     "StringDomain": {
+      "description": "Represents a string domain with a list of possible values.",
       "items": {
         "type": "string"
       },
