@@ -25,6 +25,17 @@ export const Default = {
         name: 'penguins',
         source: './data/penguins.csv',
       },
+    },
+  },
+};
+
+export const FieldExpand = {
+  args: {
+    spec: {
+      source: {
+        name: 'penguins',
+        source: './data/penguins.csv',
+      },
       representation: {
         mark: 'row',
         mapping: [

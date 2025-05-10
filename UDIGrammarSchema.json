@@ -1727,7 +1727,7 @@
               "$ref": "#/definitions/Representations"
             }
           ],
-          "description": "The visual representation of the data as either a visualization or table."
+          "description": "The visual representation of the data as either a visualization or table. If not specificed the default is a table witha all fields."
         },
         "source": {
           "anyOf": [
@@ -1752,8 +1752,7 @@
         }
       },
       "required": [
-        "source",
-        "representation"
+        "source"
       ],
       "type": "object"
     },

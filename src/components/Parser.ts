@@ -21,6 +21,20 @@ export function parseSpecification(spec: UDIGrammar): ParsedUDIGrammar {
   if (!Array.isArray(source)) {
     source = [source];
   }
+  if (!representation) {
+    // Default repesentation
+    representation = {
+      mark: 'row',
+      mapping: [
+        {
+          mark: 'text',
+          encoding: 'text',
+          field: '*',
+          type: 'nominal',
+        },
+      ],
+    };
+  }
   if (!Array.isArray(representation)) {
     representation = [representation] as Representations;
   }

@@ -16,8 +16,9 @@ export interface UDIGrammar {
 
   /**
    * The visual representation of the data as either a visualization or table.
+   * If not specificed the default is a table witha all fields.
    */
-  representation: Representation | Representations;
+  representation?: Representation | Representations;
 }
 
 /**
