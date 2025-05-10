@@ -1,4 +1,4 @@
-import{m as r}from"./monaco-BCYS6-sK.js";import"./index-CkKdE7Lg.js";/*!-----------------------------------------------------------------------------
+import{m as r}from"./monaco-DZ52KY67.js";import"./index-Cz4O6bIx.js";/*!-----------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Version: 0.52.2(404545bded1df6ffa41ea0af4e8ddb219018c6c1)
  * Released under the MIT license
