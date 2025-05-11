@@ -185,20 +185,30 @@ const fieldDomains = computed<Map<string, Domain>>(() => {
       if ('numberFields' in mapping.domain) {
         const domain = getNumberDomain(props.data, mapping.domain.numberFields);
         domainMap.set(k, domain);
+        continue;
       } else if ('categoryFields' in mapping.domain) {
         const domain = getStringDomain(
           props.data,
           mapping.domain.categoryFields,
         );
         domainMap.set(k, domain);
+        continue;
       } else {
         domainMap.set(k, mapping.domain);
+        if (Array.isArray(mapping.domain)) {
+          continue;
+        }
+        if ('min' in mapping.domain && 'max' in mapping.domain) {
+          continue;
+        }
+        // The only scenario we don't don't continue is when domain is a partial domain
       }
-      continue;
     }
+
     if (type === 'quantitative') {
       const domain = getNumberDomain(props.data, field);
-      domainMap.set(k, domain);
+      const partialDomain = domainMap.get(k) ?? {};
+      domainMap.set(k, { ...domain, ...partialDomain });
     } else if (type === 'nominal' || type === 'ordinal') {
       const domain = getStringDomain(props.data, field);
       domainMap.set(k, domain);
