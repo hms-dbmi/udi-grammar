@@ -15,6 +15,10 @@ interface Example {
   spec: UDIGrammar;
 }
 
+const links = {
+  donors: './data/hubmap_examples/hubmap-donors-metadata-2025-07-09_17-17-11.tsv',
+}
+
 const exampleGroups: ExampleGroup[] = [
   {
     name: 'Donors',
@@ -26,7 +30,7 @@ const exampleGroups: ExampleGroup[] = [
           source: [
             {
               name: 'donors',
-              source: './data/hubmap_examples/hubmap-donors-metadata-2025-07-09_17-17-11.tsv',
+              source: links.donors,
             },
           ],
           representation: [
@@ -50,7 +54,7 @@ const exampleGroups: ExampleGroup[] = [
         spec: {
             source: {
             name: "donors",
-            source: "./data/hubmap_examples/hubmap-donors-metadata-2025-07-09_17-17-11.tsv"
+            source: links.donors,
           },
           transformation: [
             {
@@ -81,6 +85,71 @@ const exampleGroups: ExampleGroup[] = [
           }
         },
       },
+      {
+        name: 'Donors by Race and Sex',
+        thumbnail: './example_thumbnails/bar_charts/donors_by_race_and_sex.png',
+        spec: {
+          source: {
+            name: "donors",
+            source: links.donors,
+          },
+          transformation: [
+            {
+              groupby: ["sex", "race"]
+            },
+            {
+              rollup: {
+                count: { op: "count" }
+              }
+            }
+          ],
+          representation: {
+            mark: "bar",
+            mapping: [
+              { encoding: "x", field: "race", type: "nominal" },
+              { encoding: "y", field: "count", type: "quantitative" },
+              { encoding: "color", field: "sex", type: "nominal" }
+            ]
+          }
+        }
+      },
+      {
+        name: 'Donors by Age Group and Sex',
+        thumbnail: './example_thumbnails/bar_charts/donors_by_age_group_and_sex.png',
+        spec: {
+          source: {
+            name: "donors",
+            source: links.donors,
+          },
+          transformation: [
+            {
+              derive: {
+                age_group: `
+                  d.age_value === undefined || d.age_value === "" ?
+                    "Unknown" :
+                    (Math.floor(+d.age_value / 10) * 10) + "s"
+                `
+              }
+            },
+            {
+              groupby: ["sex", "age_group"]
+            },
+            {
+              rollup: {
+                count: { op: "count" }
+              }
+            }
+          ],
+          representation: {
+            mark: "bar",
+            mapping: [
+              { encoding: "x", field: "age_group", type: "nominal" },
+              { encoding: "y", field: "count", type: "quantitative" },
+              { encoding: "color", field: "sex", type: "nominal" }
+            ]
+          }
+        }
+      }
     ],
   },
   {
