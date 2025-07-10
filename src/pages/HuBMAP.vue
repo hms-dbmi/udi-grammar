@@ -16,9 +16,9 @@ interface Example {
 }
 
 const links = {
-  donors: './data/hubmap_examples/hubmap-donors-metadata-2025-07-09_17-17-11.tsv',
-  datasets: './data/hubmap_examples/hubmap-datasets-metadata-2025-07-10_14-41-55.tsv',
-  samples: './data/hubmap_examples/hubmap-samples-metadata-2025-07-10_14-41-59.tsv',
+  donors: 'http://localhost:5001/metadata/v0/plain/donors.tsv',
+  datasets: 'http://localhost:5001/metadata/v0/plain/datasets.tsv',
+  samples: 'http://localhost:5001/metadata/v0/plain/samples.tsv',
 }
 
 const thumbnails = {
