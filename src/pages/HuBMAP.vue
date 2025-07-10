@@ -21,13 +21,30 @@ const links = {
   samples: './data/hubmap_examples/hubmap-samples-metadata-2025-07-10_14-41-59.tsv',
 }
 
+const thumbnails = {
+  donors: {
+    table: './data/hubmap_examples/thumbnails/donors/table.png',
+    by_sex: './data/hubmap_examples/thumbnails/donors/by-sex.png',
+    by_race_and_sex: './data/hubmap_examples/thumbnails/donors/by-race-and-sex.png',
+    by_age_and_sex: './data/hubmap_examples/thumbnails/donors/by-age-and-sex.png',
+  },
+  samples: {
+    by_organ: './data/hubmap_examples/thumbnails/samples/by-organ.png',
+  },
+  datasets: {
+    by_organ: './data/hubmap_examples/thumbnails/datasets/by-organ.png',
+    by_assay_and_organ_bar: './data/hubmap_examples/thumbnails/datasets/by-assay-and-organ-bar.png',
+    by_assay_and_organ_heatmap: './data/hubmap_examples/thumbnails/datasets/by-assay-and-organ-heatmap.png',
+  }
+}
+
 const exampleGroups: ExampleGroup[] = [
   {
     name: 'Donors',
     examples: [
       {
-        name: 'Basic Table',
-        thumbnail: './example_thumbnails/tables/basic_table.png',
+        name: 'Table',
+        thumbnail: thumbnails.donors.table,
         spec: {
           source: [
             {
@@ -52,7 +69,7 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Donors by Sex',
-        thumbnail: './example_thumbnails/tables/visual_table.png',
+        thumbnail: thumbnails.donors.by_sex,
         spec: {
             source: {
             name: "donors",
@@ -89,7 +106,7 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Donors by Race and Sex',
-        thumbnail: './example_thumbnails/bar_charts/donors_by_race_and_sex.png',
+        thumbnail: thumbnails.donors.by_race_and_sex,
         spec: {
           source: {
             name: "donors",
@@ -117,7 +134,7 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Donors by Age Group and Sex',
-        thumbnail: './example_thumbnails/bar_charts/donors_by_age_group_and_sex.png',
+        thumbnail: thumbnails.donors.by_age_and_sex,
         spec: {
           source: {
             name: "donors",
@@ -159,7 +176,7 @@ const exampleGroups: ExampleGroup[] = [
     examples: [
       {
         name: 'Samples by Organ',
-        thumbnail: './example_thumbnails/tables/samples_by_organ.png',
+        thumbnail: thumbnails.samples.by_organ,
         spec: {
           source: {
             name: 'samples',
@@ -204,7 +221,7 @@ const exampleGroups: ExampleGroup[] = [
     examples: [
       {
         name: 'Datasets by Organ',
-        thumbnail: './example_thumbnails/bar_charts/datasets_by_organ.png',
+        thumbnail: thumbnails.datasets.by_organ,
         spec: {
           source: {
             name: "datasets",
@@ -244,7 +261,7 @@ const exampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Datasets by Assay and Organ',
-        thumbnail: './example_thumbnails/bar_charts/datasets_by_organ.png',
+        thumbnail: thumbnails.datasets.by_assay_and_organ_bar,
         spec: {
           source: {
             name: "datasets",
@@ -287,73 +304,66 @@ const exampleGroups: ExampleGroup[] = [
           }
         }
       },
-{
-  name: 'Datasets Heatmap by Organ and Assay',
-  thumbnail: './example_thumbnails/bar_charts/datasets_by_organ.png',
-  spec: {
-    source: {
-      name: 'datasets',
-      source: links.datasets,
-    },
-    transformation: [
       {
-        groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
-      },
-      {
-        rollup: {
-          count: { op: 'count' },
-        },
-      },
-    ],
-    representation: [
-      {
-        mark: 'rect',
-        mapping: [
-          {
-            encoding: 'color',
-            field: 'count',
-            type: 'quantitative',
-            // TODO: why does this not work?
-            // domain: ['1', '500'],
+        name: 'Datasets Heatmap by Organ and Assay',
+        thumbnail: thumbnails.datasets.by_assay_and_organ_heatmap,
+        spec: {
+          source: {
+            name: 'datasets',
+            source: links.datasets,
           },
-          {
-            encoding: 'x',
-            field: 'origin_samples_unique_mapped_organs',
-            type: 'nominal',
-          },
-          { encoding: 'y', field: 'assay_category', type: 'nominal' },
-        ],
-      },
-      {
-        mark: 'text',
-        mapping: [
-          {
-            encoding: 'text',
-            field: 'count',
-            type: 'quantitative',
-          },
-          {
-            encoding: 'x',
-            field: 'origin_samples_unique_mapped_organs',
-            type: 'nominal',
-          },
-          {
-            encoding: 'y',
-            field: 'assay_category',
-            type: 'nominal',
-          },
-        ],
-      },
-    ],
-  }
-}
-
-    ],
-  },
-  {
-    name: 'Visualizations',
-    examples: [
-
+          transformation: [
+            {
+              groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+            },
+            {
+              rollup: {
+                count: { op: 'count' },
+              },
+            },
+          ],
+          representation: [
+            {
+              mark: 'rect',
+              mapping: [
+                {
+                  encoding: 'color',
+                  field: 'count',
+                  type: 'quantitative',
+                  // TODO: why does this not work?
+                  // domain: ['1', '500'],
+                },
+                {
+                  encoding: 'x',
+                  field: 'origin_samples_unique_mapped_organs',
+                  type: 'nominal',
+                },
+                { encoding: 'y', field: 'assay_category', type: 'nominal' },
+              ],
+            },
+            {
+              mark: 'text',
+              mapping: [
+                {
+                  encoding: 'text',
+                  field: 'count',
+                  type: 'quantitative',
+                },
+                {
+                  encoding: 'x',
+                  field: 'origin_samples_unique_mapped_organs',
+                  type: 'nominal',
+                },
+                {
+                  encoding: 'y',
+                  field: 'assay_category',
+                  type: 'nominal',
+                },
+              ],
+            },
+          ],
+        }
+      }
     ],
   },
 ];
