@@ -157,7 +157,46 @@ const exampleGroups: ExampleGroup[] = [
   {
     name: 'Samples',
     examples: [
-
+      {
+        name: 'Samples by Organ',
+        thumbnail: './example_thumbnails/tables/samples_by_organ.png',
+        spec: {
+          source: {
+            name: 'samples',
+            source: links.samples
+          },
+          transformation: [
+            {
+              derive: {
+                organ: `d.origin_samples_unique_mapped_organs`
+              }
+            },
+            {
+              groupby: ['organ']
+            },
+            {
+              rollup: {
+                count: { op: 'count' }
+              }
+            },
+            {
+              orderby: {
+                field: "organ",
+                order: "desc"
+              }
+            },
+          ],
+          representation: [
+            {
+              mark: 'row',
+              mapping: [
+                { mark: 'text', encoding: 'text', field: 'organ', type: 'nominal' },
+                { mark: 'text', encoding: 'text', field: 'count', type: 'quantitative' }
+              ]
+            }
+          ]
+        }
+      }
     ],
   },
   {
@@ -184,7 +223,14 @@ const exampleGroups: ExampleGroup[] = [
               rollup: {
                 count: { op: "count" }
               }
-            }
+            },
+            // TODO: why does this not work?
+            {
+              orderby: {
+                field: "organ",
+                order: "desc"
+              }
+            },
           ],
           representation: {
             mark: "bar",
@@ -193,6 +239,7 @@ const exampleGroups: ExampleGroup[] = [
               { encoding: "y", field: "count", type: "quantitative" }
             ]
           }
+          
         }
       },
       {
@@ -239,7 +286,68 @@ const exampleGroups: ExampleGroup[] = [
             ]
           }
         }
-      }
+      },
+{
+  name: 'Datasets Heatmap by Organ and Assay',
+  thumbnail: './example_thumbnails/bar_charts/datasets_by_organ.png',
+  spec: {
+    source: {
+      name: 'datasets',
+      source: links.datasets,
+    },
+    transformation: [
+      {
+        groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+      },
+      {
+        rollup: {
+          count: { op: 'count' },
+        },
+      },
+    ],
+    representation: [
+      {
+        mark: 'rect',
+        mapping: [
+          {
+            encoding: 'color',
+            field: 'count',
+            type: 'quantitative',
+            // TODO: why does this not work?
+            // domain: ['1', '500'],
+          },
+          {
+            encoding: 'x',
+            field: 'origin_samples_unique_mapped_organs',
+            type: 'nominal',
+          },
+          { encoding: 'y', field: 'assay_category', type: 'nominal' },
+        ],
+      },
+      {
+        mark: 'text',
+        mapping: [
+          {
+            encoding: 'text',
+            field: 'count',
+            type: 'quantitative',
+          },
+          {
+            encoding: 'x',
+            field: 'origin_samples_unique_mapped_organs',
+            type: 'nominal',
+          },
+          {
+            encoding: 'y',
+            field: 'assay_category',
+            type: 'nominal',
+          },
+        ],
+      },
+    ],
+  }
+}
+
     ],
   },
   {
