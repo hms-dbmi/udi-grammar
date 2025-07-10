@@ -17,6 +17,8 @@ interface Example {
 
 const links = {
   donors: './data/hubmap_examples/hubmap-donors-metadata-2025-07-09_17-17-11.tsv',
+  datasets: './data/hubmap_examples/hubmap-datasets-metadata-2025-07-10_14-41-55.tsv',
+  samples: './data/hubmap_examples/hubmap-samples-metadata-2025-07-10_14-41-59.tsv',
 }
 
 const exampleGroups: ExampleGroup[] = [
@@ -153,12 +155,6 @@ const exampleGroups: ExampleGroup[] = [
     ],
   },
   {
-    name: 'Organs',
-    examples: [
-
-    ],
-  },
-  {
     name: 'Samples',
     examples: [
 
@@ -166,6 +162,88 @@ const exampleGroups: ExampleGroup[] = [
   },
   {
     name: 'Datasets',
+    examples: [
+      {
+        name: 'Datasets by Organ',
+        thumbnail: './example_thumbnails/bar_charts/datasets_by_organ.png',
+        spec: {
+          source: {
+            name: "datasets",
+            source: links.datasets
+          },
+          transformation: [
+            {
+              derive: {
+                organ: `d.origin_samples_unique_mapped_organs`
+              }
+            },
+            {
+              groupby: ["organ"]
+            },
+            {
+              rollup: {
+                count: { op: "count" }
+              }
+            }
+          ],
+          representation: {
+            mark: "bar",
+            mapping: [
+              { encoding: "x", field: "organ", type: "nominal" },
+              { encoding: "y", field: "count", type: "quantitative" }
+            ]
+          }
+        }
+      },
+      {
+        name: 'Datasets by Assay and Organ',
+        thumbnail: './example_thumbnails/bar_charts/datasets_by_organ.png',
+        spec: {
+          source: {
+            name: "datasets",
+            source: links.datasets
+          },
+          transformation: [
+            {
+              groupby: [
+                "origin_samples_unique_mapped_organs",
+                "assay_category"
+              ]
+            },
+            {
+              rollup: {
+                count: {
+                  op: "count"
+                }
+              }
+            }
+          ],
+          representation: {
+            mark: "bar",
+            mapping: [
+              {
+                encoding: "x",
+                field: "count",
+                type: "quantitative"
+              },
+              {
+                encoding: "y",
+                field: "origin_samples_unique_mapped_organs",
+                type: "nominal"
+              },
+              {
+                encoding: "color",
+                field: "assay_category",
+                type: "nominal"
+              }
+            ]
+          }
+        }
+      }
+    ],
+  },
+  {
+    name: 'Visualizations',
     examples: [
 
     ],
