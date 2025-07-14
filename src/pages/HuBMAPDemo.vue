@@ -6,14 +6,19 @@ import { hubmapExampleGroups } from 'src/specs/HuBMAPSpecs';
 <template>
   <q-page class="column items-center justify-start q-ma-md">
     <div class="text-column q-mt-lg q-ml-lg q-mr-lg">
-      <p class="text-h5 text-primary text-bold">
+      <p class="text-h4 text-primary text-bold">
           HuBMAP Demo Visualizations
       </p>
       <p class="text-body1">
         The following visualizations use metadata endpoints from the 
         <a href="https://portal.hubmapconsortium.org/apis">HuBMAP Data Portal</a>
         to demonstrate how the UDI grammar can be used in collaboration
-        with projects like HuBMAP.
+        with projects like HuBMAP. To see this set of visualizations with accompanying
+        editable code, visit the <a href="#/HuBMAPExamples">HuBMAP Examples page</a>.
+        <br /> <br />
+        These visualizations are based on a
+        <a href="https://colab.research.google.com/drive/1qBmosMORt6oOC_Q0ALgLwNjNjoyNHltq?usp=sharing"> Jupyter Notebook</a>
+        that generates a similar set of visualizations using the Matplotlib library.
       </p>
     <div
       v-for="(group, groupIndex) in hubmapExampleGroups"

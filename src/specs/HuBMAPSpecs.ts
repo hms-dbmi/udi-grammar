@@ -57,6 +57,7 @@ export const hubmapExampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Donors by Sex',
+        description: 'This simple bar chart visualization compares the number of available donors of each sex via a rollup operation.',
         thumbnail: thumbnails.donors.by_sex,
         spec: {
           source: { name: 'donors', source: links.donors },
@@ -75,6 +76,7 @@ export const hubmapExampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Donors by Race and Sex',
+        description: 'This is a slightly more complex stacked bar chart showing the number of available donors of each race, with each bar divided to show the ratio of sexes within that group.',
         thumbnail: thumbnails.donors.by_race_and_sex,
         spec: {
           source: { name: 'donors', source: links.donors },
@@ -124,6 +126,7 @@ export const hubmapExampleGroups: ExampleGroup[] = [
   },
   {
     name: 'Samples',
+    description: 'The following section explores metadata from HuBMAP samples.',
     examples: [
       {
         name: 'Samples by Organ',
@@ -153,6 +156,7 @@ export const hubmapExampleGroups: ExampleGroup[] = [
   },
   {
     name: 'Datasets',
+    description: 'The following section explores metadata from HuBMAP datasets.',
     examples: [
       {
         name: 'Datasets by Organ',
