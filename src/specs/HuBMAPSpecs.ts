@@ -2,12 +2,14 @@ import type { UDIGrammar } from 'src/components/GrammarTypes';
 
 interface Example {
   name: string;
+  description?: string;
   thumbnail: string;
   spec: UDIGrammar;
 }
 
 export interface ExampleGroup {
   name: string;
+  description?: string;
   examples: Example[];
 }
 
@@ -37,9 +39,11 @@ const thumbnails = {
 export const hubmapExampleGroups: ExampleGroup[] = [
   {
     name: 'Donors',
+    description: 'The following section explores metadata from HuBMAP donors.',
     examples: [
       {
         name: 'Table',
+        description: 'This is a plain table of raw metadata for every available donor, with no transformations applied. All that is provided is the source and the representation spec.',
         thumbnail: thumbnails.donors.table,
         spec: {
           source: [{ name: 'donors', source: links.donors }],
