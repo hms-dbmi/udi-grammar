@@ -17,9 +17,14 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('pages/EditorPage.vue') }],
   },
   {
-    path: '/HuBMAP',
+    path: '/HuBMAPExamples',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/HuBMAP.vue') }],
+    children: [{ path: '', component: () => import('pages/HuBMAPExamples.vue') }],
+  },
+  {
+    path: '/HuBMAPDemo',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('pages/HuBMAPDemo.vue') }],
   },
 
   // Always leave this as last one,
