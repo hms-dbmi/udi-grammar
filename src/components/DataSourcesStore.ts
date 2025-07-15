@@ -36,8 +36,59 @@ export interface DataSourcesState {
   [key: string]: DataInterface;
 }
 
+export interface DataSelections {
+  [key: string]: {
+    dataSourceKey: string;
+    selection: null | RangeSelection; // TODO: add point selections
+  };
+}
+
+interface RangeSelection {
+  [field: string]: [min: number, max: number];
+}
+
 export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   const dataSources = ref<DataSourcesState>({});
+  const dataSelections = ref<DataSelections>({});
+
+  function watchDataSelection(dataSourceKey: string, selectionName: string) {
+    if (selectionName in dataSelections.value) {
+      return;
+    }
+    dataSelections.value[selectionName] = {
+      dataSourceKey,
+      selection: null,
+    };
+  }
+
+  function updateDataSelection(
+    selectionName: string,
+    selection: RangeSelection | null,
+  ) {
+    if (!(selectionName in dataSelections.value)) {
+      throw new Error(`Selection name ${selectionName} not found`);
+    }
+    dataSelections.value[selectionName]!.selection = selection;
+    selectionHash.value = JSON.stringify(dataSelections.value);
+  }
+
+  function RangeSelectionToArqueroFilter(
+    selection: RangeSelection | null,
+  ): string | null {
+    if (selection === null) return null;
+    const filters: string[] = [];
+    for (const [field, [min, max]] of Object.entries(selection)) {
+      if (min != null && max != null) {
+        filters.push(`d['${field}'] >= ${min} && d['${field}'] <= ${max}`);
+      } else if (min != null) {
+        filters.push(`d['${field}'] >= ${min}`);
+      } else if (max != null) {
+        filters.push(`d['${field}'] <= ${max}`);
+      }
+    }
+    return filters.join(' && ');
+  }
+
   // let connection = null;
   // let db = null;
   // init().then(async (value: DuckDB) => {
@@ -47,6 +98,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   // });
 
   const loading = ref<boolean>(true);
+  const selectionHash = ref<string>('');
 
   async function initDataSources(dataSources: DataSource[]): Promise<void> {
     loading.value = true;
@@ -89,8 +141,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       }
       namedTables.set(key, from(dataInterface.dest.reify()));
     }
-    // TODO: incorporate data transformations
-    // maybe filter to only fields used?
 
     const dataTable = PerformDataTransformations(
       namedTables,
@@ -208,7 +258,18 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         currentTable.table = inTable.derive(derive);
       } else if ('filter' in transform) {
         const inTable = getInTable(transform.in);
-        currentTable.table = inTable.filter(transform.filter).reify();
+        if (typeof transform.filter === 'string') {
+          currentTable.table = inTable.filter(transform.filter).reify();
+        } else {
+          const filter = RangeSelectionToArqueroFilter(
+            dataSelections.value[transform.filter.name]?.selection ?? null,
+          );
+          console.log('filter', filter);
+          if (filter) {
+            currentTable.table = inTable.filter(filter).reify();
+          }
+          // TODO: handle multiple / different data sources
+        }
       } else if ('join' in transform) {
         const [leftKey, rightKey] = transform.in;
         const leftTable = namedTables.get(leftKey);
@@ -358,5 +419,14 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     }
   }
 
-  return { dataSources, loading, initDataSources, getDataObject };
+  return {
+    dataSources,
+    loading,
+    selectionHash,
+    initDataSources,
+    getDataObject,
+    watchDataSelection,
+    updateDataSelection,
+    dataSelections,
+  };
 });

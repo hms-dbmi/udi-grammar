@@ -5,10 +5,10 @@ import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
 import type { UDIGrammar, VisualizationLayer } from './GrammarTypes';
 import { useDataSourcesStore } from './DataSourcesStore';
+const dataSourcesStore = useDataSourcesStore();
 import { storeToRefs } from 'pinia';
 
-const dataSourcesStore = useDataSourcesStore();
-const { loading } = storeToRefs(dataSourcesStore);
+const { loading, selectionHash } = storeToRefs(dataSourcesStore);
 
 export interface ParserProps {
   spec: UDIGrammar;
@@ -44,7 +44,7 @@ watch(
   },
 );
 
-watch(loading, () => buildVisualization());
+watch([loading, selectionHash], () => buildVisualization());
 
 function buildVisualization(): void {
   if (!parsedSpec.value) {
@@ -121,6 +121,10 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   if (!Array.isArray(inputLayers)) {
     throw new Error('invalid spec passed to vega conversion');
   }
+  let selectParam: {
+    name: string;
+    select: { type: 'point' | 'interval'; encodings?: string[] };
+  } | null = null;
   const outputLayers = inputLayers.map((layer) => {
     const mapping = Array.isArray(layer.mapping)
       ? layer.mapping
@@ -167,15 +171,37 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
         vegaEncoding[encoding].legend = null;
       }
     }
+
+    if (layer.select) {
+      selectParam = {
+        name: layer.select.name,
+        select: {
+          type: layer.select.how.type,
+        },
+      };
+      if (layer.select.how.type === 'interval') {
+        selectParam.select['encodings'] = layer.select.how.on.split('');
+      }
+      dataSourcesStore.watchDataSelection(
+        'donors', // TODO: figure out which data source to use here.
+        layer.select.name,
+      );
+      signalKeys.value = [layer.select.name];
+    }
+
     return {
       mark: layer.mark,
       encoding: vegaEncoding,
     };
   });
   vegaSpec['layer'] = outputLayers;
+  if (selectParam) {
+    vegaSpec['params'] = [selectParam];
+  }
 
   return JSON.stringify(vegaSpec);
 }
+const signalKeys = ref<string[]>([]);
 
 const debugVegaData = ref();
 </script>
@@ -185,12 +211,16 @@ const debugVegaData = ref();
     <div class="error-message" v-if="transformError">
       {{ transformError.message }}
     </div>
-    <VegaLite v-else-if="isVegaLiteComponent" :spec="vegaLiteSpec" />
+    <VegaLite
+      v-else-if="isVegaLiteComponent"
+      :spec="vegaLiteSpec"
+      :signal-keys="signalKeys"
+    />
     <TableComponent :data="transformedData" :spec="parsedSpec" v-else />
     <!-- <hr />
-    <pre
-      >{{ debugVegaData }}
-    </pre> -->
+    <div>
+      {{ selectionHash }}
+    </div> -->
   </template>
   <template v-else>
     <p>Loading...</p>

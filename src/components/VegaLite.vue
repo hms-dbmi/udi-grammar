@@ -3,11 +3,17 @@ import { ref, onMounted } from 'vue';
 import vegaEmbed from 'vega-embed';
 import { defineProps } from 'vue';
 import { watch } from 'vue';
+import { useDataSourcesStore } from './DataSourcesStore';
+const dataSourcesStore = useDataSourcesStore();
 
 const props = defineProps({
   spec: {
     type: String,
     required: true,
+  },
+  signalKeys: {
+    type: Array as () => string[],
+    default: () => [],
   },
 });
 
@@ -33,9 +39,18 @@ function updateVegaChart() {
   }
 
   vegaEmbed(vegaContainer.value, specObject)
-    .then((_result) => {
+    .then((result) => {
       console.log('Chart rendered successfully');
       errorMessage.value = null;
+      const view = result.view;
+      for (const signalKey of props.signalKeys) {
+        // replace "-" with "_" in signalKey since Vega signals cannot contain "-"
+        const signalKeyFormatted = signalKey.replace(/-/g, '_');
+        view.addSignalListener(signalKeyFormatted, (name, value) => {
+          console.log('Selection changed:', value);
+          dataSourcesStore.updateDataSelection(signalKey, value);
+        });
+      }
     })
     .catch((error) => {
       console.error('Error rendering chart', error);

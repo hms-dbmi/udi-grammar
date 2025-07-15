@@ -172,7 +172,6 @@ const fieldDomains = computed<Map<string, Domain>>(() => {
   const domainMap = new Map<string, Domain>();
   if (!flatColumnMapping.value) return domainMap;
   if (!props.data) return domainMap;
-  if (props.data.length === 0) return domainMap;
 
   for (const mapping of flatColumnMapping.value) {
     const field = mapping.field;
