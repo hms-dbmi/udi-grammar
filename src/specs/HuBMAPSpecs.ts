@@ -38,6 +38,92 @@ const thumbnails = {
 
 export const hubmapExampleGroups: ExampleGroup[] = [
   {
+    name: 'Datasets',
+    description: 'The following section explores metadata from HuBMAP datasets.',
+    examples: [
+      {
+        name: 'Datasets by Organ',
+        thumbnail: thumbnails.datasets.by_organ,
+        spec: {
+          source: { name: 'datasets', source: links.datasets },
+          transformation: [
+            { derive: { organ: `d.origin_samples_unique_mapped_organs` } },
+            { groupby: ['organ'] },
+            { rollup: { count: { op: 'count' } } },
+            { orderby: { field: 'organ', order: 'desc' } },
+          ],
+          representation: {
+            mark: 'bar',
+            mapping: [
+              { encoding: 'x', field: 'organ', type: 'nominal' },
+              { encoding: 'y', field: 'count', type: 'quantitative' },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Datasets by Assay and Organ',
+        thumbnail: thumbnails.datasets.by_assay_and_organ_bar,
+        spec: {
+          source: { name: 'datasets', source: links.datasets },
+          transformation: [
+            {
+              groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+            },
+            {
+              rollup: {
+                count: { op: 'count' },
+              },
+            },
+          ],
+          representation: {
+            mark: 'bar',
+            mapping: [
+              { encoding: 'x', field: 'count', type: 'quantitative' },
+              { encoding: 'y', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+              { encoding: 'color', field: 'assay_category', type: 'nominal' },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Datasets Heatmap by Organ and Assay',
+        thumbnail: thumbnails.datasets.by_assay_and_organ_heatmap,
+        spec: {
+          source: { name: 'datasets', source: links.datasets },
+          transformation: [
+            {
+              groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+            },
+            {
+              rollup: {
+                count: { op: 'count' },
+              },
+            },
+          ],
+          representation: [
+            {
+              mark: 'rect',
+              mapping: [
+                { encoding: 'color', field: 'count', type: 'quantitative' },
+                { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+                { encoding: 'y', field: 'assay_category', type: 'nominal' },
+              ],
+            },
+            {
+              mark: 'text',
+              mapping: [
+                { encoding: 'text', field: 'count', type: 'quantitative' },
+                { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+                { encoding: 'y', field: 'assay_category', type: 'nominal' },
+              ],
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
     name: 'Donors',
     description: 'The following section explores metadata from HuBMAP donors.',
     examples: [
@@ -147,92 +233,6 @@ export const hubmapExampleGroups: ExampleGroup[] = [
               mapping: [
                 { mark: 'text', encoding: 'text', field: 'organ', type: 'nominal' },
                 { mark: 'text', encoding: 'text', field: 'count', type: 'quantitative' },
-              ],
-            },
-          ],
-        },
-      },
-    ],
-  },
-  {
-    name: 'Datasets',
-    description: 'The following section explores metadata from HuBMAP datasets.',
-    examples: [
-      {
-        name: 'Datasets by Organ',
-        thumbnail: thumbnails.datasets.by_organ,
-        spec: {
-          source: { name: 'datasets', source: links.datasets },
-          transformation: [
-            { derive: { organ: `d.origin_samples_unique_mapped_organs` } },
-            { groupby: ['organ'] },
-            { rollup: { count: { op: 'count' } } },
-            { orderby: { field: 'organ', order: 'desc' } },
-          ],
-          representation: {
-            mark: 'bar',
-            mapping: [
-              { encoding: 'x', field: 'organ', type: 'nominal' },
-              { encoding: 'y', field: 'count', type: 'quantitative' },
-            ],
-          },
-        },
-      },
-      {
-        name: 'Datasets by Assay and Organ',
-        thumbnail: thumbnails.datasets.by_assay_and_organ_bar,
-        spec: {
-          source: { name: 'datasets', source: links.datasets },
-          transformation: [
-            {
-              groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
-            },
-            {
-              rollup: {
-                count: { op: 'count' },
-              },
-            },
-          ],
-          representation: {
-            mark: 'bar',
-            mapping: [
-              { encoding: 'x', field: 'count', type: 'quantitative' },
-              { encoding: 'y', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
-              { encoding: 'color', field: 'assay_category', type: 'nominal' },
-            ],
-          },
-        },
-      },
-      {
-        name: 'Datasets Heatmap by Organ and Assay',
-        thumbnail: thumbnails.datasets.by_assay_and_organ_heatmap,
-        spec: {
-          source: { name: 'datasets', source: links.datasets },
-          transformation: [
-            {
-              groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
-            },
-            {
-              rollup: {
-                count: { op: 'count' },
-              },
-            },
-          ],
-          representation: [
-            {
-              mark: 'rect',
-              mapping: [
-                { encoding: 'color', field: 'count', type: 'quantitative' },
-                { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
-                { encoding: 'y', field: 'assay_category', type: 'nominal' },
-              ],
-            },
-            {
-              mark: 'text',
-              mapping: [
-                { encoding: 'text', field: 'count', type: 'quantitative' },
-                { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
-                { encoding: 'y', field: 'assay_category', type: 'nominal' },
               ],
             },
           ],
