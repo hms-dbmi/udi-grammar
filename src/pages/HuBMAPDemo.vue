@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import UDIVis from 'src/components/UDIVis.vue';
 import { hubmapExampleGroups } from 'src/specs/HuBMAPSpecs';
+import { useEditorStore } from 'src/stores/EditorStore';
+
+const editorStore = useEditorStore();
 </script>
 
 <template>
@@ -43,9 +46,20 @@ import { hubmapExampleGroups } from 'src/specs/HuBMAPSpecs';
         :key="exampleIndex"
         class="q-mb-xl full-width"
       >
-        <!-- Visualization heading -->
-        <div class="text-subtitle1 text-bold q-mb-sm">
-          {{ example.name }}
+        <!-- Visualization heading and button -->
+        <div class="row items-center q-mb-md">
+          <div class="text-subtitle1 text-bold text-primary">
+            {{ example.name }}
+          </div>
+          <q-btn
+            color="primary"
+            rounded
+            no-caps
+            icon-right="open_in_new"
+            :to="editorStore.getUrlWithSpec(example.spec)"
+            label="Editor"
+            class="q-ml-md"
+          />
         </div>
 
         <!-- Visualization description -->

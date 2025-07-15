@@ -14,9 +14,9 @@ export interface ExampleGroup {
 }
 
 const links = {
-  donors: 'http://localhost:5001/metadata/v0/plain/donors.tsv',
-  datasets: 'http://localhost:5001/metadata/v0/plain/datasets.tsv',
-  samples: 'http://localhost:5001/metadata/v0/plain/samples.tsv',
+  donors: 'http://localhost:5001/metadata/v0/udi/donors.tsv',
+  datasets: 'http://localhost:5001/metadata/v0/udi/datasets.tsv',
+  samples: 'http://localhost:5001/metadata/v0/udi/samples.tsv',
 };
 
 const thumbnails = {
@@ -57,7 +57,7 @@ export const hubmapExampleGroups: ExampleGroup[] = [
       },
       {
         name: 'Donors by Sex',
-        description: 'This simple bar chart visualization compares the number of available donors of each sex via a rollup operation.',
+        description: 'This simple bar chart visualization uses the above metadata to compare the number of available donors of each sex via a rollup operation.',
         thumbnail: thumbnails.donors.by_sex,
         spec: {
           source: { name: 'donors', source: links.donors },
