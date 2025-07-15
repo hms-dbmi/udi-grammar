@@ -331,8 +331,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           .output ?? { sample: 'sample', density: 'density' };
         let kdeTable;
 
-        const minVal = agg(inTable, op.min(field)) - bandwidth * 3;
-        const maxVal = agg(inTable, op.max(field)) + bandwidth * 3;
+        const minVal = agg(inTable, op.min(field));
+        const maxVal = agg(inTable, op.max(field));
         console.log({ minVal, maxVal });
         const partitions = inTable.partitions();
         for (let i = 0; i < partitions.length; i++) {
