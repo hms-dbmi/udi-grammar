@@ -25,12 +25,13 @@ const props = defineProps<TestMultipleSpecsProps>();
 <style scoped lang="scss">
 .flex-container {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   flex-direction: row;
 }
 .inner-container {
   flex: 1;
-  min-width: 300px;
-  max-width: 600px;
+  min-width: 600px;
+  max-width: 1200px;
 }
 </style>
