@@ -2,8 +2,8 @@ import type { Domain, RowMapping } from './GrammarTypes';
 import { interpolateYlOrRd, schemeSet3 } from 'd3-scale-chromatic';
 
 export function getDomainLookupKey(mapping: RowMapping): string {
-  const { field, type } = mapping;
-  return `${field}¶${type}`;
+  const { column, field, type } = mapping;
+  return `${column}¶${field}¶${type}`;
 }
 
 export interface ExtendedRowMapping extends RowMapping {
