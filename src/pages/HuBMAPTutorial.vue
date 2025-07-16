@@ -10,7 +10,7 @@ const editorStore = useEditorStore();
 
 <template>
   <q-page class="column items-center justify-start q-ma-md">
-    <div class="text-column q-mt-lg q-ml-lg q-mr-lg">
+    <div class="tutorial-container q-mt-lg">
       <p class="text-h4 text-primary text-bold">
         HuBMAP Visualization Tutorial
       </p>
@@ -45,6 +45,7 @@ const editorStore = useEditorStore();
           {{ example.description }}
         </div>
 
+        
         <!-- Spec / Code panel -->
         <div class="col-12 col-md-6">
           <q-card flat bordered class="q-pa-md bg-grey-1 full-height">
@@ -75,6 +76,11 @@ const editorStore = useEditorStore();
 
 
 <style scoped>
+.tutorial-container {
+  width: 90%;
+  margin: 0 auto;
+}
+
 .full-width {
   width: 100%;
 }
