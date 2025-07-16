@@ -6,8 +6,8 @@ const links = {
 
 export const tutorialExamples: Example[] = [
   {
-    name: 'Table',
-    description: 'This is a plain table of raw metadata for every available donor, with no transformations applied. All that is provided is the source and the representation spec.',
+    name: '1. Plain Table',
+    description: 'This is a table of raw metadata for every available dataset, with no transformations applied. All that is provided is the source and the representation spec.',
     spec: {
       source: [{ name: 'datasets', source: links.datasets }],
       representation: [
