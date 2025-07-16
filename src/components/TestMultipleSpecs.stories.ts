@@ -1,6 +1,4 @@
 // import { fn } from '@storybook/test'
-
-import { transform } from 'lodash';
 import TestMultipleSpecs from './TestMultipleSpecs.vue';
 
 // export const ActionsData = {
@@ -11,7 +9,7 @@ import TestMultipleSpecs from './TestMultipleSpecs.vue';
 export default {
   component: TestMultipleSpecs,
   tags: ['autodocs'],
-  title: 'Multiple Interactions',
+  title: 'Interactions',
   //👇 Our exports that end in "Data" are not stories.
   // excludeStories: /.*Data$/,
   // args: {
@@ -217,6 +215,117 @@ export const ScatterOverviewDetail = {
             { encoding: 'y', field: 'height_value', type: 'quantitative' },
             { encoding: 'x', field: 'weight_value', type: 'quantitative' },
           ],
+        },
+      },
+    ],
+  },
+};
+
+export const ScatterFilter = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+              domain: [60, 200],
+            },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              domain: [0, 160],
+            },
+          ],
+          select: {
+            name: 'blargen-flargen',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'blargen-flargen',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+              domain: [60, 200],
+            },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              domain: [0, 160],
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const ScatterFilterSelf = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'filter-self',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+              domain: [60, 200],
+            },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              domain: [0, 160],
+            },
+          ],
+          select: {
+            name: 'filter-self',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
         },
       },
     ],

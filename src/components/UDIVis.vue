@@ -4,9 +4,11 @@ import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
 import type { UDIGrammar, VisualizationLayer } from './GrammarTypes';
+import type { RangeSelection } from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 const dataSourcesStore = useDataSourcesStore();
 import { storeToRefs } from 'pinia';
+import { isEmpty } from 'lodash';
 
 const { loading, selectionHash } = storeToRefs(dataSourcesStore);
 
@@ -124,6 +126,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   let selectParam: {
     name: string;
     select: { type: 'point' | 'interval'; encodings?: string[] };
+    value?: RangeSelection | null;
   } | null = null;
   const outputLayers = inputLayers.map((layer) => {
     const mapping = Array.isArray(layer.mapping)
@@ -155,6 +158,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       if (layer.mark === 'area' && encoding === 'y') {
         vegaEncoding[encoding].stack = false;
       }
+      // TODO: map our domain/range to vega format domain/range
       if ('domain' in map) {
         if (vegaEncoding[encoding].scale == null) {
           vegaEncoding[encoding].scale = {};
@@ -182,10 +186,19 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       if (layer.select.how.type === 'interval') {
         selectParam.select['encodings'] = layer.select.how.on.split('');
       }
-      dataSourcesStore.watchDataSelection(
+      const { alreadyExists } = dataSourcesStore.watchDataSelection(
         'donors', // TODO: figure out which data source to use here.
         layer.select.name,
       );
+      if (alreadyExists) {
+        const currentSelection = dataSourcesStore.getDataSelection(
+          layer.select.name,
+        );
+        if (currentSelection && !isEmpty(currentSelection)) {
+          selectParam.value = currentSelection;
+        }
+      }
+
       signalKeys.value = [layer.select.name];
     }
 
@@ -219,7 +232,7 @@ const debugVegaData = ref();
     <TableComponent :data="transformedData" :spec="parsedSpec" v-else />
     <!-- <hr />
     <div>
-      {{ selectionHash }}
+      {{ vegaLiteSpec }}
     </div> -->
   </template>
   <template v-else>

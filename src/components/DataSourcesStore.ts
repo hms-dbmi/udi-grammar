@@ -43,7 +43,7 @@ export interface DataSelections {
   };
 }
 
-interface RangeSelection {
+export interface RangeSelection {
   [field: string]: [min: number, max: number];
 }
 
@@ -51,14 +51,18 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   const dataSources = ref<DataSourcesState>({});
   const dataSelections = ref<DataSelections>({});
 
-  function watchDataSelection(dataSourceKey: string, selectionName: string) {
+  function watchDataSelection(
+    dataSourceKey: string,
+    selectionName: string,
+  ): { alreadyExists: boolean } {
     if (selectionName in dataSelections.value) {
-      return;
+      return { alreadyExists: true };
     }
     dataSelections.value[selectionName] = {
       dataSourceKey,
       selection: null,
     };
+    return { alreadyExists: false };
   }
 
   function updateDataSelection(
@@ -70,6 +74,13 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     }
     dataSelections.value[selectionName]!.selection = selection;
     selectionHash.value = JSON.stringify(dataSelections.value);
+  }
+
+  function getDataSelection(selectionName: string): RangeSelection | null {
+    if (!(selectionName in dataSelections.value)) {
+      throw new Error(`Selection name ${selectionName} not found`);
+    }
+    return dataSelections.value[selectionName]!.selection;
   }
 
   function RangeSelectionToArqueroFilter(
@@ -426,6 +437,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     initDataSources,
     getDataObject,
     watchDataSelection,
+    getDataSelection,
     updateDataSelection,
     dataSelections,
   };
