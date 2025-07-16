@@ -75,7 +75,7 @@ import { tutorialExamples } from 'src/specs/TutorialSpecs';
 .code-block {
   font-family: monospace;
   font-size: 13px;
-  max-height: 300px;
+  max-height: 400px;
   overflow: auto;
   background-color: #f5f5f5;
   line-height: 1.4;
