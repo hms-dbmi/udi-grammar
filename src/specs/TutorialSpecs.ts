@@ -17,6 +17,7 @@ export const tutorialExamples: Example[] = [
         },
       ],
     },
+    highlightLines: [1, 2, 3],
   },
   {
     name: 'Datasets by Organ',

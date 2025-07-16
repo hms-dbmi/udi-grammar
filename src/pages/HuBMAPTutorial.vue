@@ -29,6 +29,21 @@ import { tutorialExamples } from 'src/specs/TutorialSpecs';
           {{ example.description }}
         </div>
 
+        <!-- Spec / Code panel -->
+        <div class="col-12 col-md-6">
+          <q-card flat bordered class="q-pa-md bg-grey-1 full-height">
+            <div class="code-block">
+              <div
+                v-for="(line, i) in JSON.stringify(example.spec, null, 2).split('\n')"
+                :key="i"
+                :class="['code-line', { 'highlight-line': example.highlightLines?.includes(i + 1) }]"
+              >
+                {{ line }}
+              </div>
+            </div>
+          </q-card>
+        </div>
+
         <!-- Visualization -->
         <div class="col-12 col-md-6">
           <q-card flat bordered class="q-pa-md viz-container full-height">
@@ -36,14 +51,6 @@ import { tutorialExamples } from 'src/specs/TutorialSpecs';
           </q-card>
         </div>
 
-          <!-- Spec / Code panel -->
-          <div class="col-12 col-md-6">
-            <q-card flat bordered class="q-pa-md bg-grey-1 full-height">
-              <pre style="max-height: 300px; overflow: auto;">
-        {{ JSON.stringify(example.spec, null, 2) }}
-              </pre>
-            </q-card>
-          </div>
         <q-separator class="q-my-md" />
       </div>
     </div>
@@ -63,5 +70,22 @@ import { tutorialExamples } from 'src/specs/TutorialSpecs';
 .viz-container {
   width: 100%;
   min-height: 300px;
+}
+
+.code-block {
+  font-family: monospace;
+  font-size: 13px;
+  max-height: 300px;
+  overflow: auto;
+  background-color: #f5f5f5;
+  line-height: 1.4;
+}
+
+.code-line {
+  white-space: pre;
+}
+
+.highlight-line {
+  background-color: #fffbcc;
 }
 </style>

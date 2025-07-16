@@ -5,6 +5,7 @@ export interface Example {
   spec: UDIGrammar;
   description?: string;
   thumbnail?: string;
+  highlightLines?: number[];
 }
 
 export interface ExampleGroup {
