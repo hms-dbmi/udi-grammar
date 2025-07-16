@@ -165,7 +165,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     namedTables: Map<string, ColumnTable>,
     dataTransformations: DataTransformation[],
   ): ColumnTable {
-    console.log('perform data transforations');
+    // console.log('perform data transforations');
     const key = namedTables.keys().next().value ?? '';
     const table = namedTables.get(key);
     if (!table) {
@@ -275,7 +275,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           const filter = RangeSelectionToArqueroFilter(
             dataSelections.value[transform.filter.name]?.selection ?? null,
           );
-          console.log('filter', filter);
+          // console.log('filter', filter);
           if (filter) {
             currentTable.table = inTable.filter(filter).reify();
           }
@@ -344,7 +344,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
         const minVal = agg(inTable, op.min(field));
         const maxVal = agg(inTable, op.max(field));
-        console.log({ minVal, maxVal });
+        // console.log({ minVal, maxVal });
         const partitions = inTable.partitions();
         for (let i = 0; i < partitions.length; i++) {
           const partition = partitions[i];

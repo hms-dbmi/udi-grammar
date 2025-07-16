@@ -40,14 +40,14 @@ function updateVegaChart() {
 
   vegaEmbed(vegaContainer.value, specObject)
     .then((result) => {
-      console.log('Chart rendered successfully');
+      // console.log('Chart rendered successfully');
       errorMessage.value = null;
       const view = result.view;
       for (const signalKey of props.signalKeys) {
         // replace "-" with "_" in signalKey since Vega signals cannot contain "-"
         const signalKeyFormatted = signalKey.replace(/-/g, '_');
         view.addSignalListener(signalKeyFormatted, (name, value) => {
-          console.log('Selection changed:', value);
+          // console.log('Selection changed:', value);
           dataSourcesStore.updateDataSelection(signalKey, value);
         });
       }
