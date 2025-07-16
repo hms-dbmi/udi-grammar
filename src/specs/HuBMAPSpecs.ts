@@ -54,8 +54,9 @@ export const hubmapExampleGroups: ExampleGroup[] = [
         spec: {
           source: { name: 'datasets', source: links.datasets },
           transformation: [
+            { derive: { organ: `d.origin_samples_unique_mapped_organs` } },
             {
-              groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+              groupby: ['organ', 'assay_category'],
             },
             {
               rollup: {
@@ -67,7 +68,7 @@ export const hubmapExampleGroups: ExampleGroup[] = [
             mark: 'bar',
             mapping: [
               { encoding: 'x', field: 'count', type: 'quantitative' },
-              { encoding: 'y', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+              { encoding: 'y', field: 'organ', type: 'nominal' },
               { encoding: 'color', field: 'assay_category', type: 'nominal' },
             ],
           },
@@ -79,8 +80,9 @@ export const hubmapExampleGroups: ExampleGroup[] = [
         spec: {
           source: { name: 'datasets', source: links.datasets },
           transformation: [
+            { derive: { organ: `d.origin_samples_unique_mapped_organs` } },
             {
-              groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+              groupby: ['organ', 'assay_category'],
             },
             {
               rollup: {
@@ -92,8 +94,15 @@ export const hubmapExampleGroups: ExampleGroup[] = [
             {
               mark: 'rect',
               mapping: [
-                { encoding: 'color', field: 'count', type: 'quantitative' },
-                { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+                { encoding: 'color',
+                  field: 'count',
+                  type: 'quantitative',
+                  range: [
+                    "#eafab9",
+                    "#528aeb"
+                  ], 
+                },
+                { encoding: 'x', field: 'organ', type: 'nominal' },
                 { encoding: 'y', field: 'assay_category', type: 'nominal' },
               ],
             },
@@ -101,7 +110,7 @@ export const hubmapExampleGroups: ExampleGroup[] = [
               mark: 'text',
               mapping: [
                 { encoding: 'text', field: 'count', type: 'quantitative' },
-                { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+                { encoding: 'x', field: 'organ', type: 'nominal' },
                 { encoding: 'y', field: 'assay_category', type: 'nominal' },
               ],
             },

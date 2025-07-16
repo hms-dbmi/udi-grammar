@@ -1,6 +1,10 @@
 <script setup lang="ts">
+
 import UDIVis from 'src/components/UDIVis.vue';
 import { tutorialExamples } from 'src/specs/TutorialSpecs';
+import { useEditorStore } from 'src/stores/EditorStore';
+
+const editorStore = useEditorStore();
 
 </script>
 
@@ -21,9 +25,21 @@ import { tutorialExamples } from 'src/specs/TutorialSpecs';
         class="q-mb-xl full-width"
       >
       
-        <!-- Example Header -->
-        <div class="text-h5 text-bold text-primary q-mb-sm">
-          {{ example.name }}
+        <!-- Visualization Header -->
+        <!-- Visualization heading and button -->
+        <div class="row items-center q-mb-md">
+          <div class="text-subtitle1 text-bold text-primary">
+            {{ example.name }}
+          </div>
+          <q-btn
+            color="primary"
+            rounded
+            no-caps
+            icon-right="open_in_new"
+            :to="editorStore.getUrlWithSpec(example.spec)"
+            label="Editor"
+            class="q-ml-md"
+          />
         </div>
         <div class="text-body1 q-mb-md">
           {{ example.description }}
