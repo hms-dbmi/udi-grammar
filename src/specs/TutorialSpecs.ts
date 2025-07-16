@@ -6,8 +6,8 @@ const links = {
 
 export const tutorialExamples: Example[] = [
   {
-    name: '1. Plain Table',
-    description: 'This is a table of raw metadata for every available dataset, with no transformations applied. All that is provided is the source and the representation spec.',
+    name: '1. Simple Table',
+    description: 'This is a table of raw metadata for every available dataset, with no transformations applied. All that is defined is the source and the representation, which specifies that all data fields should be shown as rows of text.',
     spec: {
       source: [{ name: 'datasets', source: links.datasets }],
       representation: [
@@ -17,10 +17,11 @@ export const tutorialExamples: Example[] = [
         },
       ],
     },
-    highlightLines: [1, 2, 3],
+    highlightLines: [5, 13, 15],
   },
   {
-    name: 'Datasets by Organ',
+    name: '2. Bar Chart',
+    description: 'We can modify the previous spec to create a bar chart that shows the number of datasets per organ. This is done by applying a transformation that counts the datasets by their organ of origin, then displays these counts using a simple bar chart. We change the mark from "text" to "bar", and specify the x and y encodings to represent the organ and count, respectively.',
     spec: {
       source: { name: 'datasets', source: links.datasets },
       transformation: [
@@ -37,9 +38,10 @@ export const tutorialExamples: Example[] = [
         ],
       },
     },
+    highlightLines: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 35, 36, 37, 40, 41, 42]
   },
   {
-    name: 'Datasets by Assay and Organ',
+    name: '3. Stacked Bar Chart',
     spec: {
       source: { name: 'datasets', source: links.datasets },
       transformation: [
@@ -55,8 +57,8 @@ export const tutorialExamples: Example[] = [
       representation: {
         mark: 'bar',
         mapping: [
-          { encoding: 'x', field: 'count', type: 'quantitative' },
-          { encoding: 'y', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+          { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+          { encoding: 'y', field: 'count', type: 'quantitative' },
           { encoding: 'color', field: 'assay_category', type: 'nominal' },
         ],
       },
