@@ -332,6 +332,161 @@ export const ScatterFilterSelf = {
   },
 };
 
+export const ScatterFilterSelfMultiple = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'filter-self',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+              domain: [60, 200],
+            },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              domain: [0, 160],
+            },
+          ],
+          select: {
+            name: 'filter-self',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'filter-self-2',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+              domain: [60, 200],
+            },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              domain: [0, 160],
+            },
+          ],
+          select: {
+            name: 'filter-self-2',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'filter-self-3',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+              domain: [60, 200],
+            },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              domain: [0, 160],
+            },
+          ],
+          select: {
+            name: 'filter-self-3',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'filter-self-4',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+              domain: [60, 200],
+            },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              domain: [0, 160],
+            },
+          ],
+          select: {
+            name: 'filter-self-4',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+    ],
+  },
+};
+
 export const ScatterTable = {
   args: {
     specs: [
@@ -935,6 +1090,61 @@ export const CrossFilterStripPlot = {
               domain: { min: 0, max: 100 },
             },
           ],
+        },
+      },
+    ],
+  },
+};
+
+export const PointSelection = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'scatter-select',
+            },
+          },
+          {
+            groupby: 'sex',
+          },
+          {
+            rollup: {
+              sex_count: { op: 'count' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            { encoding: 'x', field: 'sex', type: 'nominal' },
+            { encoding: 'y', field: 'sex_count', type: 'quantitative' },
+          ],
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+          ],
+          select: {
+            name: 'scatter-select',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
         },
       },
     ],
