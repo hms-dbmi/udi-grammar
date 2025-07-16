@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import UDIVis from 'src/components/UDIVis.vue';
-import { hubmapExampleGroups } from 'src/specs/HuBMAPSpecs';
-import { useEditorStore } from 'src/stores/EditorStore';
+import { tutorialExamples } from 'src/specs/TutorialSpecs';
+// import { useEditorStore } from 'src/stores/EditorStore';
 
-const editorStore = useEditorStore();
+// const editorStore = useEditorStore();
 </script>
 
 <template>
@@ -17,56 +17,26 @@ const editorStore = useEditorStore();
         showing HuBMAP dataset counts by source organ and assay type.
       </p>
     <div
-      v-for="(group, groupIndex) in hubmapExampleGroups"
-      :key="groupIndex"
+      v-for="(example, exampleIndex) in tutorialExamples"
+      :key="exampleIndex"
       class="q-mb-xl full-width"
     >
-      <!-- Entity heading -->
+      <!-- Visualization heading -->
       <div class="text-h5 text-bold text-primary q-mb-md">
-        {{ group.name }}
+        {{ example.name }}
       </div>
 
-      <!-- Entity description -->
+      <!-- Visualization description -->
       <div class="text-body1 q-mb-md">
-        {{ group.description }}
+        {{ example.description }}
       </div>
 
-      <q-separator class="q-my-md" />
-
-      <!-- Example visualizations -->
-      <div
-        v-for="(example, exampleIndex) in group.examples"
-        :key="exampleIndex"
-        class="q-mb-xl full-width"
-      >
-        <!-- Visualization heading and button -->
-        <div class="row items-center q-mb-md">
-          <div class="text-subtitle1 text-bold text-primary">
-            {{ example.name }}
-          </div>
-          <q-btn
-            color="primary"
-            rounded
-            no-caps
-            icon-right="open_in_new"
-            :to="editorStore.getUrlWithSpec(example.spec)"
-            label="Editor"
-            class="q-ml-md"
-          />
-        </div>
-
-        <!-- Visualization description -->
-        <div class="text-subtitle1 q-mb-sm">
-          {{ example.description }}
-        </div>
-
-        <!-- Visualization rendering -->
+      <!-- Visualization rendering -->
         <div class="viz-container">
           <UDIVis :spec="example.spec" />
         </div>
 
-        <q-separator class="q-my-md" />
-      </div>
+      <q-separator class="q-my-md" />
     </div>
     </div>
   </q-page>
