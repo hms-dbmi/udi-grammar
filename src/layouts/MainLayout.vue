@@ -21,7 +21,7 @@
           <q-route-tab no-caps to="/Editor" label="Editor" />
           <q-route-tab no-caps to="/HuBMAPExamples" label="HuBMAP Examples" />
           <q-route-tab no-caps to="/HuBMAPDemo" label="HuBMAP Demo" />
-          <q-route-tab no-caps to="/HuBMAPTutorial" label="Tutorial" />
+          <q-route-tab no-caps to="/HuBMAPTutorial" label="HuBMAP Tutorial" />
         </q-tabs>
         <q-space />
         <!-- github -->
