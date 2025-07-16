@@ -26,7 +26,6 @@ const editorStore = useEditorStore();
       >
       
         <!-- Visualization Header -->
-        <!-- Visualization heading and button -->
         <div class="row items-center q-mb-md">
           <div class="text-subtitle1 text-bold text-primary">
             {{ example.name }}

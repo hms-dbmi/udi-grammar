@@ -10,12 +10,10 @@ export const tutorialExamples: Example[] = [
     description: 'This is a table of raw metadata for every available dataset, with no transformations applied. All that is defined is the source and the representation, which specifies that all data fields should be shown as rows of text.',
     spec: {
       source: [{ name: 'datasets', source: links.datasets }],
-      representation: [
-        {
+      representation: {
           mark: 'row',
           mapping: [{ mark: 'text', encoding: 'text', field: '*', type: 'nominal' }],
-        },
-      ],
+      },
     },
   },
   {
@@ -27,14 +25,25 @@ export const tutorialExamples: Example[] = [
         { derive: { organ: `d.origin_samples_unique_mapped_organs` } },
         { groupby: ['organ'] },
         { rollup: { count: { op: 'count' } } },
+        { orderby: { field: 'count', order: 'desc' } },
       ],
-      representation: {
-        mark: 'bar',
-        mapping: [
-          { encoding: 'x', field: 'organ', type: 'nominal' },
-          { encoding: 'y', field: 'count', type: 'quantitative' },
-        ],
-      },
+      representation: [
+        // {
+        //   mark: 'row',
+        //   mapping: [
+        //     { mark: 'text', encoding: 'text', field: 'organ', type: 'nominal' },
+        //     { mark: 'bar', encoding: 'y', field: 'organ', type: 'nominal' },
+        //     { mark: 'bar', encoding: 'x', field: 'count', type: 'quantitative' },
+        //   ],
+        // },
+        {
+          mark: 'bar',
+          mapping: [
+            { encoding: 'x', field: 'organ', type: 'nominal' },
+            { encoding: 'y', field: 'count', type: 'quantitative' },
+          ],
+        },
+      ],
     },
     highlightLines: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 26, 29, 30, 31, 33, 34, 35, 36, 37]
   },
