@@ -522,3 +522,421 @@ export const KDEScatterTable = {
     ],
   },
 };
+
+export const CrossFilterKDE = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+            },
+          },
+          {
+            kde: {
+              field: 'age_value',
+              output: {
+                sample: 'age_value',
+                density: 'density',
+              },
+            },
+          },
+        ],
+        representation: {
+          mark: 'area',
+          mapping: [
+            { encoding: 'y', field: 'density', type: 'quantitative' },
+            {
+              encoding: 'x',
+              field: 'age_value',
+              type: 'quantitative',
+              domain: [0, 90],
+            },
+          ],
+          select: {
+            name: 'age-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+            },
+          },
+          {
+            kde: {
+              field: 'weight_value',
+              output: {
+                sample: 'weight_value',
+                density: 'density',
+              },
+            },
+          },
+        ],
+        representation: {
+          mark: 'area',
+          mapping: [
+            { encoding: 'y', field: 'density', type: 'quantitative' },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              domain: [0, 160],
+            },
+          ],
+          select: {
+            name: 'weight-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+            },
+          },
+          {
+            kde: {
+              field: 'height_value',
+              output: {
+                sample: 'height_value',
+                density: 'density',
+              },
+            },
+          },
+        ],
+        representation: {
+          mark: 'area',
+          mapping: [
+            { encoding: 'y', field: 'density', type: 'quantitative' },
+            {
+              encoding: 'x',
+              field: 'height_value',
+              type: 'quantitative',
+              domain: [60, 200],
+            },
+          ],
+          select: {
+            name: 'height-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: 'd.height_value && d.weight_value && d.age_value',
+          },
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+            },
+          },
+          {
+            orderby: {
+              field: 'height_value',
+              order: 'desc',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              mark: 'bar',
+              field: 'height_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 60, max: 200 },
+            },
+            {
+              mark: 'bar',
+              field: 'weight_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 0, max: 160 },
+            },
+            {
+              mark: 'bar',
+              field: 'age_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 0, max: 100 },
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const CrossFilterStripPlot = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'age_value',
+              type: 'quantitative',
+              domain: [0, 90],
+            },
+          ],
+          select: {
+            name: 'age-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              domain: [0, 160],
+            },
+          ],
+          select: {
+            name: 'weight-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'height_value',
+              type: 'quantitative',
+              domain: [60, 200],
+            },
+          ],
+          select: {
+            name: 'height-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: 'd.height_value && d.weight_value && d.age_value',
+          },
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+            },
+          },
+          {
+            orderby: {
+              field: 'height_value',
+              order: 'desc',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              mark: 'bar',
+              field: 'height_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 60, max: 200 },
+            },
+            {
+              mark: 'bar',
+              field: 'weight_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 0, max: 160 },
+            },
+            {
+              mark: 'bar',
+              field: 'age_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 0, max: 100 },
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
