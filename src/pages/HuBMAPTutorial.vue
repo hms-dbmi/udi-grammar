@@ -11,7 +11,7 @@ import { tutorialExamples } from 'src/specs/TutorialSpecs';
         HuBMAP Visualization Tutorial
       </p>
       <p class="text-body1 q-mb-lg">
-        This tutorial demonstrates how the UDI grammar can be used to create a heatmap visualization
+        This tutorial goes through the process of how the UDI grammar can be used to create a heatmap visualization
         showing HuBMAP dataset counts by source organ and assay type.
       </p>
 

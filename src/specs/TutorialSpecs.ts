@@ -95,7 +95,14 @@ export const tutorialExamples: Example[] = [
           mapping: [
             { encoding: 'x', field: 'organ', type: 'nominal' },
             { encoding: 'y', field: 'assay_category', type: 'nominal' },
-            { encoding: 'color', field: 'count', type: 'quantitative' },
+            { encoding: 'color',
+              field: 'count',
+              type: 'quantitative',
+              range: [
+                "#eafab9",
+                "#528aeb"
+              ]              
+            },
           ],
         },
         {
@@ -108,6 +115,6 @@ export const tutorialExamples: Example[] = [
         },
       ],
     },
-    highlightLines: [28, 37, 38, 42, 43, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66],
+    highlightLines: [28, 37, 38, 42, 43, 44, 45, 46, 47, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70],
   },
 ];
