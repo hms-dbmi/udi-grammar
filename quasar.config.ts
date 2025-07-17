@@ -81,6 +81,9 @@ export default defineConfig((/* ctx */) => {
                 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
               useFlatConfig: true,
             },
+            overlay: {
+              initialIsOpen: false, // set to true to show overlay on startup
+            },
           },
           { server: false },
         ],
