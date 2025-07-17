@@ -4,7 +4,7 @@ import type { Example } from "src/specs/types";
 export const tutorialExamples: Example[] = [
   {
     name: '1. Simple Table',
-    description: 'This is a table of raw metadata for every available dataset, with no transformations applied. All that is defined is the source and the representation, which specifies that all data fields should be shown as rows of text.',
+    description: 'The simplest specification just lists the source of the data. That is it! If no representation is specified a table will display all fields in the data.',
     spec: {
       source: { name: 'datasets', source: links.datasets },
     },
