@@ -1096,6 +1096,84 @@ export const CrossFilterStripPlot = {
   },
 };
 
+export const FilterLayeredViz = {
+  args: {
+    specs: [
+      // {
+      //   source: {
+      //     name: 'datasets',
+      //     source: './data/datasets.csv',
+      //   },
+      //   transformation: [
+      //     {
+      //       filter: { name: 'filter-from-heatmap' },
+      //     },
+      //   ],
+      //   representation: {
+      //     mark: 'point',
+      //     mapping: [
+      //       { encoding: 'x', field: 'created_timestamp', type: 'quantitative' },
+      //       {
+      //         encoding: 'y',
+      //         field: 'last_modified_timestamp',
+      //         type: 'quantitative',
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        source: {
+          name: 'datasets',
+          source: './data/datasets.csv',
+        },
+        transformation: [
+          {
+            groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+          },
+          {
+            rollup: {
+              count: { op: 'count' },
+            },
+          },
+        ],
+        representation: [
+          {
+            mark: 'rect',
+            mapping: [
+              { encoding: 'color', field: 'count', type: 'quantitative' },
+              {
+                encoding: 'y',
+                field: 'origin_samples_unique_mapped_organs',
+                type: 'nominal',
+              },
+              { encoding: 'x', field: 'assay_category', type: 'nominal' },
+            ],
+          },
+          {
+            mark: 'text',
+            mapping: [
+              { encoding: 'text', field: 'count', type: 'quantitative' },
+              {
+                encoding: 'y',
+                field: 'origin_samples_unique_mapped_organs',
+                type: 'nominal',
+              },
+              { encoding: 'x', field: 'assay_category', type: 'nominal' },
+            ],
+            select: {
+              name: 'filter-from-heatmap',
+              how: {
+                type: 'interval',
+                on: 'xy',
+              },
+            },
+          },
+        ],
+      },
+    ],
+  },
+};
+
 // export const PointSelection = {
 //   args: {
 //     specs: [

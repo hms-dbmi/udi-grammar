@@ -122,11 +122,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   if (!Array.isArray(inputLayers)) {
     throw new Error('invalid spec passed to vega conversion');
   }
-  let selectParam: {
-    name: string;
-    select: { type: 'point' | 'interval'; encodings?: string[] };
-    value?: RangeSelection | null;
-  } | null = null;
+
   const outputLayers = inputLayers.map((layer) => {
     const mapping = Array.isArray(layer.mapping)
       ? layer.mapping
@@ -175,6 +171,11 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       }
     }
 
+    let selectParam: {
+      name: string;
+      select: { type: 'point' | 'interval'; encodings?: string[] };
+      value?: RangeSelection | null;
+    } | null = null;
     if (layer.select) {
       selectParam = {
         name: layer.select.name,
@@ -193,15 +194,22 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       signalKeys.value = [layer.select.name];
     }
 
-    return {
+    const outputLayer: {
+      mark: VisualizationLayer['mark'];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      encoding: any;
+      params?: (typeof selectParam)[];
+    } = {
       mark: layer.mark,
       encoding: vegaEncoding,
     };
+    if (selectParam) {
+      outputLayer.params = [selectParam];
+    }
+
+    return outputLayer;
   });
   vegaSpec['layer'] = outputLayers;
-  if (selectParam) {
-    vegaSpec['params'] = [selectParam];
-  }
 
   return JSON.stringify(vegaSpec);
 }

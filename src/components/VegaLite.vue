@@ -60,13 +60,14 @@ function initVegaChart() {
   if (specObject.data && specObject.data.values) {
     delete specObject.data.values;
   }
-
+  // console.log('initializing vega chart with spec:', specObject);
   vegaEmbed(vegaContainer.value, specObject as VisualizationSpec)
     .then((result) => {
       errorMessage.value = null;
       const view = result.view;
       vegaView.value = view;
       for (const signalKey of props.signalKeys) {
+        // console.log('Adding signal listener for:', signalKey);
         // replace "-" with "_" in signalKey since Vega signals cannot contain "-"
         const signalKeyFormatted = signalKey.replace(/-/g, '_');
         view.addSignalListener(signalKeyFormatted, (name, value) => {
