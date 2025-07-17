@@ -1096,31 +1096,11 @@ export const CrossFilterStripPlot = {
   },
 };
 
+// Note, the brush doesn't actually do anything in this example, but this was to debug
+// an error where layered specs weren't rendering if a brush was present.
 export const FilterLayeredViz = {
   args: {
     specs: [
-      // {
-      //   source: {
-      //     name: 'datasets',
-      //     source: './data/datasets.csv',
-      //   },
-      //   transformation: [
-      //     {
-      //       filter: { name: 'filter-from-heatmap' },
-      //     },
-      //   ],
-      //   representation: {
-      //     mark: 'point',
-      //     mapping: [
-      //       { encoding: 'x', field: 'created_timestamp', type: 'quantitative' },
-      //       {
-      //         encoding: 'y',
-      //         field: 'last_modified_timestamp',
-      //         type: 'quantitative',
-      //       },
-      //     ],
-      //   },
-      // },
       {
         source: {
           name: 'datasets',
