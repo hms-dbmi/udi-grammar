@@ -1,7 +1,5 @@
 // import { fn } from '@storybook/test'
 
-import { dom } from 'quasar';
-import TestMultipleSpecs from './TestMultipleSpecs.vue';
 import UDIVis from './UDIVis.vue';
 
 // export const ActionsData = {

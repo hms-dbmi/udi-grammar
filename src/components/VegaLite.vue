@@ -5,8 +5,17 @@ import { defineProps } from 'vue';
 import { watch } from 'vue';
 import { useDataSourcesStore } from './DataSourcesStore';
 import type { View } from 'vega';
+import type { VisualizationSpec } from 'vega-embed';
 import { changeset } from 'vega';
 const dataSourcesStore = useDataSourcesStore();
+import { isEmpty } from 'lodash';
+
+// our type is more specific than the one from vega-embed
+interface VegaSpecShim {
+  data: {
+    values?: object[];
+  };
+}
 
 const props = defineProps({
   spec: {
@@ -24,7 +33,7 @@ const vegaView = ref<View | null>(null);
 
 const errorMessage = ref();
 
-function parseSpec(): { success: boolean; specObject?: any } {
+function parseSpec(): { success: boolean; specObject?: VegaSpecShim } {
   let specObject = null;
   try {
     specObject = JSON.parse(props.spec);
@@ -44,7 +53,7 @@ function parseSpec(): { success: boolean; specObject?: any } {
 }
 
 function initVegaChart() {
-  console.log('init vega chart');
+  // console.log('init vega chart');
   const { success, specObject } = parseSpec();
   if (!success || !specObject) return;
 
@@ -52,7 +61,7 @@ function initVegaChart() {
     delete specObject.data.values;
   }
 
-  vegaEmbed(vegaContainer.value, specObject)
+  vegaEmbed(vegaContainer.value, specObject as VisualizationSpec)
     .then((result) => {
       errorMessage.value = null;
       const view = result.view;
@@ -79,10 +88,10 @@ onMounted(() => {
 });
 
 function updateVegaChart() {
-  console.log('update vega chart');
+  // console.log('update vega chart');
   if (!vegaView.value) return;
   const { success, specObject } = parseSpec();
-  if (!success) return;
+  if (!success || isEmpty(specObject)) return;
   vegaView.value
     .change(
       'udi_data',

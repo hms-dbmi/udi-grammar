@@ -8,7 +8,6 @@ import type { RangeSelection } from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 const dataSourcesStore = useDataSourcesStore();
 import { storeToRefs } from 'pinia';
-import { isEmpty } from 'lodash';
 
 const { loading, selectionHash } = storeToRefs(dataSourcesStore);
 
@@ -186,7 +185,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       if (layer.select.how.type === 'interval') {
         selectParam.select['encodings'] = layer.select.how.on.split('');
       }
-      const { alreadyExists } = dataSourcesStore.watchDataSelection(
+      dataSourcesStore.watchDataSelection(
         'donors', // TODO: figure out which data source to use here.
         layer.select.name,
       );
