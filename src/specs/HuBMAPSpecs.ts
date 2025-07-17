@@ -1,27 +1,5 @@
+import { links, thumbnails } from "src/specs/constants";
 import type { ExampleGroup } from "src/specs/types";
-
-const links = {
-  donors: 'http://localhost:5001/metadata/v0/udi/donors.tsv',
-  datasets: 'http://localhost:5001/metadata/v0/udi/datasets.tsv',
-  samples: 'http://localhost:5001/metadata/v0/udi/samples.tsv',
-};
-
-const thumbnails = {
-  donors: {
-    table: './data/hubmap_examples/thumbnails/donors/table.png',
-    by_sex: './data/hubmap_examples/thumbnails/donors/by-sex.png',
-    by_race_and_sex: './data/hubmap_examples/thumbnails/donors/by-race-and-sex.png',
-    by_age_and_sex: './data/hubmap_examples/thumbnails/donors/by-age-and-sex.png',
-  },
-  samples: {
-    by_organ: './data/hubmap_examples/thumbnails/samples/by-organ.png',
-  },
-  datasets: {
-    by_organ: './data/hubmap_examples/thumbnails/datasets/by-organ.png',
-    by_assay_and_organ_bar: './data/hubmap_examples/thumbnails/datasets/by-assay-and-organ-bar.png',
-    by_assay_and_organ_heatmap: './data/hubmap_examples/thumbnails/datasets/by-assay-and-organ-heatmap.png',
-  },
-};
 
 export const hubmapExampleGroups: ExampleGroup[] = [
   {

@@ -1,8 +1,5 @@
+import { links } from "src/specs/constants";
 import type { Example } from "src/specs/types";
-
-const links = {
-  datasets: 'http://localhost:5001/metadata/v0/udi/datasets.tsv',
-};
 
 export const tutorialExamples: Example[] = [
   {
