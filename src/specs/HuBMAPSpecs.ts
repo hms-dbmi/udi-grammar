@@ -103,16 +103,10 @@ export const hubmapExampleGroups: ExampleGroup[] = [
     examples: [
       {
         name: 'Table',
-        description: 'This is a plain table of raw metadata for every available donor, with no transformations applied. All that is provided is the source and the representation spec.',
+        description: 'This is a plain table of raw metadata for every available donor, with no transformations applied. All that is provided is the source.',
         thumbnail: thumbnails.donors.table,
         spec: {
-          source: [{ name: 'donors', source: links.donors }],
-          representation: [
-            {
-              mark: 'row',
-              mapping: [{ mark: 'text', encoding: 'text', field: '*', type: 'nominal' }],
-            },
-          ],
+          source: { name: 'donors', source: links.donors },
         },
       },
       {
