@@ -1,5 +1,6 @@
 // import { fn } from '@storybook/test'
 
+import { filter } from 'lodash';
 import UDIVis from './UDIVis.vue';
 
 // export const ActionsData = {
@@ -383,7 +384,7 @@ export const MultipleBarChartStackedRelativeReverse = {
         },
         {
           in: ['datasets', 'groupCounts'],
-          join: 'origin_samples_unique_mapped_organs',
+          join: { on: 'assay_category' },
           out: 'datasets',
         },
         {
