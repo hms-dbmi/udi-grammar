@@ -69,6 +69,7 @@ function initVegaChart() {
       for (const signalKey of props.signalKeys) {
         // console.log('Adding signal listener for:', signalKey);
         // replace "-" with "_" in signalKey since Vega signals cannot contain "-"
+        // TODO: I think if the key starts with a number they prepend an underscore
         const signalKeyFormatted = signalKey.replace(/-/g, '_');
         view.addSignalListener(signalKeyFormatted, (name, value) => {
           dataSourcesStore.updateDataSelection(signalKey, value);
