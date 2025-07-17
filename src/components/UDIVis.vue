@@ -100,7 +100,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     // data: { url: './data/penguins.csv' },
     width: 'container',
     // height: 'container',
-    data: { values: [] },
+    data: { name: 'udi_data', values: [] },
   };
 
   // add data
@@ -190,23 +190,6 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
         'donors', // TODO: figure out which data source to use here.
         layer.select.name,
       );
-      // console.log('wassup again...');
-      if (alreadyExists) {
-        // console.log('already exists');
-        const currentSelection = dataSourcesStore.getDataSelection(
-          layer.select.name,
-        );
-        if (currentSelection && !isEmpty(currentSelection)) {
-          // console.count(JSON.stringify(currentSelection));
-          selectParam.value = currentSelection;
-        }
-        // else {
-        //   console.count('empty selection');
-        // }
-      }
-      // else {
-      //   console.count('does not exist');
-      // }
 
       signalKeys.value = [layer.select.name];
     }

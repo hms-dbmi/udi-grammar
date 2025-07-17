@@ -4,6 +4,8 @@ import vegaEmbed from 'vega-embed';
 import { defineProps } from 'vue';
 import { watch } from 'vue';
 import { useDataSourcesStore } from './DataSourcesStore';
+import type { View } from 'vega';
+import { changeset } from 'vega';
 const dataSourcesStore = useDataSourcesStore();
 
 const props = defineProps({
@@ -18,11 +20,12 @@ const props = defineProps({
 });
 
 const vegaContainer = ref();
+const vegaView = ref<View | null>(null);
 
 const errorMessage = ref();
 
-function updateVegaChart() {
-  let specObject;
+function parseSpec(): { success: boolean; specObject?: any } {
+  let specObject = null;
   try {
     specObject = JSON.parse(props.spec);
   } catch (error: unknown) {
@@ -35,22 +38,33 @@ function updateVegaChart() {
     }
     // clear the container so the chart doesn't show up
     vegaContainer.value.innerHTML = '';
-    return;
+    return { success: false, specObject };
+  }
+  return { success: true, specObject };
+}
+
+function initVegaChart() {
+  console.log('init vega chart');
+  const { success, specObject } = parseSpec();
+  if (!success || !specObject) return;
+
+  if (specObject.data && specObject.data.values) {
+    delete specObject.data.values;
   }
 
   vegaEmbed(vegaContainer.value, specObject)
     .then((result) => {
-      // console.log('Chart rendered successfully');
       errorMessage.value = null;
       const view = result.view;
+      vegaView.value = view;
       for (const signalKey of props.signalKeys) {
         // replace "-" with "_" in signalKey since Vega signals cannot contain "-"
         const signalKeyFormatted = signalKey.replace(/-/g, '_');
         view.addSignalListener(signalKeyFormatted, (name, value) => {
-          // console.log('Selection changed:', value);
           dataSourcesStore.updateDataSelection(signalKey, value);
         });
       }
+      updateVegaChart();
     })
     .catch((error) => {
       console.error('Error rendering chart', error);
@@ -61,8 +75,24 @@ function updateVegaChart() {
 }
 
 onMounted(() => {
-  updateVegaChart();
+  initVegaChart();
 });
+
+function updateVegaChart() {
+  console.log('update vega chart');
+  if (!vegaView.value) return;
+  const { success, specObject } = parseSpec();
+  if (!success) return;
+  vegaView.value
+    .change(
+      'udi_data',
+      changeset()
+        .remove(() => true)
+        .insert(specObject.data.values ?? []),
+    )
+    .resize()
+    .runAsync();
+}
 
 watch(() => props.spec, updateVegaChart);
 </script>
