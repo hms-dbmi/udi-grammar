@@ -310,13 +310,13 @@ export const ScatterFilterSelf = {
               encoding: 'y',
               field: 'height_value',
               type: 'quantitative',
-              domain: [60, 200],
+              // domain: [60, 200],
             },
             {
               encoding: 'x',
               field: 'weight_value',
               type: 'quantitative',
-              domain: [0, 160],
+              // domain: [0, 160],
             },
           ],
           select: {
@@ -545,14 +545,26 @@ export const ScatterTable = {
               field: 'height_value',
               encoding: 'x',
               type: 'quantitative',
-              domain: { min: 60, max: 200 },
+              // domain: { min: 60, max: 200 },
             },
             {
               mark: 'bar',
               field: 'weight_value',
               encoding: 'x',
               type: 'quantitative',
-              domain: { min: 0, max: 160 },
+              // domain: { min: 0, max: 160 },
+            },
+            {
+              mark: 'text',
+              field: 'height_value',
+              encoding: 'text',
+              type: 'quantitative',
+            },
+            {
+              mark: 'text',
+              field: 'weight_value',
+              encoding: 'text',
+              type: 'quantitative',
             },
           ],
         },
@@ -715,7 +727,12 @@ export const CrossFilterKDE = {
         representation: {
           mark: 'area',
           mapping: [
-            { encoding: 'y', field: 'density', type: 'quantitative' },
+            {
+              encoding: 'y',
+              field: 'density',
+              type: 'quantitative',
+              domain: [0, 0.02],
+            },
             {
               encoding: 'x',
               field: 'age_value',
@@ -934,7 +951,7 @@ export const CrossFilterStripPlot = {
               encoding: 'x',
               field: 'age_value',
               type: 'quantitative',
-              domain: [0, 90],
+              // domain: [0, 90],
             },
           ],
           select: {
@@ -975,7 +992,7 @@ export const CrossFilterStripPlot = {
               encoding: 'x',
               field: 'weight_value',
               type: 'quantitative',
-              domain: [0, 160],
+              // domain: [0, 160],
             },
           ],
           select: {
@@ -1016,7 +1033,7 @@ export const CrossFilterStripPlot = {
               encoding: 'x',
               field: 'height_value',
               type: 'quantitative',
-              domain: [60, 200],
+              // domain: [60, 200],
             },
           ],
           select: {

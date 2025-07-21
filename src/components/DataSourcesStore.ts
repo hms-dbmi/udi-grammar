@@ -139,32 +139,63 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   function getDataObject(
     keys: string[],
     dataTransformations?: DataTransformation[],
-  ): object[] | null {
+  ): {
+    displayData: object[]; // only the data the should be displayed
+    allData: object[]; // all data (needed for full domains)
+    isDisplayDataSubset: boolean; // true if the returned data is a subset of the full data
+  } | null {
     if (loading.value) return null;
 
     // make copy of tables from data sources
-    const namedTables = new Map();
-    for (const key of keys) {
-      const dataInterface = getDataSource(key);
-      if (dataInterface === null) {
-        // continue;
-        throw new Error(`key not found in data sources: [${key}]`);
+    const getNamedTables = () => {
+      const namedTables = new Map();
+      for (const key of keys) {
+        const dataInterface = getDataSource(key);
+        if (dataInterface === null) {
+          // continue;
+          throw new Error(`key not found in data sources: [${key}]`);
+        }
+        namedTables.set(key, from(dataInterface.dest.reify()));
       }
-      namedTables.set(key, from(dataInterface.dest.reify()));
+      return namedTables;
+    };
+
+    const { data: dataTable, containsNamedFilter } = PerformDataTransformations(
+      getNamedTables(),
+      dataTransformations ?? [],
+      {
+        skipNamedFilters: false,
+      },
+    );
+    const displayData = dataTable.objects();
+
+    let allData = displayData;
+    if (containsNamedFilter) {
+      const { data: fullData } = PerformDataTransformations(
+        getNamedTables(),
+        dataTransformations ?? [],
+        {
+          skipNamedFilters: true,
+        },
+      );
+      allData = fullData.objects();
     }
 
-    const dataTable = PerformDataTransformations(
-      namedTables,
-      dataTransformations ?? [],
-    );
-
-    return dataTable.objects();
+    return {
+      displayData,
+      allData,
+      isDisplayDataSubset: containsNamedFilter,
+    };
   }
 
   function PerformDataTransformations(
     namedTables: Map<string, ColumnTable>,
     dataTransformations: DataTransformation[],
-  ): ColumnTable {
+    config?: {
+      skipNamedFilters?: boolean; // if true, skip named filters in transformations
+    },
+  ): { data: ColumnTable; containsNamedFilter: boolean } {
+    let containsNamedFilter = false;
     // console.log('perform data transforations');
     const key = namedTables.keys().next().value ?? '';
     const table = namedTables.get(key);
@@ -272,6 +303,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         if (typeof transform.filter === 'string') {
           currentTable.table = inTable.filter(transform.filter).reify();
         } else {
+          containsNamedFilter = true;
+          if (config?.skipNamedFilters) {
+            continue;
+          }
           const filter = RangeSelectionToArqueroFilter(
             dataSelections.value[transform.filter.name]?.selection ?? null,
           );
@@ -390,7 +425,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       }
       setOutTable(transform);
     }
-    return currentTable.table;
+    return { data: currentTable.table, containsNamedFilter };
   }
 
   function getArqueroAggregateFunction(aggFunc: AggregateFunction): TableExpr {

@@ -61,11 +61,92 @@ function buildVisualization(): void {
     return;
   }
 
+  if (isTransformedDataSubset.value) {
+    setDefaultDomains(parsedSpec.value, transformedDataFull.value);
+  }
+
   if (isVegaLiteCompatible(parsedSpec.value)) {
     vegaLiteSpec.value = convertToVegaSpec(parsedSpec.value);
     isVegaLiteComponent.value = true;
   } else {
     isVegaLiteComponent.value = false;
+  }
+}
+
+function setDefaultDomains(
+  spec: ParsedUDIGrammar,
+  data: object[] | null,
+): void {
+  if (!data || data.length === 0) return;
+  const firstObject = data[0] ?? {};
+  const fields = Object.keys(firstObject);
+  const numberDomainCache = new Map<string, [number, number]>();
+  const catDomainCache = new Map<string, unknown[]>();
+
+  for (const representation of spec.representation) {
+    const mark = representation.mark;
+    if (!representation.mapping) continue;
+    const mappingList = Array.isArray(representation.mapping)
+      ? representation.mapping
+      : [representation.mapping];
+    for (const mapping of mappingList) {
+      // @ts-expect-error: I'm checking if domain exists, don't give me a type checking saying domain might not exist.
+      if (mapping.domain) continue;
+      // @ts-expect-error: same, but for field.
+      if (!mapping.field) continue;
+      // @ts-expect-error: Again...
+      const field: string = mapping.field;
+      if (!fields.includes(field)) continue;
+      // @ts-expect-error: Again...
+      if (!mapping.type) continue;
+      // @ts-expect-error: Again...
+      const type: DataTypes = mapping.type;
+      if (type === 'quantitative') {
+        if (numberDomainCache.has(field)) {
+          // @ts-expect-error: Again...
+          const [min, max] = numberDomainCache.get(field);
+          if (mark === 'row') {
+            mapping.domain = { min, max };
+          } else {
+            mapping.domain = [min, max];
+          }
+        } else {
+          const values = data
+            .filter((d) => d[field] != null)
+            .map((d) => d[field]);
+          // const min = minBy(data, (d) => 0);
+          let min = Math.min(...values);
+          if (mark === 'bar') {
+            min = Math.min(min, 0);
+          }
+          // const min = Math.min(...values, 0);
+          const max = Math.max(...values);
+          const extent = max - min;
+          const padding = extent * 0.05;
+          let paddedMin = min;
+          if (min !== 0) {
+            paddedMin = min - padding;
+          }
+          const paddedMax = max + padding;
+          if (mark === 'row') {
+            mapping.domain = { min: paddedMin, max: paddedMax };
+          } else {
+            mapping.domain = [paddedMin, paddedMax];
+          }
+          numberDomainCache.set(field, [paddedMin, paddedMax]);
+        }
+      } else {
+        // TODO, check if row categorical fields work here.
+        if (catDomainCache.has(field)) {
+          mapping.domain = catDomainCache.get(field);
+        } else {
+          const values = data.map((d) => d[field]);
+          const uniqueValues = Array.from(new Set(values));
+          mapping.domain = uniqueValues;
+          catDomainCache.set(field, uniqueValues);
+        }
+      }
+    }
   }
 }
 
@@ -76,15 +157,22 @@ function isVegaLiteCompatible(spec: ParsedUDIGrammar): boolean {
 const transformError = ref();
 
 const transformedData = ref<object[] | null>(null);
+const transformedDataFull = ref<object[] | null>(null);
+const isTransformedDataSubset = ref<boolean>(false);
 
 function performDataTransformation(spec: ParsedUDIGrammar) {
   transformedData.value = null;
   try {
     transformError.value = null;
-    transformedData.value = dataSourcesStore.getDataObject(
+    const dataObjects = dataSourcesStore.getDataObject(
       spec.source.map((x) => x.name),
       spec.transformation,
     );
+    if (dataObjects == null) return;
+    const { allData, displayData, isDisplayDataSubset } = dataObjects;
+    transformedData.value = displayData;
+    transformedDataFull.value = allData;
+    isTransformedDataSubset.value = isDisplayDataSubset;
   } catch (error) {
     console.error('Failed to complete data transformation', error);
     transformError.value = error;
