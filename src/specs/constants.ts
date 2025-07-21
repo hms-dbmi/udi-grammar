@@ -1,11 +1,7 @@
 export const links = {
-  donors: './data/hubmap_examples/donors.tsv',
-  datasets: './data/hubmap_examples/datasets.tsv',
-  samples: './data/hubmap_examples/samples.tsv',
-  // TODO: Uncomment when this is available on prod
-  // donors: 'https://portal.hubmapconsortium.org/metadata/v0/udi/donors.tsv',
-  // datasets: 'https://portal.hubmapconsortium.org/metadata/v0/udi/datasets.tsv',
-  // samples: 'https://portal.hubmapconsortium.org/metadata/v0/udi/samples.tsv',
+  donors: 'https://portal.hubmapconsortium.org/metadata/v0/udi/donors.tsv',
+  datasets: 'https://portal.hubmapconsortium.org/metadata/v0/udi/datasets.tsv',
+  samples: 'https://portal.hubmapconsortium.org/metadata/v0/udi/samples.tsv',
 };
 
 export const thumbnails = {
