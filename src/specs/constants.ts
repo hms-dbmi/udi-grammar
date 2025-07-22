@@ -10,6 +10,7 @@ export const links = {
 export const thumbnails = {
   donors: {
     table: './data/hubmap_examples/thumbnails/donors/table.png',
+    visual_table: './data/hubmap_examples/thumbnails/donors/visual-table.png',
     by_sex: './data/hubmap_examples/thumbnails/donors/by-sex.png',
     by_race_and_sex: './data/hubmap_examples/thumbnails/donors/by-race-and-sex.png',
     by_age_and_sex: './data/hubmap_examples/thumbnails/donors/by-age-and-sex.png',

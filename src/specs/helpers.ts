@@ -1,5 +1,16 @@
 import type { RowMapping } from "src/components/GrammarTypes";
 
+export function getTextMapping(field: string): RowMapping[] {
+  return [
+    {
+      field,
+      encoding: 'text',
+      mark: 'text',
+      type: 'quantitative',
+    },
+  ];
+}
+
 export function getColorCategoryMapping(field: string): RowMapping[] {
   return [
     {
@@ -36,6 +47,10 @@ export function getColorBarMapping(field: string): RowMapping[] {
       encoding: 'color',
       mark: 'bar',
       type: 'quantitative',
+      range: [
+        "#eafab9",
+        "#528aeb"
+      ]  
     },
   ];
 }
