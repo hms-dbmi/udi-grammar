@@ -46,11 +46,7 @@ export function getColorBarMapping(field: string): RowMapping[] {
       field,
       encoding: 'color',
       mark: 'bar',
-      type: 'quantitative',
-      range: [
-        "#eafab9",
-        "#528aeb"
-      ]  
+      type: 'quantitative', 
     },
   ];
 }
