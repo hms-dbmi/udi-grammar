@@ -26,6 +26,10 @@ const props = defineProps({
     type: Array as () => string[],
     default: () => [],
   },
+  pointSelect: {
+    type: Object,
+    default: null,
+  },
 });
 
 const vegaContainer = ref();
@@ -66,6 +70,7 @@ function initVegaChart() {
       errorMessage.value = null;
       const view = result.view;
       vegaView.value = view;
+      console.log(props.signalKeys);
       for (const signalKey of props.signalKeys) {
         // console.log('Adding signal listener for:', signalKey);
         // replace "-" with "_" in signalKey since Vega signals cannot contain "-"
@@ -75,6 +80,31 @@ function initVegaChart() {
           dataSourcesStore.updateDataSelection(signalKey, value);
         });
       }
+      if (props.pointSelect) {
+        // if the signal is a point selection we I couldn't get signals
+        // to work with dynamic data, so click events it is!
+        view.addEventListener('click', function (event, item) {
+          let fields = props.pointSelect.fields;
+          if (typeof fields === 'string') {
+            fields = [fields];
+          }
+          const datum = item.datum;
+          if (!datum) {
+            dataSourcesStore.clearDataSelection(props.pointSelect.name);
+          } else {
+            // console.log(fields, datum);
+            const pointSelection = {};
+            for (const f of fields) {
+              pointSelection[f] = [datum[f]];
+            }
+            dataSourcesStore.updateDataSelection(
+              props.pointSelect.name,
+              pointSelection,
+            );
+          }
+        });
+      }
+
       updateVegaChart();
     })
     .catch((error) => {

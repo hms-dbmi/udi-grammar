@@ -1,4 +1,5 @@
 // import { fn } from '@storybook/test'
+import { on } from 'events';
 import TestMultipleSpecs from './TestMultipleSpecs.vue';
 
 // export const ActionsData = {
@@ -1171,57 +1172,336 @@ export const FilterLayeredViz = {
   },
 };
 
-// export const PointSelection = {
-//   args: {
-//     specs: [
-//       {
-//         source: {
-//           name: 'donors',
-//           source: './data/donors.csv',
-//         },
-//         transformation: [
-//           {
-//             filter: {
-//               name: 'scatter-select',
-//             },
-//           },
-//           {
-//             groupby: 'sex',
-//           },
-//           {
-//             rollup: {
-//               sex_count: { op: 'count' },
-//             },
-//           },
-//         ],
-//         representation: {
-//           mark: 'bar',
-//           mapping: [
-//             { encoding: 'x', field: 'sex', type: 'nominal' },
-//             { encoding: 'y', field: 'sex_count', type: 'quantitative' },
-//           ],
-//         },
-//       },
-//       {
-//         source: {
-//           name: 'donors',
-//           source: './data/donors.csv',
-//         },
-//         representation: {
-//           mark: 'point',
-//           mapping: [
-//             { encoding: 'y', field: 'height_value', type: 'quantitative' },
-//             { encoding: 'x', field: 'weight_value', type: 'quantitative' },
-//           ],
-//           select: {
-//             name: 'scatter-select',
-//             how: {
-//               type: 'interval',
-//               on: 'xy',
-//             },
-//           },
-//         },
-//       },
-//     ],
-//   },
-// };
+export const SimplePointSelection = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'sex-select',
+            },
+          },
+          {
+            groupby: 'sex',
+          },
+          {
+            rollup: {
+              sex_count: { op: 'count' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            { encoding: 'x', field: 'sex', type: 'nominal' },
+            { encoding: 'y', field: 'sex_count', type: 'quantitative' },
+          ],
+          select: {
+            name: 'sex-select',
+            how: {
+              type: 'point',
+            },
+            fields: 'sex',
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'sex-select',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+            { encoding: 'color', field: 'sex', type: 'nominal' },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const PointSelectionRow = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'race-select',
+            },
+          },
+          {
+            groupby: ['sex', 'race'],
+          },
+          {
+            rollup: {
+              sex_count: { op: 'count' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            { encoding: 'y', field: 'race', type: 'nominal' },
+            { encoding: 'x', field: 'sex', type: 'nominal' },
+            { encoding: 'color', field: 'race', type: 'nominal' },
+          ],
+          select: {
+            name: 'race-select',
+            how: {
+              type: 'point',
+            },
+            fields: 'race',
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'race-select',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+            { encoding: 'color', field: 'race', type: 'nominal' },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const PointSelectionColumn = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'sex-select',
+            },
+          },
+          {
+            groupby: ['sex', 'race'],
+          },
+          {
+            rollup: {
+              sex_count: { op: 'count' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            { encoding: 'y', field: 'race', type: 'nominal' },
+            { encoding: 'x', field: 'sex', type: 'nominal' },
+            { encoding: 'color', field: 'sex', type: 'nominal' },
+          ],
+          select: {
+            name: 'sex-select',
+            how: {
+              type: 'point',
+            },
+            fields: 'sex',
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'sex-select',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+            { encoding: 'color', field: 'sex', type: 'nominal' },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const PointSelectionCell = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'sex-select',
+            },
+          },
+          {
+            groupby: ['sex', 'race'],
+          },
+          {
+            rollup: {
+              sex_count: { op: 'count' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            { encoding: 'y', field: 'race', type: 'nominal' },
+            { encoding: 'x', field: 'sex', type: 'nominal' },
+            { encoding: 'color', field: 'sex_count', type: 'quantitative' },
+          ],
+          select: {
+            name: 'sex-select',
+            how: {
+              type: 'point',
+            },
+            fields: ['sex', 'race'],
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'sex-select',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const PointSelectionCellCrossFilter = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'sex-select',
+            },
+          },
+          {
+            filter: {
+              name: 'height-weight-select',
+            },
+          },
+          {
+            groupby: ['sex', 'race'],
+          },
+          {
+            rollup: {
+              sex_count: { op: 'count' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            { encoding: 'y', field: 'race', type: 'nominal' },
+            { encoding: 'x', field: 'sex', type: 'nominal' },
+            { encoding: 'color', field: 'sex_count', type: 'quantitative' },
+          ],
+          select: {
+            name: 'sex-select',
+            how: {
+              type: 'point',
+            },
+            fields: ['sex', 'race'],
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'sex-select',
+            },
+          },
+          {
+            filter: {
+              name: 'height-weight-select',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+          ],
+          select: {
+            name: 'height-weight-select',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+    ],
+  },
+};

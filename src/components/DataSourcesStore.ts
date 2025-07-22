@@ -26,6 +26,7 @@ import type {
   TableExpr,
 } from 'arquero/dist/types/table/types';
 import { defineStore } from 'pinia';
+import { clear } from 'console';
 
 interface DataInterface {
   source: DataSource;
@@ -39,12 +40,19 @@ export interface DataSourcesState {
 export interface DataSelections {
   [key: string]: {
     dataSourceKey: string;
-    selection: null | RangeSelection; // TODO: add point selections
+    selection: null | RangeSelection | PointSelection;
+    type: 'interval' | 'point';
   };
 }
 
 export interface RangeSelection {
   [field: string]: [min: number, max: number];
+}
+
+export interface PointSelection {
+  // the field is the name of thing selected, e.g. "species"
+  // and the values are the selected values, e.g. ["setosa", "versicolor"]
+  [field: string]: string[];
 }
 
 export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
@@ -54,6 +62,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   function watchDataSelection(
     dataSourceKey: string,
     selectionName: string,
+    type: 'point' | 'interval',
   ): { alreadyExists: boolean } {
     if (selectionName in dataSelections.value) {
       return { alreadyExists: true };
@@ -61,13 +70,14 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     dataSelections.value[selectionName] = {
       dataSourceKey,
       selection: null,
+      type,
     };
     return { alreadyExists: false };
   }
 
   function updateDataSelection(
     selectionName: string,
-    selection: RangeSelection | null,
+    selection: RangeSelection | PointSelection | null,
   ) {
     if (!(selectionName in dataSelections.value)) {
       throw new Error(`Selection name ${selectionName} not found`);
@@ -76,7 +86,13 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     selectionHash.value = JSON.stringify(dataSelections.value);
   }
 
-  function getDataSelection(selectionName: string): RangeSelection | null {
+  function clearDataSelection(selectionName: string): void {
+    updateDataSelection(selectionName, null);
+  }
+
+  function getDataSelection(
+    selectionName: string,
+  ): RangeSelection | PointSelection | null {
     if (!(selectionName in dataSelections.value)) {
       throw new Error(`Selection name ${selectionName} not found`);
     }
@@ -98,6 +114,40 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       }
     }
     return filters.join(' && ');
+  }
+
+  function PointSelectionToArqueroFilter(
+    selection: PointSelection | null,
+  ): string | null {
+    if (selection === null) return null;
+    const filters: string[] = [];
+    for (const [field, values] of Object.entries(selection)) {
+      const innerFilters: string[] = [];
+      for (const value of values) {
+        innerFilters.push(`d['${field}'] === ${JSON.stringify(value)}`);
+      }
+      filters.push(innerFilters.join(' || '));
+    }
+    return filters.join(' && ');
+  }
+
+  function GetArqueroFilter(key: string): string | null {
+    if (!(key in dataSelections.value)) {
+      return null;
+    }
+    const dataSelection = dataSelections.value[key];
+
+    if (!dataSelection) return null;
+    if (!dataSelection.selection) return null;
+    if (dataSelection.type === 'point') {
+      return PointSelectionToArqueroFilter(
+        dataSelection.selection as PointSelection,
+      );
+    } else {
+      return RangeSelectionToArqueroFilter(
+        dataSelection.selection as RangeSelection,
+      );
+    }
   }
 
   // let connection = null;
@@ -307,9 +357,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           if (config?.skipNamedFilters) {
             continue;
           }
-          const filter = RangeSelectionToArqueroFilter(
-            dataSelections.value[transform.filter.name]?.selection ?? null,
-          );
+          const filter = GetArqueroFilter(transform.filter.name);
+          // const filter = RangeSelectionToArqueroFilter(
+          // dataSelections.value[transform.filter.name]?.selection ?? null,
+          // );
           // console.log('filter', filter);
           if (filter) {
             currentTable.table = inTable.filter(filter).reify();
@@ -474,6 +525,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     watchDataSelection,
     getDataSelection,
     updateDataSelection,
+    clearDataSelection,
     dataSelections,
   };
 });

@@ -102,6 +102,7 @@ function setDefaultDomains(
       // @ts-expect-error: Again...
       const type: DataTypes = mapping.type;
       if (type === 'quantitative') {
+        if (mark === 'bar') continue;
         if (numberDomainCache.has(field)) {
           // @ts-expect-error: Again...
           const [min, max] = numberDomainCache.get(field);
@@ -261,7 +262,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
 
     let selectParam: {
       name: string;
-      select: { type: 'point' | 'interval'; encodings?: string[] };
+      select: { type: 'point' | 'interval'; encodings?: string[]; on?: string };
       value?: RangeSelection | null;
     } | null = null;
     if (layer.select) {
@@ -274,14 +275,21 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       if (layer.select.how.type === 'interval') {
         selectParam.select['encodings'] = layer.select.how.on.split('');
       }
+      // else {
+      //   // selectParam.select['on'] = 'click';
+      //   // selectParam.select['encodings'] = 'sex';
+      // }
       dataSourcesStore.watchDataSelection(
         'donors', // TODO: figure out which data source to use here.
         layer.select.name,
+        layer.select.how.type, // TODO: set point if needed
       );
-
-      signalKeys.value = [layer.select.name];
+      if (selectParam.select.type === 'interval') {
+        signalKeys.value = [layer.select.name];
+      } else {
+        pointSelect.value = layer.select;
+      }
     }
-
     const outputLayer: {
       mark: VisualizationLayer['mark'];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -291,7 +299,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       mark: layer.mark,
       encoding: vegaEncoding,
     };
-    if (selectParam) {
+    if (selectParam && selectParam.select.type === 'interval') {
       outputLayer.params = [selectParam];
     }
 
@@ -302,6 +310,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   return JSON.stringify(vegaSpec);
 }
 const signalKeys = ref<string[]>([]);
+const pointSelect = ref<any>();
 
 const debugVegaData = ref();
 </script>
@@ -315,6 +324,7 @@ const debugVegaData = ref();
       v-else-if="isVegaLiteComponent"
       :spec="vegaLiteSpec"
       :signal-keys="signalKeys"
+      :point-select="pointSelect"
     />
     <TableComponent :data="transformedData" :spec="parsedSpec" v-else />
     <!-- <hr />

@@ -1,5 +1,6 @@
 <template>
   <q-page class="column items-center justify-start q-ma-md">
+    <UDIVis :spec="spec" class="q-mb-md"></UDIVis>
     <div class="text-column q-mt-lg q-ml-lg q-mr-lg">
       <p class="text-h5">
         The
@@ -36,6 +37,39 @@
 </template>
 
 <script setup lang="ts">
+import UDIVis from 'src/components/UDIVis.vue';
+
+const spec = {
+  source: {
+    name: 'donors',
+    source: './data/donors.csv',
+  },
+  transformation: [
+    {
+      groupby: 'sex',
+    },
+    {
+      rollup: {
+        sex_count: { op: 'count' },
+      },
+    },
+  ],
+  representation: {
+    mark: 'bar',
+    mapping: [
+      { encoding: 'x', field: 'sex', type: 'nominal' },
+      { encoding: 'y', field: 'sex_count', type: 'quantitative' },
+    ],
+    select: {
+      name: 'sex-select',
+      how: {
+        type: 'point',
+      },
+      fields: 'sex',
+    },
+  },
+};
+const signalKeys = [];
 // import { ref } from 'vue';
 </script>
 <style scoped>
