@@ -52,7 +52,7 @@ export default defineConfig((/* ctx */) => {
         },
       },
 
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
+      vueRouterMode: 'history', // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
       // vueOptionsAPI: false,
@@ -66,10 +66,29 @@ export default defineConfig((/* ctx */) => {
       // ignorePublicFolder: true,
       // minify: false,
       // polyfillModulePreload: true,
-      // distDir
-
-      // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
+    
+      distDir: 'dist', // default Quasar output
+      extendViteConf(viteConf) {
+        viteConf.build = viteConf.build || {};
+        viteConf.build.lib = {
+          entry: 'src/embed.ts',
+          formats: ['es'],
+          fileName: 'embed',
+          name: 'embed',
+        };
+      },
+
+      rollupOptions: {
+        input: {
+          // output a separate build for embed function
+          embed: 'src/embed.ts',
+        },
+        output: {
+          entryFileNames: 'embed.js',
+          format: 'es',
+        },
+      },
 
       vitePlugins: [
         [
