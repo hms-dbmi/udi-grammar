@@ -1,4 +1,5 @@
 import { links, thumbnails } from "src/specs/constants";
+import { getColorBarMapping, getColorCategoryMapping, getTextMapping } from "src/specs/helpers";
 import type { ExampleGroup } from "src/specs/types";
 
 export const hubmapExampleGroups: ExampleGroup[] = [
@@ -107,6 +108,32 @@ export const hubmapExampleGroups: ExampleGroup[] = [
         thumbnail: thumbnails.donors.table,
         spec: {
           source: { name: 'donors', source: links.donors },
+        },
+      },
+      {
+        name: 'Visual Table',
+        description: 'This is a table that visualizes the available donor metadata.',
+        thumbnail: thumbnails.donors.visual_table,
+        spec: {
+          source: { name: 'donors', source: links.donors },
+          representation: {
+            mark: 'row',
+            mapping: [
+              ...getTextMapping('hubmap_id'),
+              ...getColorCategoryMapping('sex'),
+              ...getColorCategoryMapping('abo_blood_group_system'),
+              ...getColorBarMapping('age_value'),
+              ...getTextMapping('age_unit'),
+              ...getColorBarMapping('body_mass_index_value'),
+              ...getTextMapping('body_mass_index_unit'),
+              ...getColorBarMapping('weight_value'),
+              ...getTextMapping('weight_unit'),
+              ...getColorBarMapping('height_value'),
+              ...getTextMapping('height_unit'),
+              ...getColorCategoryMapping('group_name'),
+              ...getColorCategoryMapping('race'),
+            ],
+          },
         },
       },
       {
