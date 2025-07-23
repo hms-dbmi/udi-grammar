@@ -52,7 +52,7 @@ export default defineConfig((/* ctx */) => {
         },
       },
 
-      vueRouterMode: 'history', // available values: 'hash', 'history'
+      vueRouterMode: 'hash', // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
       // vueOptionsAPI: false,
@@ -67,7 +67,7 @@ export default defineConfig((/* ctx */) => {
       // minify: false,
       // polyfillModulePreload: true,
       // viteVuePluginOptions: {},
-    
+
       distDir: 'dist', // default Quasar output
       extendViteConf(viteConf) {
         viteConf.build = viteConf.build || {};
