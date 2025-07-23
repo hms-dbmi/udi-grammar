@@ -107,16 +107,21 @@ function setDefaultDomains(
           // @ts-expect-error: Again...
           const [min, max] = numberDomainCache.get(field);
           if (mark === 'row') {
+            // @ts-expect-error: Again...
             mapping.domain = { min, max };
           } else {
+            // @ts-expect-error: Again...
             mapping.domain = [min, max];
           }
         } else {
           const values = data
+            // @ts-expect-error: Again...
             .filter((d) => d[field] != null)
+            // @ts-expect-error: Again...
             .map((d) => d[field]);
           // const min = minBy(data, (d) => 0);
           let min = Math.min(...values);
+          // @ts-expect-error: Again...
           if (mark === 'bar') {
             min = Math.min(min, 0);
           }
@@ -130,8 +135,10 @@ function setDefaultDomains(
           }
           const paddedMax = max + padding;
           if (mark === 'row') {
+            // @ts-expect-error: Again...
             mapping.domain = { min: paddedMin, max: paddedMax };
           } else {
+            // @ts-expect-error: Again...
             mapping.domain = [paddedMin, paddedMax];
           }
           numberDomainCache.set(field, [paddedMin, paddedMax]);
@@ -139,10 +146,13 @@ function setDefaultDomains(
       } else {
         // TODO, check if row categorical fields work here.
         if (catDomainCache.has(field)) {
+          // @ts-expect-error: Again...
           mapping.domain = catDomainCache.get(field);
         } else {
+          // @ts-expect-error: Again...
           const values = data.map((d) => d[field]);
           const uniqueValues = Array.from(new Set(values));
+          // @ts-expect-error: Again...
           mapping.domain = uniqueValues;
           catDomainCache.set(field, uniqueValues);
         }

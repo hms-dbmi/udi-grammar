@@ -88,6 +88,7 @@ function initVegaChart() {
           if (typeof fields === 'string') {
             fields = [fields];
           }
+          // @ts-expect-error: I check it's existence right below
           const datum = item.datum;
           if (!datum) {
             dataSourcesStore.clearDataSelection(props.pointSelect.name);
@@ -95,6 +96,7 @@ function initVegaChart() {
             // console.log(fields, datum);
             const pointSelection = {};
             for (const f of fields) {
+              // @ts-expect-error: ignore errror
               pointSelection[f] = [datum[f]];
             }
             dataSourcesStore.updateDataSelection(

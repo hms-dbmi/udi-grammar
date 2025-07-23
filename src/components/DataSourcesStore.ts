@@ -26,7 +26,6 @@ import type {
   TableExpr,
 } from 'arquero/dist/types/table/types';
 import { defineStore } from 'pinia';
-import { clear } from 'console';
 
 interface DataInterface {
   source: DataSource;
