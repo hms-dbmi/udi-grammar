@@ -68,27 +68,27 @@ export default defineConfig((/* ctx */) => {
       // polyfillModulePreload: true,
       // viteVuePluginOptions: {},
 
-      distDir: 'dist', // default Quasar output
-      extendViteConf(viteConf) {
-        viteConf.build = viteConf.build || {};
-        viteConf.build.lib = {
-          entry: 'src/embed.ts',
-          formats: ['es'],
-          fileName: 'embed',
-          name: 'embed',
-        };
-      },
+      // distDir: 'dist', // default Quasar output
+      // extendViteConf(viteConf) {
+      //   viteConf.build = viteConf.build || {};
+      //   viteConf.build.lib = {
+      //     entry: 'src/embed.ts',
+      //     formats: ['es'],
+      //     fileName: 'embed',
+      //     name: 'embed',
+      //   };
+      // },
 
-      rollupOptions: {
-        input: {
-          // output a separate build for embed function
-          embed: 'src/embed.ts',
-        },
-        output: {
-          entryFileNames: 'embed.js',
-          format: 'es',
-        },
-      },
+      // rollupOptions: {
+      //   input: {
+      //     // output a separate build for embed function
+      //     embed: 'src/embed.ts',
+      //   },
+      //   output: {
+      //     entryFileNames: 'embed.js',
+      //     format: 'es',
+      //   },
+      // },
 
       vitePlugins: [
         [
