@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>UDI Embed Test</title>
+
+  <!-- Load Vue 3 global build -->
+  <script src="https://unpkg.com/vue@3.4.15/dist/vue.global.prod.js"></script>
+
+  <!-- Basic styles -->
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    #udi-vis-container {
+      width: 800px;
+      height: 500px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>UDI Embed Test</h1>
+  <div id="udi-vis-container"></div>
+
+<!-- Use correct UMD bundle -->
+<script src="./dist/embed.umd.js"></script>
+<script>
+  const spec = {
+    source: {
+      name: 'samples',
+      source: './data/example_samples.csv',
+    },
+    transformation: [
+      {
+        rollup: {
+          count: { op: 'count' },
+        },
+      },
+    ],
+    representation: {
+      mark: 'bar',
+      mapping: { encoding: 'x', field: 'count', type: 'quantitative' },
+    }
+  };
+
+  const el = document.getElementById('udi-vis-container');
+  UDIEmbed.embed(el, spec);
+</script>
+</body>
+</html>
