@@ -205,17 +205,14 @@ const exampleGroups: ExampleGroup[] = [
         },
       },
       {
-        name: 'Count by Category',
+        name: 'Cool Test',
         thumbnail: './example_thumbnails/bar_charts/count_by_category.png',
         spec: {
           source: {
-            name: 'donors',
-            source: './data/example_donors.csv',
+            name: 'samples',
+            source: './data/example_samples.csv',
           },
           transformation: [
-            {
-              groupby: 'sex',
-            },
             {
               rollup: {
                 count: { op: 'count' },
@@ -224,11 +221,8 @@ const exampleGroups: ExampleGroup[] = [
           ],
           representation: {
             mark: 'bar',
-            mapping: [
-              { encoding: 'x', field: 'sex', type: 'nominal' },
-              { encoding: 'y', field: 'count', type: 'quantitative' },
-            ],
-          },
+            mapping: { encoding: 'x', field: 'count', type: 'quantitative' },
+          }
         },
       },
       {

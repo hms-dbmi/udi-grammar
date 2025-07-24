@@ -64,7 +64,6 @@ function initVegaChart() {
   if (specObject.data && specObject.data.values) {
     delete specObject.data.values;
   }
-  // console.log('initializing vega chart with spec:', specObject);
   vegaEmbed(vegaContainer.value, specObject as VisualizationSpec)
     .then((result) => {
       errorMessage.value = null;
@@ -151,6 +150,7 @@ watch(() => props.spec, updateVegaChart);
 .vega-chart-container {
   width: 100%;
   height: 100%;
+  display: block;
   /* max-width: 600px; */
   overflow-x: auto;
 }

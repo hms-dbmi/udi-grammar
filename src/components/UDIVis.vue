@@ -28,8 +28,10 @@ onMounted(() => {
 async function render() {
   // parse/validate grammar
   // console.log('render');
+
   parsedSpec.value = parseSpecification(props.spec);
   await dataSourcesStore.initDataSources(parsedSpec.value.source);
+
   buildVisualization();
 
   // if (isVegaLiteCompatible(parsedSpec.value)) {
@@ -173,22 +175,27 @@ const isTransformedDataSubset = ref<boolean>(false);
 
 function performDataTransformation(spec: ParsedUDIGrammar) {
   transformedData.value = null;
+
   try {
     transformError.value = null;
+
     const dataObjects = dataSourcesStore.getDataObject(
       spec.source.map((x) => x.name),
       spec.transformation,
     );
-    if (dataObjects == null) return;
+
+    if (dataObjects == null) {
+      return;
+    }
+
     const { allData, displayData, isDisplayDataSubset } = dataObjects;
+
     transformedData.value = displayData;
     transformedDataFull.value = allData;
     isTransformedDataSubset.value = isDisplayDataSubset;
   } catch (error) {
-    console.error('Failed to complete data transformation', error);
     transformError.value = error;
   }
-  return;
 }
 
 function convertToVegaSpec(spec: ParsedUDIGrammar): string {
@@ -196,8 +203,6 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   const vegaSpec: any = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     // data: { url: './data/penguins.csv' },
-    width: 'container',
-    // height: 'container',
     data: { name: 'udi_data', values: [] },
   };
 
@@ -330,12 +335,13 @@ const debugVegaData = ref();
     <div class="error-message" v-if="transformError">
       {{ transformError.message }}
     </div>
-    <VegaLite
-      v-else-if="isVegaLiteComponent"
-      :spec="vegaLiteSpec"
-      :signal-keys="signalKeys"
-      :point-select="pointSelect"
-    />
+    <div v-else-if="isVegaLiteComponent">
+      <VegaLite
+        :spec="vegaLiteSpec"
+        :signal-keys="signalKeys"
+        :point-select="pointSelect"
+      />
+    </div>
     <TableComponent :data="transformedData" :spec="parsedSpec" v-else />
     <!-- <hr />
     <div>
