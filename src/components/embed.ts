@@ -28,3 +28,7 @@ export function embed(el: HTMLElement, spec: UDIGrammar) {
 
   (el as any).__vue_app__ = app;
 }
+
+if (typeof window !== 'undefined') {
+  (window as any).UDIEmbed = { embed };
+}
