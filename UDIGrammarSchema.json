@@ -461,10 +461,15 @@
         "name": {
           "description": "The name of the selection.",
           "type": "string"
+        },
+        "source": {
+          "description": "The name of the source table of the selection.",
+          "type": "string"
         }
       },
       "required": [
-        "name"
+        "name",
+        "source"
       ],
       "type": "object"
     },

@@ -281,6 +281,11 @@ export interface FilterDataSelection {
   name: string;
 
   /**
+   * The name of the source table of the selection.
+   */
+  source: string;
+
+  /**
    * Specifies whether to use 'all' or 'any' of the selected data in a 1-to-many mapping.
    * Default is 'any'.
    */

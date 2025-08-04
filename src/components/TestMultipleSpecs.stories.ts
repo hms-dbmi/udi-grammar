@@ -1114,6 +1114,162 @@ export const CrossFilterStripPlot = {
   },
 };
 
+export const CrossEntityStripPlot = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              source: 'donors',
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              source: 'samples',
+              name: 'organ-filter',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'age_value',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'age-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'samples',
+          source: './data/samples.csv',
+        },
+        transformation: [
+          {
+            derive: {
+              organ: 'd.origin_samples_unique_mapped_organs'
+            }
+          },
+          {
+            groupby: [
+              'organ'
+            ]
+          },
+          {
+            rollup: {
+              count: {
+                op: 'count'
+              }
+            }
+          },
+          {
+            orderby: {
+              field: 'organ',
+              order: 'desc'
+            }
+          },
+          {
+            filter: {
+              name: 'age-filter',
+              source: 'donors',
+            },
+          },
+          {
+            filter: {
+              name: 'organ-filter',
+              source: 'samples',
+            },
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'organ',
+              type: 'nominal',
+            },
+            {
+              encoding: 'y',
+              field: 'count',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'organ-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: 'd.age_value',
+          },
+          {
+            filter: {
+              name: 'age-filter',
+              source: 'donors',
+            },
+          },
+          {
+            filter: {
+              name: 'organ-filter',
+              source: 'samples',
+            },
+          },
+          {
+            orderby: {
+              field: 'age_value',
+              order: 'desc',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              mark: 'bar',
+              field: 'age_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 0, max: 100 },
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
 // Note, the brush doesn't actually do anything in this example, but this was to debug
 // an error where layered specs weren't rendering if a brush was present.
 export const FilterLayeredViz = {
