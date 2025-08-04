@@ -286,10 +286,30 @@ export interface FilterDataSelection {
   source: string;
 
   /**
+   * A mapping of current fields to source fields for the selection.
+   */
+  mapping?: FilterDataSelectionMapping;
+
+  /**
    * Specifies whether to use 'all' or 'any' of the selected data in a 1-to-many mapping.
    * Default is 'any'.
    */
   match?: 'all' | 'any';
+}
+
+/**
+ * A mapping for data selection, which specifies how fields in the source table correspond to fields in the target table.
+ */
+export interface FilterDataSelectionMapping {
+  /**
+   * The name of the identifying column in the source table.
+   */
+  source: string;
+
+  /**
+   * The name of the identifying column in the target table.
+   */
+  target: FilterExpression;
 }
 
 /**

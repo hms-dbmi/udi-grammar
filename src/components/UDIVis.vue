@@ -56,6 +56,9 @@ function buildVisualization(): void {
   // for (const dataSource of parsedSpec.value.dataSource) {
   //   dataSourcesStore.initDataSource(dataSource);
   // }
+
+  console.log('building visualization', parsedSpec.value);
+
   performDataTransformation(parsedSpec.value);
   if (transformedData.value == null) {
     return;

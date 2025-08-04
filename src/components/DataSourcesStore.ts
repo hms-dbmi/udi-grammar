@@ -132,7 +132,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
   function GetArqueroFilter(key: string): string | null {
 
-    console.log('GetArqueroFilter', key, dataSelections.value);
+    console.log('GetArqueroFilter', key);
+    console.log('dataSelections', dataSelections.value);
+    console.log('dataSources', dataSources.value);
 
     if (!(key in dataSelections.value)) {
       return null;
@@ -359,6 +361,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           if (config?.skipNamedFilters) {
             continue;
           }
+
+          console.log('applying named filter', transform.filter);
+
           const filter = GetArqueroFilter(transform.filter.name);
           // const filter = RangeSelectionToArqueroFilter(
           // dataSelections.value[transform.filter.name]?.selection ?? null,

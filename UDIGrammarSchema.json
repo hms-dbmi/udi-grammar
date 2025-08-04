@@ -465,6 +465,10 @@
         "source": {
           "description": "The name of the source table of the selection.",
           "type": "string"
+        },
+        "mapping": {
+          "description": "The mapping that provides the identifying columns from the source table and target table.",
+          "type": "object"
         }
       },
       "required": [
