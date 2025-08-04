@@ -85,6 +85,7 @@ export const Reversed = {
           {
             filter: {
               name: 'scatter-select',
+              source: 'donors',
             },
           },
           {
@@ -140,6 +141,7 @@ export const ScatterDetailOverview = {
           {
             filter: {
               name: 'scatter-select',
+              source: 'donors',
             },
           },
         ],
@@ -207,6 +209,7 @@ export const ScatterOverviewDetail = {
           {
             filter: {
               name: 'blargen-flargen',
+              source: 'donors',
             },
           },
         ],
@@ -264,6 +267,7 @@ export const ScatterFilter = {
           {
             filter: {
               name: 'blargen-flargen',
+              source: 'donors',
             },
           },
         ],
@@ -301,6 +305,7 @@ export const ScatterFilterSelf = {
           {
             filter: {
               name: 'filter-self',
+              source: 'donors',
             },
           },
         ],
@@ -345,6 +350,7 @@ export const ScatterFilterSelfMultiple = {
           {
             filter: {
               name: 'filter-self',
+              source: 'donors',
             },
           },
         ],
@@ -382,6 +388,7 @@ export const ScatterFilterSelfMultiple = {
           {
             filter: {
               name: 'filter-self-2',
+              source: 'donors',
             },
           },
         ],
@@ -419,6 +426,7 @@ export const ScatterFilterSelfMultiple = {
           {
             filter: {
               name: 'filter-self-3',
+              source: 'donors',
             },
           },
         ],
@@ -456,6 +464,7 @@ export const ScatterFilterSelfMultiple = {
           {
             filter: {
               name: 'filter-self-4',
+              source: 'donors',
             },
           },
         ],
@@ -523,6 +532,7 @@ export const ScatterTable = {
           {
             filter: {
               name: 'blargen-flargen',
+              source: 'donors',
             },
           },
           {
@@ -640,11 +650,13 @@ export const KDEScatterTable = {
           {
             filter: {
               name: 'age-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'height-weight-filter',
+              source: 'donors',
             },
           },
           {
@@ -703,16 +715,19 @@ export const CrossFilterKDE = {
           {
             filter: {
               name: 'age-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'height-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'weight-filter',
+              source: 'donors',
             },
           },
           {
@@ -759,16 +774,19 @@ export const CrossFilterKDE = {
           {
             filter: {
               name: 'age-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'height-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'weight-filter',
+              source: 'donors',
             },
           },
           {
@@ -810,16 +828,19 @@ export const CrossFilterKDE = {
           {
             filter: {
               name: 'age-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'height-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'weight-filter',
+              source: 'donors',
             },
           },
           {
@@ -864,16 +885,19 @@ export const CrossFilterKDE = {
           {
             filter: {
               name: 'age-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'height-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'weight-filter',
+              source: 'donors',
             },
           },
           {
@@ -932,16 +956,19 @@ export const CrossFilterStripPlot = {
           {
             filter: {
               name: 'age-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'height-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'weight-filter',
+              source: 'donors',
             },
           },
         ],
@@ -973,16 +1000,19 @@ export const CrossFilterStripPlot = {
           {
             filter: {
               name: 'age-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'height-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'weight-filter',
+              source: 'donors',
             },
           },
         ],
@@ -1014,16 +1044,19 @@ export const CrossFilterStripPlot = {
           {
             filter: {
               name: 'age-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'height-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'weight-filter',
+              source: 'donors',
             },
           },
         ],
@@ -1058,16 +1091,19 @@ export const CrossFilterStripPlot = {
           {
             filter: {
               name: 'age-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'height-filter',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'weight-filter',
+              source: 'donors',
             },
           },
           {
@@ -1127,12 +1163,14 @@ export const CrossEntityStripPlot = {
             filter: {
               source: 'donors',
               name: 'age-filter',
+
             },
           },
           {
             filter: {
               source: 'samples',
               name: 'organ-filter',
+
             },
           },
         ],
@@ -1187,6 +1225,7 @@ export const CrossEntityStripPlot = {
             filter: {
               name: 'age-filter',
               source: 'donors',
+
             },
           },
           {
@@ -1340,6 +1379,7 @@ export const SimplePointSelection = {
           {
             filter: {
               name: 'sex-select',
+              source: 'donors',
             },
           },
           {
@@ -1375,6 +1415,7 @@ export const SimplePointSelection = {
           {
             filter: {
               name: 'sex-select',
+              source: 'donors',
             },
           },
         ],
@@ -1403,6 +1444,7 @@ export const PointSelectionRow = {
           {
             filter: {
               name: 'race-select',
+              source: 'donors',
             },
           },
           {
@@ -1439,6 +1481,7 @@ export const PointSelectionRow = {
           {
             filter: {
               name: 'race-select',
+              source: 'donors',
             },
           },
         ],
@@ -1467,6 +1510,7 @@ export const PointSelectionColumn = {
           {
             filter: {
               name: 'sex-select',
+              source: 'donors',
             },
           },
           {
@@ -1503,6 +1547,7 @@ export const PointSelectionColumn = {
           {
             filter: {
               name: 'sex-select',
+              source: 'donors',
             },
           },
         ],
@@ -1531,6 +1576,7 @@ export const PointSelectionCell = {
           {
             filter: {
               name: 'sex-select',
+              source: 'donors',
             },
           },
           {
@@ -1567,6 +1613,7 @@ export const PointSelectionCell = {
           {
             filter: {
               name: 'sex-select',
+              source: 'donors',
             },
           },
         ],
@@ -1594,11 +1641,13 @@ export const PointSelectionCellCrossFilter = {
           {
             filter: {
               name: 'sex-select',
+              source: 'donors',
             },
           },
           {
             filter: {
               name: 'height-weight-select',
+              source: 'donors',
             },
           },
           {
