@@ -1163,14 +1163,12 @@ export const CrossEntityStripPlot = {
             filter: {
               source: 'donors',
               name: 'age-filter',
-
             },
           },
           {
             filter: {
               source: 'samples',
               name: 'organ-filter',
-
             },
           },
         ],

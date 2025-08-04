@@ -131,6 +131,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   }
 
   function GetArqueroFilter(key: string): string | null {
+
+    console.log('GetArqueroFilter', key, dataSelections.value);
+
     if (!(key in dataSelections.value)) {
       return null;
     }
