@@ -176,12 +176,16 @@ const isTransformedDataSubset = ref<boolean>(false);
 
 function performDataTransformation(spec: ParsedUDIGrammar) {
   transformedData.value = null;
+
+  console.log('performing data transformation', spec);
+
   try {
     transformError.value = null;
     const dataObjects = dataSourcesStore.getDataObject(
       spec.source.map((x) => x.name),
       spec.transformation,
     );
+    console.log('dataObjects', dataObjects);
     if (dataObjects == null) return;
     const { allData, displayData, isDisplayDataSubset } = dataObjects;
     transformedData.value = displayData;

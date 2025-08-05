@@ -6,6 +6,7 @@ import type {
   DataSource,
   DataTransformation,
   DirectionalOrder,
+  FilterDataSelectionMapping,
 } from './GrammarTypes';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
 import {
@@ -141,6 +142,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     }
     const dataSelection = dataSelections.value[key];
 
+    console.log('dataSelection.value[key]', dataSelection);
+
     if (!dataSelection) return null;
     if (!dataSelection.selection) return null;
     if (dataSelection.type === 'point') {
@@ -153,6 +156,123 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       );
     }
   }
+
+  function GetMappedArqueroFilter(
+    selectionName: string,
+    sourceTable: ColumnTable,
+    mapping?: FilterDataSelectionMapping,
+    mappingKey?: string,
+  ): string | null {
+    console.log('top of GetMappedArqueroFilter');
+
+    console.log('selectionName', selectionName);
+    // HERE - this needs to be pre-transformed data, not source data, because we need the IDs
+    console.log('sourceTable', sourceTable);
+    console.log('mapping', mapping);
+    console.log('mappingKey', mappingKey);
+
+    const dataSelection = dataSelections.value[selectionName];
+    if (!dataSelection || !dataSelection.selection) return null;
+  
+    // Pull matching values from source selection
+    const selection = dataSelection.selection;
+    const originField = mapping?.origin;
+    const targetField = mapping?.target;
+
+    console.log('selection', selection);
+  
+    if (!originField || !targetField) {
+      // fall back to same-entity filtering
+      return dataSelection.type === 'point'
+        ? PointSelectionToArqueroFilter(selection as PointSelection)
+        : RangeSelectionToArqueroFilter(selection as RangeSelection);
+    }
+
+    // Otherwise, we are doing cross-entity filtering
+
+    if (!mappingKey) {
+      // If no mapping key is provided, return (fix later)
+      return null;
+    }
+
+    console.log('dataSources.value', dataSources.value);
+    console.log('mappingKey', mappingKey);
+  
+    // Get the selected values from the selection source
+    const sourceData = dataSources.value[mappingKey]?.dest;
+    console.log('sourceData', sourceData);
+    
+    if (!sourceData) return null;
+  
+    const selectedValues = new Set<string>();
+  
+    if (dataSelection.type === 'point') {
+      const pointSel = selection as PointSelection;
+      for (const values of Object.values(pointSel)) {
+        values.forEach((v) => selectedValues.add(v));
+      }
+    } else if (dataSelection.type === 'interval') {
+      const rangeSel = selection as RangeSelection;
+      console.log('dataSelection.type is INTERVAAAAAL');
+      console.log('rangeSel', rangeSel);
+  
+      // Assume a single field is selected (expand this later)
+      const entries = Object.entries(rangeSel);
+      if (entries.length === 0) return null;
+
+      const entry = entries[0];
+      if (!entry) return null;
+
+      const [selField, range] = entry;
+      const [selMin, selMax] = range;
+
+      console.log('selField', selField, 'range', range, 'selMin', selMin, 'selMax', selMax);
+      console.log('sourceData', sourceData);
+      console.log('targetField', targetField);
+      console.log('sourceData.array(targetField)', sourceData.array(targetField));
+  
+      const values = Array.from(sourceData.array(targetField)).filter((v) => {
+        if (typeof v !== 'number') return false;
+        return v >= selMin && v <= selMax;
+      });
+
+      console.log('values', values);
+  
+      if (values.length === 0) return null;
+  
+      // Compute the min/max of the origin field in the matching records
+      const matchingRows = sourceData.objects().filter((row) => {
+        const val = row[targetField];
+        return typeof val === 'number' && val >= selMin && val <= selMax;
+      });
+  
+      const originValues = matchingRows
+        .map((row) => row[originField])
+        .filter((v): v is number => typeof v === 'number');
+  
+      if (originValues.length === 0) return null;
+  
+      const mappedMin = Math.min(...originValues);
+      const mappedMax = Math.max(...originValues);
+  
+      return `d['${originField}'] >= ${mappedMin} && d['${originField}'] <= ${mappedMax}`;  
+    } else {
+      console.warn('Something came up with the selection type', dataSelection.type);
+      return null;
+    }
+  
+    const selectedFieldValues = Array.from(sourceData.array(targetField))
+    .filter((v) => selectedValues.has(v));  
+  
+    if (selectedFieldValues.length === 0) return null;
+  
+    // Build OR filter on the origin field
+    const filters = selectedFieldValues.map(
+      (v) => `d['${originField}'] === ${JSON.stringify(v)}`,
+    );
+    return filters.join(' || ');
+  }
+  
 
   // let connection = null;
   // let db = null;
@@ -198,6 +318,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     allData: object[]; // all data (needed for full domains)
     isDisplayDataSubset: boolean; // true if the returned data is a subset of the full data
   } | null {
+    console.log('top of getDataObject');
+    console.log('keys', keys);
+    console.log('dataTransformations', dataTransformations);
+  
     if (loading.value) return null;
 
     // make copy of tables from data sources
@@ -214,6 +338,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       return namedTables;
     };
 
+    console.log('getNamedTables', getNamedTables());
+
     const { data: dataTable, containsNamedFilter } = PerformDataTransformations(
       getNamedTables(),
       dataTransformations ?? [],
@@ -222,6 +348,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       },
     );
     const displayData = dataTable.objects();
+
+    console.log('displayData', displayData);
 
     let allData = displayData;
     if (containsNamedFilter) {
@@ -249,8 +377,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       skipNamedFilters?: boolean; // if true, skip named filters in transformations
     },
   ): { data: ColumnTable; containsNamedFilter: boolean } {
+    console.log('PerformDataTransformations', namedTables, dataTransformations, config);
+
     let containsNamedFilter = false;
-    // console.log('perform data transforations');
     const key = namedTables.keys().next().value ?? '';
     const table = namedTables.get(key);
     if (!table) {
@@ -353,6 +482,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         }
         currentTable.table = inTable.derive(derive);
       } else if ('filter' in transform) {
+        console.log('APPLYING FILTER', transform.filter);
+
         const inTable = getInTable(transform.in);
         if (typeof transform.filter === 'string') {
           currentTable.table = inTable.filter(transform.filter).reify();
@@ -364,7 +495,13 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
           console.log('applying named filter', transform.filter);
 
-          const filter = GetArqueroFilter(transform.filter.name);
+          const filter = GetMappedArqueroFilter(
+            transform.filter.name,
+            inTable,
+            transform.filter.mapping,
+            transform.filter.source,
+          );
+          
           // const filter = RangeSelectionToArqueroFilter(
           // dataSelections.value[transform.filter.name]?.selection ?? null,
           // );

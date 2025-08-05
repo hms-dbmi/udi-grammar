@@ -304,12 +304,12 @@ export interface FilterDataSelectionMapping {
   /**
    * The name of the identifying column in the source table.
    */
-  source: string;
+  origin: string;
 
   /**
    * The name of the identifying column in the target table.
    */
-  target: FilterExpression;
+  target: string;
 }
 
 /**
