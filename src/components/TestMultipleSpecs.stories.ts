@@ -1385,12 +1385,8 @@ export const BasicStripPlotCopy = {
           },
           {
             filter: {
-              name: 'age-filter',
-              source: 'donors',
-              mapping: {
-                origin: 'd.donor.hubmap_id',
-                target: 'hubmap_id',
-              },
+              name: 'time-filter',
+              source: 'samples',
             },
           },
           {
@@ -1430,12 +1426,12 @@ export const BasicStripPlotCopy = {
         },
         transformation: [
           {
-            filter: 'd.age_value',
+            filter: 'd.created_timestamp',
           },
           {
             filter: {
-              name: 'age-filter',
-              source: 'donors',
+              name: 'time-filter',
+              source: 'samples',
             },
           },
           {
@@ -1446,7 +1442,7 @@ export const BasicStripPlotCopy = {
           },
           {
             orderby: {
-              field: 'age_value',
+              field: 'created_timestamp',
               order: 'desc',
             },
           },
@@ -1462,10 +1458,9 @@ export const BasicStripPlotCopy = {
             },
             {
               mark: 'bar',
-              field: 'age_value',
+              field: 'created_timestamp',
               encoding: 'x',
               type: 'quantitative',
-              domain: { min: 0, max: 100 },
             },
           ],
         },
