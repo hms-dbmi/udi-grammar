@@ -162,6 +162,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     sourceTable: ColumnTable,
     mapping?: FilterDataSelectionMapping,
     mappingKey?: string,
+    transformations: DataTransformation[] = [],
   ): string | null {
     console.log('top of GetMappedArqueroFilter');
 
@@ -199,7 +200,18 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     console.log('mappingKey', mappingKey);
   
     // Get the selected values from the selection source
-    const sourceData = dataSources.value[mappingKey]?.dest;
+    const cleanedTransformations = transformations.filter(
+      (t) =>
+        !(
+          'filter' in t &&
+          typeof t.filter !== 'string' &&
+          t.filter.name === selectionName &&
+          t.filter.source === mappingKey
+        )
+    );
+    
+    const sourceData = getTransformedTableByName(mappingKey, cleanedTransformations);
+    
     console.log('sourceData', sourceData);
     
     if (!sourceData) return null;
@@ -309,6 +321,28 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     if (!(key in dataSources.value)) return null;
     return dataSources.value[key] ?? null;
   }
+
+  function getTransformedTableByName(
+    name: string,
+    transformations: DataTransformation[],
+  ): ColumnTable | null {
+    console.log('top of getTransformedTableByName');
+    console.log('name', name);
+    console.log('transformations', transformations);
+
+    const namedTables = new Map<string, ColumnTable>();
+    const dataInterface = getDataSource(name);
+    if (!dataInterface) return null;
+    namedTables.set(name, from(dataInterface.dest.reify()));
+  
+    const { data } = PerformDataTransformations(namedTables, transformations, {
+      skipNamedFilters: false,
+    });
+
+    console.log('getTransformedTableByName is RETURNING', data);
+  
+    return data;
+  }  
 
   function getDataObject(
     keys: string[],
@@ -494,13 +528,16 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           }
 
           console.log('applying named filter', transform.filter);
+  
+          const cleanedTransforms = dataTransformations.filter((t) => t !== transform);
 
           const filter = GetMappedArqueroFilter(
             transform.filter.name,
             inTable,
             transform.filter.mapping,
             transform.filter.source,
-          );
+            cleanedTransforms,
+          );          
           
           // const filter = RangeSelectionToArqueroFilter(
           // dataSelections.value[transform.filter.name]?.selection ?? null,

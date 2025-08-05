@@ -1314,25 +1314,29 @@ export const CrossEntityStripPlot = {
   },
 };
 
-export const BasicStripPlotCopy = {
+export const BasicStripPlot = {
   args: {
     specs: [
       {
         source: {
-          name: 'samples',
-          source: './data/samples.csv',
+          name: 'donors',
+          source: './data/donors.csv',
         },
         transformation: [
           {
             filter: {
-              source: 'samples',
+              source: 'donors',
               name: 'time-filter',
             },
           },
           {
             filter: {
-              source: 'samples',
-              name: 'organ-filter',
+              source: 'donors',
+              name: 'age-filter',
+              mapping: {
+                origin: 'd.donor.hubmap_id',
+                target: 'hubmap_id',
+              },
             },
           },
         ],
@@ -1356,64 +1360,40 @@ export const BasicStripPlotCopy = {
       },
       {
         source: {
-          name: 'samples',
-          source: './data/samples.csv',
+          name: 'donors',
+          source: './data/donors.csv',
         },
         transformation: [
           {
-            derive: {
-              organ: 'd.origin_samples_unique_mapped_organs'
-            }
-          },
-          {
-            groupby: [
-              'organ'
-            ]
-          },
-          {
-            rollup: {
-              count: {
-                op: 'count'
-              }
-            }
-          },
-          {
-            orderby: {
-              field: 'organ',
-              order: 'desc'
-            }
-          },
-          {
             filter: {
-              name: 'time-filter',
-              source: 'samples',
+              source: 'donors',
+              name: 'age-filter',
             },
           },
           {
             filter: {
-              name: 'organ-filter',
               source: 'samples',
+              name: 'time-filter',
+              mapping: {
+                origin: 'hubmap_id',
+                target: 'd.donor.hubmap_id',
+              },
             },
           },
         ],
         representation: {
-          mark: 'bar',
+          mark: 'point',
           mapping: [
             {
               encoding: 'x',
-              field: 'organ',
-              type: 'nominal',
-            },
-            {
-              encoding: 'y',
-              field: 'count',
+              field: 'age_value',
               type: 'quantitative',
             },
           ],
           select: {
-            name: 'organ-filter',
+            name: 'age-filter',
             how: {
-              type: 'nominal',
+              type: 'interval',
               on: 'x',
             },
           },
@@ -1461,6 +1441,145 @@ export const BasicStripPlotCopy = {
               field: 'created_timestamp',
               encoding: 'x',
               type: 'quantitative',
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const AlternateCrossFilter = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'samples',
+          source: './data/samples.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              source: 'samples',
+              name: 'time-filter',
+            },
+          },
+          {
+            filter: {
+              source: 'donors',
+              name: 'age-filter',
+              mapping: {
+                origin: 'd.donor.hubmap_id',
+                target: 'hubmap_id',
+              },
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'created_timestamp',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'time-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              source: 'donors',
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              source: 'samples',
+              name: 'time-filter',
+              mapping: {
+                origin: 'd.donor.hubmap_id',
+                target: 'hubmap_id',
+              },
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'age_value',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'age-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: 'd.age_value',
+          },
+          {
+            filter: {
+              name: 'time-filter',
+              source: 'samples',
+              mapping: {
+                origin: 'hubmap_id',
+                target: 'd.donor.hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'age-filter',
+              source: 'samples',
+            },
+          },
+          {
+            orderby: {
+              field: 'age_value',
+              order: 'desc',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              field: 'age_value',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
             },
           ],
         },
