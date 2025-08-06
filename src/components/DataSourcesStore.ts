@@ -284,15 +284,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     );
     return filters.join(' || ');
   }
-  
-
-  // let connection = null;
-  // let db = null;
-  // init().then(async (value: DuckDB) => {
-  //   db = value.db;
-  //   console.log(value);
-  //   connection = await db.connect();
-  // });
 
   const loading = ref<boolean>(true);
   const selectionHash = ref<string>('');
@@ -528,21 +519,19 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           }
 
           console.log('applying named filter', transform.filter);
-  
-          const cleanedTransforms = dataTransformations.filter((t) => t !== transform);
 
           const filter = GetMappedArqueroFilter(
             transform.filter.name,
             inTable,
             transform.filter.mapping,
             transform.filter.source,
-            cleanedTransforms,
-          );          
-          
-          // const filter = RangeSelectionToArqueroFilter(
-          // dataSelections.value[transform.filter.name]?.selection ?? null,
-          // );
-          // console.log('filter', filter);
+            dataTransformations,
+          );
+
+          console.log('output filter', filter);
+          // const stupidFakeFilter = "d['donor.hubmap_id'] === 'HBM253.KBSM.226' || d['donor.hubmap_id'] === 'HBM534.PKFT.943'";
+          // const filterToUse = transform.filter.mapping?.target === 'samples' ? stupidFakeFilter : filter;
+
           if (filter) {
             currentTable.table = inTable.filter(filter).reify();
           }
