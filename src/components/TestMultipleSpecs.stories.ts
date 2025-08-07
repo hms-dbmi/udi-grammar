@@ -1171,7 +1171,7 @@ export const CrossEntityStripPlot = {
               name: 'organ-filter',
               mapping: {
                 origin: 'hubmap_id',
-                target: 'd.donor.hubmap_id',
+                target: 'donor.hubmap_id',
               },
             },
           },
@@ -1228,7 +1228,7 @@ export const CrossEntityStripPlot = {
               name: 'age-filter',
               source: 'donors',
               mapping: {
-                origin: 'd.donor.hubmap_id',
+                origin: 'donor.hubmap_id',
                 target: 'hubmap_id',
               },
             },
@@ -1334,7 +1334,7 @@ export const BasicStripPlot = {
               source: 'donors',
               name: 'age-filter',
               mapping: {
-                origin: 'd.donor.hubmap_id',
+                origin: 'donor.hubmap_id',
                 target: 'hubmap_id',
               },
             },
@@ -1376,7 +1376,7 @@ export const BasicStripPlot = {
               name: 'time-filter',
               mapping: {
                 origin: 'hubmap_id',
-                target: 'd.donor.hubmap_id',
+                target: 'donor.hubmap_id',
               },
             },
           },
@@ -1469,7 +1469,7 @@ export const AlternateCrossFilter = {
               source: 'donors',
               name: 'age-filter',
               mapping: {
-                origin: 'd.donor.hubmap_id',
+                origin: 'donor.hubmap_id',
                 target: 'hubmap_id',
               },
             },
@@ -1510,7 +1510,7 @@ export const AlternateCrossFilter = {
               source: 'samples',
               name: 'time-filter',
               mapping: {
-                origin: 'd.donor.hubmap_id',
+                origin: 'donor.hubmap_id',
                 target: 'hubmap_id',
               },
             },
@@ -1549,14 +1549,14 @@ export const AlternateCrossFilter = {
               source: 'samples',
               mapping: {
                 origin: 'hubmap_id',
-                target: 'd.donor.hubmap_id',
+                target: 'donor.hubmap_id',
               },
             },
           },
           {
             filter: {
               name: 'age-filter',
-              source: 'samples',
+              source: 'donors',
             },
           },
           {

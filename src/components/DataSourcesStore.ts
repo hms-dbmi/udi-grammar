@@ -37,12 +37,14 @@ export interface DataSourcesState {
   [key: string]: DataInterface;
 }
 
+export interface DataSelection {
+  dataSourceKey: string;
+  selection: null | RangeSelection | PointSelection;
+  type: 'interval' | 'point';
+}
+
 export interface DataSelections {
-  [key: string]: {
-    dataSourceKey: string;
-    selection: null | RangeSelection | PointSelection;
-    type: 'interval' | 'point';
-  };
+  [key: string]: DataSelection;
 }
 
 export interface RangeSelection {
@@ -131,30 +133,14 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     return filters.join(' && ');
   }
 
-  function GetArqueroFilter(key: string): string | null {
-
-    console.log('GetArqueroFilter', key);
-    console.log('dataSelections', dataSelections.value);
-    console.log('dataSources', dataSources.value);
-
-    if (!(key in dataSelections.value)) {
-      return null;
+  function selectionToArqueroFilter(dataSelection: DataSelection) {
+    const { type, selection } = dataSelection;
+  
+    if (type === 'point') {
+      return PointSelectionToArqueroFilter(selection as PointSelection);
     }
-    const dataSelection = dataSelections.value[key];
-
-    console.log('dataSelection.value[key]', dataSelection);
-
-    if (!dataSelection) return null;
-    if (!dataSelection.selection) return null;
-    if (dataSelection.type === 'point') {
-      return PointSelectionToArqueroFilter(
-        dataSelection.selection as PointSelection,
-      );
-    } else {
-      return RangeSelectionToArqueroFilter(
-        dataSelection.selection as RangeSelection,
-      );
-    }
+  
+    return RangeSelectionToArqueroFilter(selection as RangeSelection);
   }
 
   function GetMappedArqueroFilter(
@@ -164,15 +150,20 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     mappingKey?: string,
     transformations: DataTransformation[] = [],
   ): string | null {
-    console.log('top of GetMappedArqueroFilter');
-
-    console.log('selectionName', selectionName);
-    // HERE - this needs to be pre-transformed data, not source data, because we need the IDs
-    console.log('sourceTable', sourceTable);
-    console.log('mapping', mapping);
-    console.log('mappingKey', mappingKey);
+    console.groupCollapsed(`GetMappedArqueroFilter → ${selectionName} :: ${mappingKey}`);
+    console.log({
+      selectionName,
+      sourceTable,
+      mapping,
+      mappingKey,
+      transformations,
+    });
+    console.groupEnd();
 
     const dataSelection = dataSelections.value[selectionName];
+
+    console.log('dataSelections.value', dataSelections.value);
+    console.log('dataSelection', dataSelection);
     if (!dataSelection || !dataSelection.selection) return null;
   
     // Pull matching values from source selection
@@ -182,107 +173,22 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
     console.log('selection', selection);
   
-    if (!originField || !targetField) {
-      // fall back to same-entity filtering
-      return dataSelection.type === 'point'
-        ? PointSelectionToArqueroFilter(selection as PointSelection)
-        : RangeSelectionToArqueroFilter(selection as RangeSelection);
+    // assume same-entity filtering if these are not provided
+    if (!originField || !targetField || !mappingKey) {
+      return selectionToArqueroFilter(dataSelection);
     }
 
     // Otherwise, we are doing cross-entity filtering
+    // Make a copy of the relevant source table
+    const relevantTable = dataSources.value[mappingKey]
+    console.log('relevant table', relevantTable);
 
-    if (!mappingKey) {
-      // If no mapping key is provided, return (fix later)
-      return null;
-    }
+    // Apply the filter to the copied table
 
-    console.log('dataSources.value', dataSources.value);
-    console.log('mappingKey', mappingKey);
-  
-    // Get the selected values from the selection source
-    const cleanedTransformations = transformations.filter(
-      (t) =>
-        !(
-          'filter' in t &&
-          typeof t.filter !== 'string' &&
-          t.filter.name === selectionName &&
-          t.filter.source === mappingKey
-        )
-    );
-    
-    const sourceData = getTransformedTableByName(mappingKey, cleanedTransformations);
-    
-    console.log('sourceData', sourceData);
-    
-    if (!sourceData) return null;
-  
-    const selectedValues = new Set<string>();
-  
-    if (dataSelection.type === 'point') {
-      const pointSel = selection as PointSelection;
-      for (const values of Object.values(pointSel)) {
-        values.forEach((v) => selectedValues.add(v));
-      }
-    } else if (dataSelection.type === 'interval') {
-      const rangeSel = selection as RangeSelection;
-      console.log('dataSelection.type is INTERVAAAAAL');
-      console.log('rangeSel', rangeSel);
-  
-      // Assume a single field is selected (expand this later)
-      const entries = Object.entries(rangeSel);
-      if (entries.length === 0) return null;
 
-      const entry = entries[0];
-      if (!entry) return null;
-
-      const [selField, range] = entry;
-      const [selMin, selMax] = range;
-
-      console.log('selField', selField, 'range', range, 'selMin', selMin, 'selMax', selMax);
-      console.log('sourceData', sourceData);
-      console.log('targetField', targetField);
-      console.log('sourceData.array(targetField)', sourceData.array(targetField));
   
-      const values = Array.from(sourceData.array(targetField)).filter((v) => {
-        if (typeof v !== 'number') return false;
-        return v >= selMin && v <= selMax;
-      });
-
-      console.log('values', values);
-  
-      if (values.length === 0) return null;
-  
-      // Compute the min/max of the origin field in the matching records
-      const matchingRows = sourceData.objects().filter((row) => {
-        const val = row[targetField];
-        return typeof val === 'number' && val >= selMin && val <= selMax;
-      });
-  
-      const originValues = matchingRows
-        .map((row) => row[originField])
-        .filter((v): v is number => typeof v === 'number');
-  
-      if (originValues.length === 0) return null;
-  
-      const mappedMin = Math.min(...originValues);
-      const mappedMax = Math.max(...originValues);
-  
-      return `d['${originField}'] >= ${mappedMin} && d['${originField}'] <= ${mappedMax}`;  
-    } else {
-      console.warn('Something came up with the selection type', dataSelection.type);
-      return null;
-    }
-  
-    const selectedFieldValues = Array.from(sourceData.array(targetField))
-    .filter((v) => selectedValues.has(v));  
-  
-    if (selectedFieldValues.length === 0) return null;
-  
-    // Build OR filter on the origin field
-    const filters = selectedFieldValues.map(
-      (v) => `d['${originField}'] === ${JSON.stringify(v)}`,
-    );
-    return filters.join(' || ');
+    // Return a list of ORed ids as a filter string
+    return "d['donor.hubmap_id'] === 'HBM253.KBSM.226' || d['donor.hubmap_id'] === 'HBM534.PKFT.943'";
   }
 
   const loading = ref<boolean>(true);
@@ -312,28 +218,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     if (!(key in dataSources.value)) return null;
     return dataSources.value[key] ?? null;
   }
-
-  function getTransformedTableByName(
-    name: string,
-    transformations: DataTransformation[],
-  ): ColumnTable | null {
-    console.log('top of getTransformedTableByName');
-    console.log('name', name);
-    console.log('transformations', transformations);
-
-    const namedTables = new Map<string, ColumnTable>();
-    const dataInterface = getDataSource(name);
-    if (!dataInterface) return null;
-    namedTables.set(name, from(dataInterface.dest.reify()));
-  
-    const { data } = PerformDataTransformations(namedTables, transformations, {
-      skipNamedFilters: false,
-    });
-
-    console.log('getTransformedTableByName is RETURNING', data);
-  
-    return data;
-  }  
 
   function getDataObject(
     keys: string[],
@@ -517,8 +401,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           if (config?.skipNamedFilters) {
             continue;
           }
-
-          console.log('applying named filter', transform.filter);
 
           const filter = GetMappedArqueroFilter(
             transform.filter.name,
