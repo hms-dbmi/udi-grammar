@@ -1161,18 +1161,18 @@ export const CrossEntityStripPlot = {
         transformation: [
           {
             filter: {
-              source: 'donors',
-              name: 'age-filter',
-            },
-          },
-          {
-            filter: {
               source: 'samples',
               name: 'organ-filter',
               mapping: {
                 origin: 'donor.hubmap_id',
                 target: 'hubmap_id',
               },
+            },
+          },
+          {
+            filter: {
+              source: 'donors',
+              name: 'age-filter',
             },
           },
         ],
@@ -1200,11 +1200,11 @@ export const CrossEntityStripPlot = {
           source: './data/samples.csv',
         },
         transformation: [
-          {
-            derive: {
-              organ: 'd.origin_samples_unique_mapped_organs'
-            }
-          },
+          // {
+          //   derive: {
+          //     organ: 'd.origin_samples_unique_mapped_organs'
+          //   }
+          // },
           {
             filter: {
               name: 'age-filter',
@@ -1216,8 +1216,14 @@ export const CrossEntityStripPlot = {
             },
           },
           {
+            filter: {
+              name: 'organ-filter',
+              source: 'samples',
+            },
+          },
+          {
             groupby: [
-              'organ'
+              'origin_samples_unique_mapped_organs'
             ]
           },
           {
@@ -1229,15 +1235,9 @@ export const CrossEntityStripPlot = {
           },
           {
             orderby: {
-              field: 'organ',
+              field: 'origin_samples_unique_mapped_organs',
               order: 'desc'
             }
-          },
-          {
-            filter: {
-              name: 'organ-filter',
-              source: 'samples',
-            },
           },
         ],
         representation: {
@@ -1245,7 +1245,7 @@ export const CrossEntityStripPlot = {
           mapping: [
             {
               encoding: 'x',
-              field: 'organ',
+              field: 'origin_samples_unique_mapped_organs',
               type: 'nominal',
             },
             {
@@ -1256,9 +1256,9 @@ export const CrossEntityStripPlot = {
           ],
           select: {
             name: 'organ-filter',
+            fields: 'origin_samples_unique_mapped_organs',
             how: {
-              type: 'nominal',
-              on: 'x',
+              type: 'point',
             },
           },
         },
@@ -1270,7 +1270,14 @@ export const CrossEntityStripPlot = {
         },
         transformation: [
           {
-            filter: 'd.age_value',
+            filter: {
+              name: 'organ-filter',
+              source: 'samples',
+              mapping: {
+                origin: 'donor.hubmap_id',
+                target: 'hubmap_id',
+              },
+            },
           },
           {
             filter: {
@@ -1279,10 +1286,7 @@ export const CrossEntityStripPlot = {
             },
           },
           {
-            filter: {
-              name: 'organ-filter',
-              source: 'samples',
-            },
+            filter: 'd.age_value',
           },
           {
             orderby: {
