@@ -183,7 +183,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     const relevantTable = dataSources.value[mappingKey]
 
     if (!relevantTable || !relevantFilter) {
-      throw new Error(`No data source or filter found for key: ${mappingKey}`);
+      console.warn(`No relevant table or filter for mapping: ${mappingKey}`);
+      return null;
     }
   
     console.log('relevant table', relevantTable);
@@ -193,16 +194,15 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     const updatedTable = relevantTable.dest.filter(relevantFilter).reify();
     console.log('updatedTable', updatedTable);
 
-    // Extract the target ids from the filtered table
-    console.log('targetField', targetField);
-    const targetIds = updatedTable.array(targetField) as string[];
+    // Extract the origin ids from the filtered table
+    console.log('originField', originField);
+    const originIds = updatedTable.array(originField) as string[];
 
     // Return a list of ORed ids as a filter string
-    const orExpression = targetIds
-      .map((id) => `d['${originField}'] === '${id}'`)
+    const orExpression = originIds
+      .map((id) => `d['${targetField}'] === '${id}'`)
       .join(' || ');
-    
-    console.log('orExpression', orExpression);
+
     return orExpression;
   }
 

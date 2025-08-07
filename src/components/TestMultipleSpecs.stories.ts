@@ -1469,8 +1469,8 @@ export const AlternateCrossFilter = {
               source: 'donors',
               name: 'age-filter',
               mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
+                origin: 'hubmap_id',
+                target: 'donor.hubmap_id',
               },
             },
           },
@@ -1548,8 +1548,8 @@ export const AlternateCrossFilter = {
               name: 'time-filter',
               source: 'samples',
               mapping: {
-                origin: 'hubmap_id',
-                target: 'donor.hubmap_id',
+                origin: 'donor.hubmap_id',
+                target: 'hubmap_id',
               },
             },
           },
