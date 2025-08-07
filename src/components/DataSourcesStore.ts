@@ -179,8 +179,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     }
 
     // Otherwise, we are doing cross-entity filtering
-    // Make a copy of the relevant source table
-    const relevantTable = dataSources.value[mappingKey]
+    // Get the relevant source table
+    const relevantTable = dataSources.value[mappingKey];
 
     if (!relevantTable || !relevantFilter) {
       console.warn(`No relevant table or filter for mapping: ${mappingKey}`);
@@ -190,7 +190,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     console.log('relevant table', relevantTable);
     console.log('relevantFilter', relevantFilter);
 
-    // Apply the filter to the copied table
+    // Apply the filter to a copy of the table
     const updatedTable = relevantTable.dest.filter(relevantFilter).reify();
     console.log('updatedTable', updatedTable);
 
@@ -315,6 +315,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     } = { key, table };
 
     const getInTable = (key?: string): ColumnTable => {
+      console.log('getInTable', key, currentTable, namedTables);
       const columnTable = key ? namedTables.get(key) : currentTable.table;
       if (!columnTable) {
         throw new Error('in table not found');
@@ -332,7 +333,38 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     };
 
     for (const transform of dataTransformations) {
-      if ('groupby' in transform) {
+      if ('filter' in transform) {
+        console.log('APPLYING FILTER', transform.filter);
+
+        const inTable = getInTable(transform.in);
+        if (typeof transform.filter === 'string') {
+          currentTable.table = inTable.filter(transform.filter).reify();
+        } else {
+          containsNamedFilter = true;
+          if (config?.skipNamedFilters) {
+            continue;
+          }
+
+          const filter = GetMappedArqueroFilter(
+            transform.filter.name,
+            inTable,
+            transform.filter.mapping,
+            transform.filter.source,
+            dataTransformations,
+          );
+
+          console.log('output filter', filter);
+          console.log('inTable', inTable);
+          // const stupidFakeFilter = "d['donor.hubmap_id'] === 'HBM253.KBSM.226' || d['donor.hubmap_id'] === 'HBM534.PKFT.943'";
+          // const filterToUse = transform.filter.mapping?.target === 'samples' ? stupidFakeFilter : filter;
+
+          if (filter) {
+            currentTable.table = inTable.filter(filter).reify();
+          }
+          // TODO: handle multiple / different data sources
+        }
+      } else if ('groupby' in transform) {
+        console.log('APPLYING GROUPBY', transform.groupby);
         const inTable = getInTable(transform.in);
         if (Array.isArray(transform.groupby)) {
           currentTable.table = inTable.groupby(...transform.groupby);
@@ -354,6 +386,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
         currentTable.table = inTable.groupby(groupbyObject);
       } else if ('rollup' in transform) {
+        console.log('APPLYING ROLLUP', transform.rollup);
         const inTable = getInTable(transform.in);
         const aggregateFunctions: { [key: string]: TableExpr } = {};
         const frequencyKeys: string[] = [];
@@ -405,35 +438,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           }
         }
         currentTable.table = inTable.derive(derive);
-      } else if ('filter' in transform) {
-        console.log('APPLYING FILTER', transform.filter);
-
-        const inTable = getInTable(transform.in);
-        if (typeof transform.filter === 'string') {
-          currentTable.table = inTable.filter(transform.filter).reify();
-        } else {
-          containsNamedFilter = true;
-          if (config?.skipNamedFilters) {
-            continue;
-          }
-
-          const filter = GetMappedArqueroFilter(
-            transform.filter.name,
-            inTable,
-            transform.filter.mapping,
-            transform.filter.source,
-            dataTransformations,
-          );
-
-          console.log('output filter', filter);
-          // const stupidFakeFilter = "d['donor.hubmap_id'] === 'HBM253.KBSM.226' || d['donor.hubmap_id'] === 'HBM534.PKFT.943'";
-          // const filterToUse = transform.filter.mapping?.target === 'samples' ? stupidFakeFilter : filter;
-
-          if (filter) {
-            currentTable.table = inTable.filter(filter).reify();
-          }
-          // TODO: handle multiple / different data sources
-        }
       } else if ('join' in transform) {
         const [leftKey, rightKey] = transform.in;
         const leftTable = namedTables.get(leftKey);

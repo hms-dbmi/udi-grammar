@@ -1170,8 +1170,8 @@ export const CrossEntityStripPlot = {
               source: 'samples',
               name: 'organ-filter',
               mapping: {
-                origin: 'hubmap_id',
-                target: 'donor.hubmap_id',
+                origin: 'donor.hubmap_id',
+                target: 'hubmap_id',
               },
             },
           },
@@ -1206,6 +1206,16 @@ export const CrossEntityStripPlot = {
             }
           },
           {
+            filter: {
+              name: 'age-filter',
+              source: 'donors',
+              mapping: {
+                origin: 'hubmap_id',
+                target: 'donor.hubmap_id',
+              },
+            },
+          },
+          {
             groupby: [
               'organ'
             ]
@@ -1222,16 +1232,6 @@ export const CrossEntityStripPlot = {
               field: 'organ',
               order: 'desc'
             }
-          },
-          {
-            filter: {
-              name: 'age-filter',
-              source: 'donors',
-              mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
-              },
-            },
           },
           {
             filter: {
