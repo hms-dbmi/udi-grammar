@@ -171,24 +171,39 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     const originField = mapping?.origin;
     const targetField = mapping?.target;
 
-    console.log('selection', selection);
+    const relevantFilter = selectionToArqueroFilter(dataSelection);
   
     // assume same-entity filtering if these are not provided
     if (!originField || !targetField || !mappingKey) {
-      return selectionToArqueroFilter(dataSelection);
+      return relevantFilter;
     }
 
     // Otherwise, we are doing cross-entity filtering
     // Make a copy of the relevant source table
     const relevantTable = dataSources.value[mappingKey]
+
+    if (!relevantTable || !relevantFilter) {
+      throw new Error(`No data source or filter found for key: ${mappingKey}`);
+    }
+  
     console.log('relevant table', relevantTable);
+    console.log('relevantFilter', relevantFilter);
 
     // Apply the filter to the copied table
+    const updatedTable = relevantTable.dest.filter(relevantFilter).reify();
+    console.log('updatedTable', updatedTable);
 
+    // Extract the target ids from the filtered table
+    console.log('targetField', targetField);
+    const targetIds = updatedTable.array(targetField) as string[];
 
-  
     // Return a list of ORed ids as a filter string
-    return "d['donor.hubmap_id'] === 'HBM253.KBSM.226' || d['donor.hubmap_id'] === 'HBM534.PKFT.943'";
+    const orExpression = targetIds
+      .map((id) => `d['${originField}'] === '${id}'`)
+      .join(' || ');
+    
+    console.log('orExpression', orExpression);
+    return orExpression;
   }
 
   const loading = ref<boolean>(true);
