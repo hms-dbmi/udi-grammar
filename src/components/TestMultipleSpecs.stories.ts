@@ -1570,6 +1570,13 @@ export const CrossEntityTableAndBarPlot = {
           },
         },
       },
+    ],
+  },
+};
+
+export const CrossEntityHeatmapAndBarPlot = {
+  args: {
+    specs: [
       {
         source: {
           name: 'donors',
@@ -1578,8 +1585,8 @@ export const CrossEntityTableAndBarPlot = {
         transformation: [
           {
             filter: {
-              name: 'organ-filter',
-              source: 'samples',
+              source: 'datasets',
+              name: 'dataset-filter',
               mapping: {
                 origin: 'donor.hubmap_id',
                 target: 'hubmap_id',
@@ -1588,18 +1595,120 @@ export const CrossEntityTableAndBarPlot = {
           },
           {
             filter: {
-              name: 'size-filter',
               source: 'donors',
+              name: 'size-filter',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+            },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'size-filter',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: { name: 'datasets', source: './data/datasets.csv' },
+        transformation: [
+          {
+            filter: {
+              source: 'donors',
+              name: 'size-filter',
+              mapping: {
+                origin: 'hubmap_id',
+                target: 'donor.hubmap_id',
+              },
             },
           },
           {
-            filter: 'd.size_value',
+            filter: {
+              source: 'datasets',
+              name: 'dataset-filter',
+
+            },
           },
           {
-            orderby: {
-              field: 'size_value',
-              order: 'desc',
+            groupby: ['origin_samples_unique_mapped_organs', 'assay_category'],
+          },
+          {
+            rollup: {
+              count: { op: 'count' },
             },
+          },
+        ],
+        representation: [
+          {
+            mark: 'rect',
+            mapping: [
+              { encoding: 'color',
+                field: 'count',
+                type: 'quantitative',
+                range: [
+                  "#eafab9",
+                  "#528aeb"
+                ], 
+              },
+              { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+              { encoding: 'y', field: 'assay_category', type: 'nominal' },
+            ],
+            select: {
+              name: 'dataset-filter',
+              how: {
+                type: 'point',
+              },
+              fields: ['origin_samples_unique_mapped_organs', 'assay_category'],
+            },
+          },
+          {
+            mark: 'text',
+            mapping: [
+              { encoding: 'text', field: 'count', type: 'quantitative' },
+              { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+              { encoding: 'y', field: 'assay_category', type: 'nominal' },
+            ],
+          },
+        ],
+      },
+      {
+        source: {
+          name: 'datasets',
+          source: './data/datasets.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              source: 'donors',
+              name: 'size-filter',
+              mapping: {
+                origin: 'hubmap_id',
+                target: 'donor.hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'dataset-filter',
+              source: 'datasets',
+            },
+          },
+          {
+            filter: 'd.origin_samples_unique_mapped_organs && d.assay_category',
           },
         ],
         representation: {
@@ -1612,11 +1721,16 @@ export const CrossEntityTableAndBarPlot = {
               type: 'nominal',
             },
             {
-              mark: 'bar',
-              field: 'size_value',
-              encoding: 'x',
-              type: 'quantitative',
-              domain: { min: 0, max: 100 },
+              field: 'origin_samples_unique_mapped_organs',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              field: 'assay_category',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
             },
           ],
         },
