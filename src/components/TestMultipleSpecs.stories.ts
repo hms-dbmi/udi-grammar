@@ -1155,6 +1155,145 @@ export const CrossEntityStripPlot = {
     specs: [
       {
         source: {
+          name: 'samples',
+          source: './data/samples.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              source: 'samples',
+              name: 'time-filter',
+            },
+          },
+          {
+            filter: {
+              source: 'donors',
+              name: 'age-filter',
+              mapping: {
+                origin: 'hubmap_id',
+                target: 'donor.hubmap_id',
+              },
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'created_timestamp',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'time-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              source: 'donors',
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: {
+              source: 'samples',
+              name: 'time-filter',
+              mapping: {
+                origin: 'donor.hubmap_id',
+                target: 'hubmap_id',
+              },
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'age_value',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'age-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: 'd.age_value',
+          },
+          {
+            filter: {
+              name: 'time-filter',
+              source: 'samples',
+              mapping: {
+                origin: 'donor.hubmap_id',
+                target: 'hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'age-filter',
+              source: 'donors',
+            },
+          },
+          {
+            orderby: {
+              field: 'age_value',
+              order: 'desc',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              field: 'age_value',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const CrossEntityStripAndBarPlot = {
+  args: {
+    specs: [
+      {
+        source: {
           name: 'donors',
           source: './data/donors.csv',
         },
@@ -1318,7 +1457,7 @@ export const CrossEntityStripPlot = {
   },
 };
 
-export const BasicStripPlot = {
+export const CrossEntityTableAndBarPlot = {
   args: {
     specs: [
       {
@@ -1329,93 +1468,58 @@ export const BasicStripPlot = {
         transformation: [
           {
             filter: {
-              source: 'donors',
-              name: 'time-filter',
-            },
-          },
-          {
-            filter: {
-              source: 'donors',
-              name: 'age-filter',
+              source: 'samples',
+              name: 'organ-filter',
               mapping: {
                 origin: 'donor.hubmap_id',
                 target: 'hubmap_id',
               },
             },
           },
+          {
+            filter: {
+              source: 'donors',
+              name: 'size-filter',
+            },
+          },
         ],
         representation: {
           mark: 'point',
           mapping: [
             {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+            },
+            {
               encoding: 'x',
-              field: 'created_timestamp',
+              field: 'weight_value',
               type: 'quantitative',
             },
           ],
           select: {
-            name: 'time-filter',
+            name: 'size-filter',
             how: {
               type: 'interval',
-              on: 'x',
+              on: 'xy',
             },
           },
         },
       },
       {
         source: {
-          name: 'donors',
-          source: './data/donors.csv',
+          name: 'samples',
+          source: './data/samples.csv',
         },
         transformation: [
           {
             filter: {
+              name: 'size-filter',
               source: 'donors',
-              name: 'age-filter',
-            },
-          },
-          {
-            filter: {
-              source: 'samples',
-              name: 'time-filter',
               mapping: {
                 origin: 'hubmap_id',
                 target: 'donor.hubmap_id',
               },
-            },
-          },
-        ],
-        representation: {
-          mark: 'point',
-          mapping: [
-            {
-              encoding: 'x',
-              field: 'age_value',
-              type: 'quantitative',
-            },
-          ],
-          select: {
-            name: 'age-filter',
-            how: {
-              type: 'interval',
-              on: 'x',
-            },
-          },
-        },
-      },
-      {
-        source: {
-          name: 'donors',
-          source: './data/donors.csv',
-        },
-        transformation: [
-          {
-            filter: 'd.created_timestamp',
-          },
-          {
-            filter: {
-              name: 'time-filter',
-              source: 'samples',
             },
           },
           {
@@ -1425,8 +1529,75 @@ export const BasicStripPlot = {
             },
           },
           {
+            groupby: [
+              'origin_samples_unique_mapped_organs'
+            ]
+          },
+          {
+            rollup: {
+              count: {
+                op: 'count'
+              }
+            }
+          },
+          {
             orderby: {
-              field: 'created_timestamp',
+              field: 'origin_samples_unique_mapped_organs',
+              order: 'desc'
+            }
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'origin_samples_unique_mapped_organs',
+              type: 'nominal',
+            },
+            {
+              encoding: 'y',
+              field: 'count',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'organ-filter',
+            fields: 'origin_samples_unique_mapped_organs',
+            how: {
+              type: 'point',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'organ-filter',
+              source: 'samples',
+              mapping: {
+                origin: 'donor.hubmap_id',
+                target: 'hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'size-filter',
+              source: 'donors',
+            },
+          },
+          {
+            filter: 'd.size_value',
+          },
+          {
+            orderby: {
+              field: 'size_value',
               order: 'desc',
             },
           },
@@ -1442,148 +1613,10 @@ export const BasicStripPlot = {
             },
             {
               mark: 'bar',
-              field: 'created_timestamp',
+              field: 'size_value',
               encoding: 'x',
               type: 'quantitative',
-            },
-          ],
-        },
-      },
-    ],
-  },
-};
-
-export const AlternateCrossFilter = {
-  args: {
-    specs: [
-      {
-        source: {
-          name: 'samples',
-          source: './data/samples.csv',
-        },
-        transformation: [
-          {
-            filter: {
-              source: 'samples',
-              name: 'time-filter',
-            },
-          },
-          {
-            filter: {
-              source: 'donors',
-              name: 'age-filter',
-              mapping: {
-                origin: 'hubmap_id',
-                target: 'donor.hubmap_id',
-              },
-            },
-          },
-        ],
-        representation: {
-          mark: 'point',
-          mapping: [
-            {
-              encoding: 'x',
-              field: 'created_timestamp',
-              type: 'quantitative',
-            },
-          ],
-          select: {
-            name: 'time-filter',
-            how: {
-              type: 'interval',
-              on: 'x',
-            },
-          },
-        },
-      },
-      {
-        source: {
-          name: 'donors',
-          source: './data/donors.csv',
-        },
-        transformation: [
-          {
-            filter: {
-              source: 'donors',
-              name: 'age-filter',
-            },
-          },
-          {
-            filter: {
-              source: 'samples',
-              name: 'time-filter',
-              mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
-              },
-            },
-          },
-        ],
-        representation: {
-          mark: 'point',
-          mapping: [
-            {
-              encoding: 'x',
-              field: 'age_value',
-              type: 'quantitative',
-            },
-          ],
-          select: {
-            name: 'age-filter',
-            how: {
-              type: 'interval',
-              on: 'x',
-            },
-          },
-        },
-      },
-      {
-        source: {
-          name: 'donors',
-          source: './data/donors.csv',
-        },
-        transformation: [
-          {
-            filter: 'd.age_value',
-          },
-          {
-            filter: {
-              name: 'time-filter',
-              source: 'samples',
-              mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
-              },
-            },
-          },
-          {
-            filter: {
-              name: 'age-filter',
-              source: 'donors',
-            },
-          },
-          {
-            orderby: {
-              field: 'age_value',
-              order: 'desc',
-            },
-          },
-        ],
-        representation: {
-          mark: 'row',
-          mapping: [
-            {
-              field: 'hubmap_id',
-              encoding: 'text',
-              mark: 'text',
-              type: 'nominal',
-            },
-            {
-              field: 'age_value',
-              encoding: 'text',
-              mark: 'text',
-              type: 'nominal',
+              domain: { min: 0, max: 100 },
             },
           ],
         },
