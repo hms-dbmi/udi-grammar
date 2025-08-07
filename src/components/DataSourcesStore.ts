@@ -230,7 +230,13 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   }
 
   function getDataSource(key: string): DataInterface | null {
+    console.log('getDataSource', key, dataSources.value);
+    if (loading.value) {
+      console.warn('Data sources are still loading');
+      return null;
+    }
     if (!(key in dataSources.value)) return null;
+    console.log('found data source', dataSources.value[key]);
     return dataSources.value[key] ?? null;
   }
 
@@ -253,9 +259,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       const namedTables = new Map();
       for (const key of keys) {
         const dataInterface = getDataSource(key);
-        if (dataInterface === null) {
-          // continue;
-          throw new Error(`key not found in data sources: [${key}]`);
+        if (!dataInterface) {
+          console.warn(`Skipping missing data source for key: ${key}`);
+          continue;
         }
         namedTables.set(key, from(dataInterface.dest.reify()));
       }
