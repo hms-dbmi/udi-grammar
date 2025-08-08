@@ -1591,6 +1591,7 @@ export const CrossEntityHeatmapAndBarPlot = {
                 origin: 'donor.hubmap_id',
                 target: 'hubmap_id',
               },
+              match: 'all',
             },
           },
           {
@@ -1634,6 +1635,7 @@ export const CrossEntityHeatmapAndBarPlot = {
                 origin: 'hubmap_id',
                 target: 'donor.hubmap_id',
               },
+              match: 'all',
             },
           },
           {
@@ -1699,6 +1701,7 @@ export const CrossEntityHeatmapAndBarPlot = {
                 origin: 'hubmap_id',
                 target: 'donor.hubmap_id',
               },
+              match: 'all',
             },
           },
           {
@@ -1728,6 +1731,41 @@ export const CrossEntityHeatmapAndBarPlot = {
             },
             {
               field: 'assay_category',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+          ],
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              source: 'donors',
+              name: 'size-filter',
+            },
+          },
+          {
+            filter: {
+              name: 'dataset-filter',
+              source: 'datasets',
+              mapping: {
+                origin: 'donor.hubmap_id',
+                target: 'hubmap_id',
+              },
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
               encoding: 'text',
               mark: 'text',
               type: 'nominal',

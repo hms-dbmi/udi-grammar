@@ -80,8 +80,6 @@ function initVegaChart() {
         });
       }
       if (props.pointSelect) {
-        console.log('props', props);
-        console.log('props current signalKey', props.signalKeys);
         // if the signal is a point selection we I couldn't get signals
         // to work with dynamic data, so click events it is!
         view.addEventListener('click', function (event, item) {
@@ -94,8 +92,6 @@ function initVegaChart() {
           if (!datum) {
             dataSourcesStore.clearDataSelection(props.pointSelect.name);
           } else {
-            console.log('fields', fields);
-            console.log('datum', datum);
             const pointSelection = {};
             for (const f of fields) {
               // @ts-expect-error: ignore errror

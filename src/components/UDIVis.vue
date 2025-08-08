@@ -57,8 +57,6 @@ function buildVisualization(): void {
   //   dataSourcesStore.initDataSource(dataSource);
   // }
 
-  console.log('building visualization', parsedSpec.value);
-
   performDataTransformation(parsedSpec.value);
   if (transformedData.value == null) {
     return;
@@ -177,15 +175,12 @@ const isTransformedDataSubset = ref<boolean>(false);
 function performDataTransformation(spec: ParsedUDIGrammar) {
   transformedData.value = null;
 
-  console.log('performing data transformation', spec);
-
   try {
     transformError.value = null;
     const dataObjects = dataSourcesStore.getDataObject(
       spec.source.map((x) => x.name),
       spec.transformation,
     );
-    console.log('dataObjects', dataObjects);
     if (dataObjects == null) return;
     const { allData, displayData, isDisplayDataSubset } = dataObjects;
     transformedData.value = displayData;
@@ -218,10 +213,6 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   }
 
   debugVegaData.value = vegaSpec.data.values;
-  // console.log(vegaSpec);
-  // TODO: perform transformations
-
-  // dataInterface.
 
   // add layers
   const inputLayers = spec.representation as VisualizationLayer[];
@@ -297,7 +288,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       //   // selectParam.select['encodings'] = 'sex';
       // }
       dataSourcesStore.watchDataSelection(
-        layer.select.source, // TODO: figure out which data source to use here.
+        layer.select.source,
         layer.select.name,
         layer.select.how.type, // TODO: set point if needed
       );
