@@ -145,29 +145,14 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
   function GetMappedArqueroFilter(
     selectionName: string,
-    sourceTable: ColumnTable,
     mapping?: FilterDataSelectionMapping,
     mappingKey?: string,
-    transformations: DataTransformation[] = [],
   ): string | null {
-    console.groupCollapsed(`GetMappedArqueroFilter → ${selectionName} :: ${mappingKey}`);
-    console.log({
-      selectionName,
-      sourceTable,
-      mapping,
-      mappingKey,
-      transformations,
-    });
-    console.groupEnd();
-
+    // Check that the filter is being applied
     const dataSelection = dataSelections.value[selectionName];
-
-    console.log('dataSelections.value', dataSelections.value);
-    console.log('dataSelection', dataSelection);
     if (!dataSelection || !dataSelection.selection) return null;
   
     // Pull matching values from source selection
-    const selection = dataSelection.selection;
     const originField = mapping?.origin;
     const targetField = mapping?.target;
 
@@ -186,16 +171,11 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       console.warn(`No relevant table or filter for mapping: ${mappingKey}`);
       return null;
     }
-  
-    console.log('relevant table', relevantTable);
-    console.log('relevantFilter', relevantFilter);
 
     // Apply the filter to a copy of the table
     const updatedTable = relevantTable.dest.filter(relevantFilter).reify();
-    console.log('updatedTable', updatedTable);
 
     // Extract the origin ids from the filtered table
-    console.log('originField', originField);
     const originIds = updatedTable.array(originField) as string[];
 
     // Return a list of ORed ids as a filter string
@@ -230,13 +210,11 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   }
 
   function getDataSource(key: string): DataInterface | null {
-    console.log('getDataSource', key, dataSources.value);
     if (loading.value) {
       console.warn('Data sources are still loading');
       return null;
     }
     if (!(key in dataSources.value)) return null;
-    console.log('found data source', dataSources.value[key]);
     return dataSources.value[key] ?? null;
   }
 
@@ -248,10 +226,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     allData: object[]; // all data (needed for full domains)
     isDisplayDataSubset: boolean; // true if the returned data is a subset of the full data
   } | null {
-    console.log('top of getDataObject');
-    console.log('keys', keys);
-    console.log('dataTransformations', dataTransformations);
-  
     if (loading.value) return null;
 
     // make copy of tables from data sources
@@ -268,8 +242,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       return namedTables;
     };
 
-    console.log('getNamedTables', getNamedTables());
-
     const { data: dataTable, containsNamedFilter } = PerformDataTransformations(
       getNamedTables(),
       dataTransformations ?? [],
@@ -278,8 +250,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       },
     );
     const displayData = dataTable.objects();
-
-    console.log('displayData', displayData);
 
     let allData = displayData;
     if (containsNamedFilter) {
@@ -307,8 +277,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       skipNamedFilters?: boolean; // if true, skip named filters in transformations
     },
   ): { data: ColumnTable; containsNamedFilter: boolean } {
-    console.log('PerformDataTransformations', namedTables, dataTransformations, config);
-
     let containsNamedFilter = false;
     const key = namedTables.keys().next().value ?? '';
     const table = namedTables.get(key);
@@ -321,7 +289,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     } = { key, table };
 
     const getInTable = (key?: string): ColumnTable => {
-      console.log('getInTable', key, currentTable, namedTables);
       const columnTable = key ? namedTables.get(key) : currentTable.table;
       if (!columnTable) {
         throw new Error('in table not found');
@@ -340,37 +307,30 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
     for (const transform of dataTransformations) {
       if ('filter' in transform) {
-        console.log('APPLYING FILTER', transform.filter);
+        const { filter, in: tableName } = transform;
+        const inTable = getInTable(tableName);
 
-        const inTable = getInTable(transform.in);
-        if (typeof transform.filter === 'string') {
-          currentTable.table = inTable.filter(transform.filter).reify();
+        // Just apply the filter if it's a string
+        if (typeof filter === 'string') {
+          currentTable.table = inTable.filter(filter).reify();
         } else {
+          // Otherwise, we assume it's a named filter
           containsNamedFilter = true;
           if (config?.skipNamedFilters) {
             continue;
           }
 
-          const filter = GetMappedArqueroFilter(
-            transform.filter.name,
-            inTable,
-            transform.filter.mapping,
-            transform.filter.source,
-            dataTransformations,
+          const mappedFilter = GetMappedArqueroFilter(
+            filter.name,
+            filter.mapping,
+            filter.source,
           );
 
-          console.log('output filter', filter);
-          console.log('inTable', inTable);
-          // const stupidFakeFilter = "d['donor.hubmap_id'] === 'HBM253.KBSM.226' || d['donor.hubmap_id'] === 'HBM534.PKFT.943'";
-          // const filterToUse = transform.filter.mapping?.target === 'samples' ? stupidFakeFilter : filter;
-
-          if (filter) {
-            currentTable.table = inTable.filter(filter).reify();
+          if (mappedFilter) {
+            currentTable.table = inTable.filter(mappedFilter).reify();
           }
-          // TODO: handle multiple / different data sources
         }
       } else if ('groupby' in transform) {
-        console.log('APPLYING GROUPBY', transform.groupby);
         const inTable = getInTable(transform.in);
         if (Array.isArray(transform.groupby)) {
           currentTable.table = inTable.groupby(...transform.groupby);
@@ -392,7 +352,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
         currentTable.table = inTable.groupby(groupbyObject);
       } else if ('rollup' in transform) {
-        console.log('APPLYING ROLLUP', transform.rollup);
         const inTable = getInTable(transform.in);
         const aggregateFunctions: { [key: string]: TableExpr } = {};
         const frequencyKeys: string[] = [];
