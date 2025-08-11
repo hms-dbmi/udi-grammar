@@ -1114,6 +1114,211 @@ export const CrossFilterStripPlot = {
   },
 };
 
+export const MatchTestCrossFilterStripPlot = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/match_test_donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+              match: 'all',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+              match: 'all',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+              match: 'all',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'age_value',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'age-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/match_test_donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+              match: 'all',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+              match: 'all',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+              match: 'all',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              // domain: [0, 160],
+            },
+          ],
+          select: {
+            name: 'weight-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/match_test_donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+              match: 'all',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+              match: 'all',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+              match: 'all',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'height_value',
+              type: 'quantitative',
+              // domain: [60, 200],
+            },
+          ],
+          select: {
+            name: 'height-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/match_test_donors.csv',
+        },
+        transformation: [
+          {
+            filter: 'd.height_value && d.weight_value && d.age_value',
+          },
+          {
+            filter: {
+              name: 'age-filter',
+              match: 'all',
+            },
+          },
+          {
+            filter: {
+              name: 'height-filter',
+              match: 'all',
+            },
+          },
+          {
+            filter: {
+              name: 'weight-filter',
+              match: 'all',
+            },
+          },
+          {
+            orderby: {
+              field: 'height_value',
+              order: 'desc',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              mark: 'bar',
+              field: 'height_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 60, max: 200 },
+            },
+            {
+              mark: 'bar',
+              field: 'weight_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 0, max: 160 },
+            },
+            {
+              mark: 'bar',
+              field: 'age_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 0, max: 100 },
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
 export const CrossEntityStripPlot = {
   args: {
     specs: [
@@ -1720,6 +1925,166 @@ export const CrossEntityHeatmapAndBarPlot = {
               encoding: 'text',
               mark: 'text',
               type: 'nominal',
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const CrossEntityErrorTest = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              source: 'samples',
+              name: 'organ-filter',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'age_value',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'age-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'samples',
+          source: './data/samples.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'organ-filter',
+            },
+          },
+          {
+            groupby: [
+              'origin_samples_unique_mapped_organs'
+            ]
+          },
+          {
+            rollup: {
+              count: {
+                op: 'count'
+              }
+            }
+          },
+          {
+            filter: {
+              name: 'age-filter',
+              source: 'donors',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
+              },
+            },
+          },
+          {
+            orderby: {
+              field: 'origin_samples_unique_mapped_organs',
+              order: 'desc'
+            }
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'origin_samples_unique_mapped_organs',
+              type: 'nominal',
+            },
+            {
+              encoding: 'y',
+              field: 'count',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'organ-filter',
+            fields: 'origin_samples_unique_mapped_organs',
+            how: {
+              type: 'point',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'organ-filter',
+              source: 'samples',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+          {
+            filter: 'd.age_value',
+          },
+          {
+            orderby: {
+              field: 'age_value',
+              order: 'desc',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              mark: 'bar',
+              field: 'age_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 0, max: 100 },
             },
           ],
         },

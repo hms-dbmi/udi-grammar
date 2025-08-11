@@ -143,11 +143,19 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     return RangeSelectionToArqueroFilter(selection as RangeSelection);
   }
 
-  function GetMappedArqueroFilter(
+  function GetMappedArqueroFilter({
+    key,
+    inTable,
+    selectionName,
+    entityRelationship,
+    selectionSourceKey,
+  }: {
+    key: string,
+    inTable: ColumnTable,
     selectionName: string,
-    entityRelationship?: FilterEntityRelationship,
+    entityRelationship?: FilterEntityRelationship | null,
     selectionSourceKey?: string,
-  ): string | null {
+  }): string | null {
     // Check that the filter is being applied
     const dataSelection = dataSelections.value[selectionName];
     if (!dataSelection || !dataSelection.selection) return null;
@@ -166,12 +174,18 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     }
 
     // Otherwise, we are doing cross-entity filtering
+  
     // Get the relevant source table
     const relevantTable = dataSources.value[selectionSourceKey];
 
     if (!relevantTable || !relevantFilter) {
       console.warn(`No relevant table or filter for mapping: ${selectionSourceKey}`);
       return null;
+    }
+
+    // Check that the originKey is present in the source table
+    if (!inTable.columnNames().includes(originKey)) {
+      throw new Error(`Identifying key [${originKey}] not found in table [${key}]. Ensure any filters relying on the [${originKey}] column are applied before other transformations that may remove it.`);
     }
 
     // Apply the filter to a copy of the table
@@ -322,11 +336,13 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
             continue;
           }
 
-          const mappedFilter = GetMappedArqueroFilter(
-            filter.name,
-            filter.entityRelationship,
-            filter.source ?? tableName,
-          );
+          const mappedFilter = GetMappedArqueroFilter({
+            key,
+            inTable,
+            selectionName: filter.name,
+            selectionSourceKey: filter.source,
+            entityRelationship: filter.entityRelationship ?? null,
+          });
 
           if (mappedFilter) {
             currentTable.table = inTable.filter(mappedFilter).reify();
