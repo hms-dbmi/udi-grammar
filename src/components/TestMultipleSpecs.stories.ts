@@ -1642,7 +1642,6 @@ export const CrossEntityHeatmapAndBarPlot = {
             filter: {
               source: 'datasets',
               name: 'dataset-filter',
-
             },
           },
           {
