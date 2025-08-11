@@ -466,8 +466,18 @@
           "description": "The name of the source table of the selection.",
           "type": "string"
         },
-        "mapping": {
-          "description": "The mapping that provides the identifying columns from the source table and target table.",
+        "entityRelationship": {
+          "description": "The identifying columns from the source table and target table that describe the entity relationship.",
+          "properties": {
+            "originKey": {
+              "description": "The name of the column in the source table that identifies the entity.",
+              "type": "string"
+            },
+            "targetKey": {
+              "description": "The name of the column in the target table that identifies the entity.",
+              "type": "string"
+            }
+          },
           "type": "object"
         }
       },

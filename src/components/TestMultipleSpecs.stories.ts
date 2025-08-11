@@ -1169,9 +1169,9 @@ export const CrossEntityStripPlot = {
             filter: {
               source: 'donors',
               name: 'age-filter',
-              mapping: {
-                origin: 'hubmap_id',
-                target: 'donor.hubmap_id',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
               },
             },
           },
@@ -1210,9 +1210,9 @@ export const CrossEntityStripPlot = {
             filter: {
               source: 'samples',
               name: 'time-filter',
-              mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
               },
             },
           },
@@ -1248,9 +1248,9 @@ export const CrossEntityStripPlot = {
             filter: {
               name: 'time-filter',
               source: 'samples',
-              mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
               },
             },
           },
@@ -1302,9 +1302,9 @@ export const CrossEntityStripAndBarPlot = {
             filter: {
               source: 'samples',
               name: 'organ-filter',
-              mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
               },
             },
           },
@@ -1348,9 +1348,9 @@ export const CrossEntityStripAndBarPlot = {
             filter: {
               name: 'age-filter',
               source: 'donors',
-              mapping: {
-                origin: 'hubmap_id',
-                target: 'donor.hubmap_id',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
               },
             },
           },
@@ -1412,9 +1412,9 @@ export const CrossEntityStripAndBarPlot = {
             filter: {
               name: 'organ-filter',
               source: 'samples',
-              mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
               },
             },
           },
@@ -1470,9 +1470,9 @@ export const CrossEntityTableAndBarPlot = {
             filter: {
               source: 'samples',
               name: 'organ-filter',
-              mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
               },
             },
           },
@@ -1516,9 +1516,9 @@ export const CrossEntityTableAndBarPlot = {
             filter: {
               name: 'size-filter',
               source: 'donors',
-              mapping: {
-                origin: 'hubmap_id',
-                target: 'donor.hubmap_id',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
               },
             },
           },
@@ -1587,9 +1587,9 @@ export const CrossEntityHeatmapAndBarPlot = {
             filter: {
               source: 'datasets',
               name: 'dataset-filter',
-              mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
               },
               match: 'all',
             },
@@ -1631,9 +1631,9 @@ export const CrossEntityHeatmapAndBarPlot = {
             filter: {
               source: 'donors',
               name: 'size-filter',
-              mapping: {
-                origin: 'hubmap_id',
-                target: 'donor.hubmap_id',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
               },
               match: 'all',
             },
@@ -1696,9 +1696,9 @@ export const CrossEntityHeatmapAndBarPlot = {
             filter: {
               source: 'donors',
               name: 'size-filter',
-              mapping: {
-                origin: 'hubmap_id',
-                target: 'donor.hubmap_id',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
               },
               match: 'all',
             },
@@ -1753,9 +1753,9 @@ export const CrossEntityHeatmapAndBarPlot = {
             filter: {
               name: 'dataset-filter',
               source: 'datasets',
-              mapping: {
-                origin: 'donor.hubmap_id',
-                target: 'hubmap_id',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
               },
             },
           },

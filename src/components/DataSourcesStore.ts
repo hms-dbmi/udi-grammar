@@ -6,7 +6,7 @@ import type {
   DataSource,
   DataTransformation,
   DirectionalOrder,
-  FilterDataSelectionMapping,
+  FilterEntityRelationship,
 } from './GrammarTypes';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
 import {
@@ -145,30 +145,32 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
   function GetMappedArqueroFilter(
     selectionName: string,
-    mapping?: FilterDataSelectionMapping,
-    mappingKey?: string,
+    entityRelationship?: FilterEntityRelationship,
+    selectionSourceKey?: string,
   ): string | null {
     // Check that the filter is being applied
     const dataSelection = dataSelections.value[selectionName];
     if (!dataSelection || !dataSelection.selection) return null;
   
     // Pull matching values from source selection
-    const originField = mapping?.origin;
-    const targetField = mapping?.target;
+    const {
+      originKey,
+      targetKey,
+    } = entityRelationship || { originKey: null, targetKey: null };
 
     const relevantFilter = selectionToArqueroFilter(dataSelection);
   
     // assume same-entity filtering if these are not provided
-    if (!originField || !targetField || !mappingKey) {
+    if (!originKey || !targetKey || !selectionSourceKey) {
       return relevantFilter;
     }
 
     // Otherwise, we are doing cross-entity filtering
     // Get the relevant source table
-    const relevantTable = dataSources.value[mappingKey];
+    const relevantTable = dataSources.value[selectionSourceKey];
 
     if (!relevantTable || !relevantFilter) {
-      console.warn(`No relevant table or filter for mapping: ${mappingKey}`);
+      console.warn(`No relevant table or filter for mapping: ${selectionSourceKey}`);
       return null;
     }
 
@@ -176,11 +178,11 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     const updatedTable = relevantTable.dest.filter(relevantFilter).reify();
 
     // Extract the origin ids from the filtered table
-    const originIds = updatedTable.array(originField) as string[];
+    const originIds = updatedTable.array(originKey) as string[];
 
     // Return a list of ORed ids as a filter string
     const orExpression = originIds
-      .map((id) => `d['${targetField}'] === '${id}'`)
+      .map((id) => `d['${targetKey}'] === '${id}'`)
       .join(' || ');
 
     return orExpression;
@@ -322,7 +324,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
           const mappedFilter = GetMappedArqueroFilter(
             filter.name,
-            filter.mapping,
+            filter.entityRelationship,
             filter.source,
           );
 

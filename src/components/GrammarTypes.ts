@@ -286,9 +286,9 @@ export interface FilterDataSelection {
   source: string;
 
   /**
-   * A mapping of current fields to source fields for the selection.
+   * The identifying columns from the source table and target table that describe the entity relationship.
    */
-  mapping?: FilterDataSelectionMapping;
+  entityRelationship?: FilterEntityRelationship;
 
   /**
    * Specifies whether to use 'all' or 'any' of the selected data in a 1-to-many mapping.
@@ -300,16 +300,16 @@ export interface FilterDataSelection {
 /**
  * A mapping for data selection, which specifies how fields in the source table correspond to fields in the target table.
  */
-export interface FilterDataSelectionMapping {
+export interface FilterEntityRelationship {
   /**
    * The name of the identifying column in the source table.
    */
-  origin: string;
+  originKey: string;
 
   /**
    * The name of the identifying column in the target table.
    */
-  target: string;
+  targetKey: string;
 }
 
 /**
