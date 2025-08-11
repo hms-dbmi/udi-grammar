@@ -258,8 +258,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       return namedTables;
     };
 
+    const namedTables = getNamedTables();
+
     const { data: dataTable, containsNamedFilter } = PerformDataTransformations(
-      getNamedTables(),
+      namedTables,
       dataTransformations ?? [],
       {
         skipNamedFilters: false,
@@ -270,7 +272,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     let allData = displayData;
     if (containsNamedFilter) {
       const { data: fullData } = PerformDataTransformations(
-        getNamedTables(),
+        namedTables,
         dataTransformations ?? [],
         {
           skipNamedFilters: true,
@@ -297,7 +299,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     const key = namedTables.keys().next().value ?? '';
     const table = namedTables.get(key);
     if (!table) {
-      throw new Error('table not found');
+      // Wait until the first table is available
+      console.warn('No table found for key:', key);
+      return { data: from([]), containsNamedFilter: false };
     }
     const currentTable: {
       key: string;
