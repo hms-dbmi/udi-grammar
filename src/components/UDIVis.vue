@@ -287,6 +287,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       //   // selectParam.select['on'] = 'click';
       //   // selectParam.select['encodings'] = 'sex';
       // }
+
       dataSourcesStore.watchDataSelection(
         layer.select.source,
         layer.select.name,

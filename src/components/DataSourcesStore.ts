@@ -325,7 +325,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           const mappedFilter = GetMappedArqueroFilter(
             filter.name,
             filter.entityRelationship,
-            filter.source,
+            filter.source ?? tableName,
           );
 
           if (mappedFilter) {
