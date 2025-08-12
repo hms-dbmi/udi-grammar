@@ -1,7 +1,5 @@
 hubmap_id,weight_value,height_value,sex,race,age_value,cause_of_death
 D001,150,50,Male,White,45,Trauma
-D016,150,90,Male,White,45,Trauma
-D017,150,10,Male,White,45,Trauma
 D002,130,65,Female,Black,38,Cardiac Arrest
 D003,180,70,Male,Hispanic,52,Anoxia
 D004,160,64,Female,Asian,29,Head Trauma

@@ -7,6 +7,7 @@ import type {
   DataTransformation,
   DirectionalOrder,
   FilterEntityRelationship,
+  FilterMatch,
 } from './GrammarTypes';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
 import {
@@ -147,13 +148,15 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     key,
     inTable,
     selectionName,
-    entityRelationship,
+    selectionMatching = 'any',
+    selectionEntityRelationship,
     selectionSourceKey,
   }: {
     key: string,
     inTable: ColumnTable,
     selectionName: string,
-    entityRelationship?: FilterEntityRelationship | null,
+    selectionMatching?: FilterMatch | undefined,
+    selectionEntityRelationship?: FilterEntityRelationship | null,
     selectionSourceKey?: string,
   }): string | null {
     // Check that the filter is being applied
@@ -164,7 +167,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     const {
       originKey,
       targetKey,
-    } = entityRelationship || { originKey: null, targetKey: null };
+    } = selectionEntityRelationship || { originKey: null, targetKey: null };
 
     const relevantFilter = selectionToArqueroFilter(dataSelection);
   
@@ -183,23 +186,50 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       return null;
     }
 
-    // Check that the originKey is present in the source table
-    if (!inTable.columnNames().includes(originKey)) {
-      throw new Error(`Identifying key [${originKey}] not found in table [${key}]. Ensure any filters relying on the [${originKey}] column are applied before other transformations that may remove it.`);
+    // Check that the targetKey is present in the in table
+    if (!inTable.columnNames().includes(targetKey)) {
+      throw new Error(`Identifying key [${targetKey}] not found in table [${key}]. Ensure any filters relying on the [${targetKey}] column are applied before other transformations that may remove it.`);
     }
+    
+    const totalTable = relevantTable.dest.reify();
+    const filteredTable = relevantTable.dest.filter(relevantFilter).reify();
 
-    // Apply the filter to a copy of the table
-    const updatedTable = relevantTable.dest.filter(relevantFilter).reify();
+    // If the matching is 'any' or not specified, we just return the filter expression
+    if (selectionMatching != 'all') {
+      const originIds = filteredTable.array(originKey) as string[];
 
-    // Extract the origin ids from the filtered table
-    const originIds = updatedTable.array(originKey) as string[];
-
-    // Return a list of ORed ids as a filter string
-    const orExpression = originIds
+      return originIds
       .map((id) => `d['${targetKey}'] === '${id}'`)
       .join(' || ');
+    }
 
-    return orExpression;
+    // Otherwise, the matching is 'all', meaning we need to find entities that satisfy the filter completely 
+    
+    // Count helper
+    const toCounts = (ids: string[]) => {
+      const m = new Map<string, number>();
+      for (const id of ids) m.set(id, (m.get(id) ?? 0) + 1);
+      return m;
+    };
+    
+    // Per-entity counts
+    const totalCounts = toCounts(totalTable.array(originKey) as string[]);
+    const filteredCounts = toCounts(filteredTable.array(originKey) as string[]);
+    
+    // Entities whose entire set matches the filter
+    const exclusiveOriginIds: string[] = [];
+    for (const [id, f] of filteredCounts.entries()) {
+      const t = totalCounts.get(id) ?? 0;
+      if (f > 0 && f === t) exclusiveOriginIds.push(id);
+    }
+    
+    // Return a list of OR-ed ids as a filter string for the target table
+    const orExpression =
+      exclusiveOriginIds.length > 0
+        ? exclusiveOriginIds.map((id) => `d['${targetKey}'] === '${id}'`).join(' || ')
+        : 'false'; // nothing qualifies
+    
+    return orExpression;    
   }
 
   const loading = ref<boolean>(true);
@@ -340,13 +370,17 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
             continue;
           }
 
+          // Weird spread syntax to handle optional properties
           const mappedFilter = GetMappedArqueroFilter({
             key,
             inTable,
             selectionName: filter.name,
             selectionSourceKey: filter.source,
-            entityRelationship: filter.entityRelationship ?? null,
-          });
+            ...(filter.match !== undefined ? { selectionMatching: filter.match } : {}),
+            ...(filter.entityRelationship !== undefined
+                ? { selectionEntityRelationship: filter.entityRelationship }
+                : {}),
+          });          
 
           if (mappedFilter) {
             currentTable.table = inTable.filter(mappedFilter).reify();

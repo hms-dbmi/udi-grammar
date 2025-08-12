@@ -1,0 +1,33 @@
+hubmap_id,donor.hubmap_id,organ,organ_condition,weight_value,sample_category
+S001,D001,Heart,Healthy,300,block
+S002,D001,Heart,Slightly Damaged,1500,organ
+S050,D001,Heart,Slightly Damaged,1500,organ
+S052,D001,Heart,Slightly Damaged,1500,organ
+S003,D002,Kidney,Healthy,250,section
+S004,D002,Kidney,Healthy,400,block
+S005,D003,Heart,Healthy,310,organ
+S006,D003,Kidney,Slightly Damaged,240,section
+S007,D004,Liver,Healthy,1450,block
+S008,D004,Lung,Healthy,380,organ
+S009,D005,Kidney,Healthy,260,section
+S010,D005,Pancreas,Healthy,90,block
+S011,D006,Heart,Slightly Damaged,320,organ
+S012,D006,Liver,Healthy,1480,section
+S013,D007,Kidney,Severely Damaged,230,block
+S014,D007,Lung,Healthy,420,organ
+S015,D008,Heart,Healthy,305,section
+S016,D008,Spleen,Healthy,150,block
+S017,D009,Liver,Healthy,1520,organ
+S018,D009,Kidney,Healthy,265,section
+S019,D010,Lung,Slightly Damaged,390,block
+S020,D010,Pancreas,Healthy,85,organ
+S021,D011,Heart,Healthy,315,section
+S022,D011,Liver,Slightly Damaged,1490,block
+S023,D012,Kidney,Healthy,255,organ
+S024,D012,Lung,Healthy,410,section
+S025,D013,Heart,Healthy,310,block
+S026,D013,Spleen,Healthy,160,organ
+S027,D014,Kidney,Healthy,1500,section
+S028,D014,Kidney,Slightly Damaged,250,block
+S029,D015,Lung,Severely Damaged,430,organ
+S030,D015,Pancreas,Healthy,95,section

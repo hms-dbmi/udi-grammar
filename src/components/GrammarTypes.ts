@@ -272,6 +272,11 @@ export interface Filter extends DataTransformationBase {
 export type FilterExpression = string | FilterDataSelection;
 
 /**
+ * A filter match type, which specifies how to match the filter data selection.
+ */
+export type FilterMatch = 'all' | 'any';
+
+/**
  * A data selection used for filtering.
  */
 export interface FilterDataSelection {
@@ -294,7 +299,7 @@ export interface FilterDataSelection {
    * Specifies whether to use 'all' or 'any' of the selected data in a 1-to-many mapping.
    * Default is 'any'.
    */
-  match?: 'all' | 'any';
+  match?: FilterMatch;
 }
 
 /**

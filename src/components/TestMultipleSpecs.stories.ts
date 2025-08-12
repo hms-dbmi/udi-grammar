@@ -1192,7 +1192,6 @@ export const MatchTestCrossFilterStripPlot = {
               encoding: 'x',
               field: 'weight_value',
               type: 'quantitative',
-              // domain: [0, 160],
             },
           ],
           select: {
@@ -1447,6 +1446,172 @@ export const CrossEntityStripPlot = {
               encoding: 'text',
               mark: 'text',
               type: 'nominal',
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const MatchTestCrossEntityStripAndBarPlot = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/match_test_donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              source: 'samples',
+              name: 'organ-filter',
+              match: 'all',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'age-filter',
+              match: 'all',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'age_value',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'age-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'samples',
+          source: './data/match_test_samples.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+              source: 'donors',
+              match: 'all',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'organ-filter',
+              match: 'all',
+            },
+          },
+          {
+            groupby: [
+              'organ'
+            ]
+          },
+          {
+            rollup: {
+              count: {
+                op: 'count'
+              }
+            }
+          },
+          {
+            orderby: {
+              field: 'organ',
+              order: 'desc'
+            }
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'organ',
+              type: 'nominal',
+            },
+            {
+              encoding: 'y',
+              field: 'count',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'organ-filter',
+            fields: 'organ',
+            how: {
+              type: 'point',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/match_test_donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'organ-filter',
+              source: 'samples',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
+              },
+              match: 'all',
+            },
+          },
+          {
+            filter: {
+              name: 'age-filter',
+              match: 'all',
+            },
+          },
+          {
+            filter: 'd.age_value',
+          },
+          {
+            orderby: {
+              field: 'age_value',
+              order: 'desc',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              mark: 'bar',
+              field: 'age_value',
+              encoding: 'x',
+              type: 'quantitative',
+              domain: { min: 0, max: 100 },
             },
           ],
         },
