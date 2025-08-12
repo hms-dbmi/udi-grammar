@@ -482,8 +482,7 @@
         }
       },
       "required": [
-        "name",
-        "source"
+        "name"
       ],
       "type": "object"
     },
