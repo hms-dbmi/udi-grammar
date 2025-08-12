@@ -1454,7 +1454,7 @@ export const CrossEntityStripPlot = {
   },
 };
 
-export const MatchTestCrossEntityStripAndBarPlot = {
+export const MatchAllTestCrossEntityStripAndBarPlot = {
   args: {
     specs: [
       {
@@ -1588,7 +1588,208 @@ export const MatchTestCrossEntityStripAndBarPlot = {
             },
           },
           {
-            filter: 'd.age_value',
+            orderby: {
+              field: 'age_value',
+              order: 'desc',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              mark: 'text',
+              field: 'age_value',
+              encoding: 'text',
+              type: 'nominal',
+            },
+          ],
+        },
+      },
+      {
+        source: {
+          name: 'samples',
+          source: './data/match_test_samples.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+              source: 'donors',
+              match: 'all',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'organ-filter',
+              match: 'all',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              field: 'donor.hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              mark: 'text',
+              field: 'organ',
+              encoding: 'text',
+              type: 'nominal',
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const MatchAnyTestCrossEntityStripAndBarPlot = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/match_test_donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              source: 'samples',
+              name: 'organ-filter',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'age-filter',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'age_value',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'age-filter',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'samples',
+          source: './data/match_test_samples.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+              source: 'donors',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'organ-filter',
+            },
+          },
+          {
+            groupby: [
+              'organ'
+            ]
+          },
+          {
+            rollup: {
+              count: {
+                op: 'count'
+              }
+            }
+          },
+          {
+            orderby: {
+              field: 'organ',
+              order: 'desc'
+            }
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'organ',
+              type: 'nominal',
+            },
+            {
+              encoding: 'y',
+              field: 'count',
+              type: 'quantitative',
+            },
+          ],
+          select: {
+            name: 'organ-filter',
+            fields: 'organ',
+            how: {
+              type: 'point',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/match_test_donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'organ-filter',
+              source: 'samples',
+              entityRelationship: {
+                originKey: 'donor.hubmap_id',
+                targetKey: 'hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'age-filter',
+            },
           },
           {
             orderby: {
@@ -1607,11 +1808,56 @@ export const MatchTestCrossEntityStripAndBarPlot = {
               type: 'nominal',
             },
             {
-              mark: 'bar',
+              mark: 'text',
               field: 'age_value',
-              encoding: 'x',
-              type: 'quantitative',
-              domain: { min: 0, max: 100 },
+              encoding: 'text',
+              type: 'nominal',
+            },
+          ],
+        },
+      },
+      {
+        source: {
+          name: 'samples',
+          source: './data/match_test_samples.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'age-filter',
+              source: 'donors',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'organ-filter',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              field: 'donor.hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              mark: 'text',
+              field: 'organ',
+              encoding: 'text',
+              type: 'nominal',
             },
           ],
         },
