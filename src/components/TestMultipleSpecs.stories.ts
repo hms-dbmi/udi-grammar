@@ -2046,6 +2046,12 @@ export const CrossEntityHeatmapAndBarPlot = {
               type: 'nominal',
             },
             {
+              field: 'donor.hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
               field: 'origin_samples_unique_mapped_organs',
               encoding: 'text',
               mark: 'text',
