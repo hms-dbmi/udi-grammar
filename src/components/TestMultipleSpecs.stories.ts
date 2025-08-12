@@ -2097,6 +2097,18 @@ export const CrossEntityHeatmapAndBarPlot = {
               mark: 'text',
               type: 'nominal',
             },
+            {
+              field: 'height_value',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              field: 'weight_value',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
           ],
         },
       },
