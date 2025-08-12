@@ -1917,7 +1917,6 @@ export const CrossEntityHeatmapAndBarPlot = {
                 originKey: 'donor.hubmap_id',
                 targetKey: 'hubmap_id',
               },
-              match: 'all',
             },
           },
           {
@@ -1960,7 +1959,6 @@ export const CrossEntityHeatmapAndBarPlot = {
                 originKey: 'hubmap_id',
                 targetKey: 'donor.hubmap_id',
               },
-              match: 'all',
             },
           },
           {
@@ -2009,64 +2007,7 @@ export const CrossEntityHeatmapAndBarPlot = {
             ],
           },
         ],
-      },
-      {
-        source: {
-          name: 'datasets',
-          source: './data/datasets.csv',
-        },
-        transformation: [
-          {
-            filter: {
-              name: 'size-filter',
-              source: 'donors',
-              entityRelationship: {
-                originKey: 'hubmap_id',
-                targetKey: 'donor.hubmap_id',
-              },
-              match: 'all',
-            },
-          },
-          {
-            filter: {
-              name: 'dataset-filter',
-            },
-          },
-          {
-            filter: 'd.origin_samples_unique_mapped_organs && d.assay_category',
-          },
-        ],
-        representation: {
-          mark: 'row',
-          mapping: [
-            {
-              field: 'hubmap_id',
-              encoding: 'text',
-              mark: 'text',
-              type: 'nominal',
-            },
-            {
-              field: 'donor.hubmap_id',
-              encoding: 'text',
-              mark: 'text',
-              type: 'nominal',
-            },
-            {
-              field: 'origin_samples_unique_mapped_organs',
-              encoding: 'text',
-              mark: 'text',
-              type: 'nominal',
-            },
-            {
-              field: 'assay_category',
-              encoding: 'text',
-              mark: 'text',
-              type: 'nominal',
-            },
-          ],
-        },
-      },
-      {
+      },      {
         source: {
           name: 'donors',
           source: './data/donors.csv',
@@ -2105,6 +2046,58 @@ export const CrossEntityHeatmapAndBarPlot = {
             },
             {
               field: 'weight_value',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+          ],
+        },
+      },
+      {
+        source: {
+          name: 'datasets',
+          source: './data/datasets.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'size-filter',
+              source: 'donors',
+              entityRelationship: {
+                originKey: 'hubmap_id',
+                targetKey: 'donor.hubmap_id',
+              },
+            },
+          },
+          {
+            filter: {
+              name: 'dataset-filter',
+            },
+          },
+        ],
+        representation: {
+          mark: 'row',
+          mapping: [
+            {
+              field: 'hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              field: 'donor.hubmap_id',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              field: 'origin_samples_unique_mapped_organs',
+              encoding: 'text',
+              mark: 'text',
+              type: 'nominal',
+            },
+            {
+              field: 'assay_category',
               encoding: 'text',
               mark: 'text',
               type: 'nominal',
