@@ -70,7 +70,6 @@ function initVegaChart() {
       errorMessage.value = null;
       const view = result.view;
       vegaView.value = view;
-      console.log(props.signalKeys);
       for (const signalKey of props.signalKeys) {
         // console.log('Adding signal listener for:', signalKey);
         // replace "-" with "_" in signalKey since Vega signals cannot contain "-"
@@ -93,7 +92,6 @@ function initVegaChart() {
           if (!datum) {
             dataSourcesStore.clearDataSelection(props.pointSelect.name);
           } else {
-            // console.log(fields, datum);
             const pointSelection = {};
             for (const f of fields) {
               // @ts-expect-error: ignore errror

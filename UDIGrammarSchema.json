@@ -461,6 +461,24 @@
         "name": {
           "description": "The name of the selection.",
           "type": "string"
+        },
+        "source": {
+          "description": "The name of the source table of the selection.",
+          "type": "string"
+        },
+        "entityRelationship": {
+          "description": "The identifying columns from the source table and target table that describe the entity relationship.",
+          "properties": {
+            "originKey": {
+              "description": "The name of the column in the source table that identifies the entity.",
+              "type": "string"
+            },
+            "targetKey": {
+              "description": "The name of the column in the target table that identifies the entity.",
+              "type": "string"
+            }
+          },
+          "type": "object"
         }
       },
       "required": [

@@ -272,6 +272,11 @@ export interface Filter extends DataTransformationBase {
 export type FilterExpression = string | FilterDataSelection;
 
 /**
+ * A filter match type, which specifies how to match the filter data selection.
+ */
+export type FilterMatch = 'all' | 'any';
+
+/**
  * A data selection used for filtering.
  */
 export interface FilterDataSelection {
@@ -281,10 +286,35 @@ export interface FilterDataSelection {
   name: string;
 
   /**
+   * The name of the source table of the selection.
+   */
+  source: string;
+
+  /**
+   * The identifying columns from the source table and target table that describe the entity relationship.
+   */
+  entityRelationship?: FilterEntityRelationship;
+
+  /**
    * Specifies whether to use 'all' or 'any' of the selected data in a 1-to-many mapping.
    * Default is 'any'.
    */
-  match?: 'all' | 'any';
+  match?: FilterMatch;
+}
+
+/**
+ * A mapping for data selection, which specifies how fields in the source table correspond to fields in the target table.
+ */
+export interface FilterEntityRelationship {
+  /**
+   * The name of the identifying column in the source table.
+   */
+  originKey: string;
+
+  /**
+   * The name of the identifying column in the target table.
+   */
+  targetKey: string;
 }
 
 /**

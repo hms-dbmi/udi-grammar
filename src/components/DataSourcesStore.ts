@@ -6,6 +6,8 @@ import type {
   DataSource,
   DataTransformation,
   DirectionalOrder,
+  FilterEntityRelationship,
+  FilterMatch,
 } from './GrammarTypes';
 // import { DuckDB, init } from './dataWrappers/DuckDB.js';
 import {
@@ -36,12 +38,14 @@ export interface DataSourcesState {
   [key: string]: DataInterface;
 }
 
+export interface DataSelection {
+  dataSourceKey: string;
+  selection: null | RangeSelection | PointSelection;
+  type: 'interval' | 'point';
+}
+
 export interface DataSelections {
-  [key: string]: {
-    dataSourceKey: string;
-    selection: null | RangeSelection | PointSelection;
-    type: 'interval' | 'point';
-  };
+  [key: string]: DataSelection;
 }
 
 export interface RangeSelection {
@@ -130,32 +134,103 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     return filters.join(' && ');
   }
 
-  function GetArqueroFilter(key: string): string | null {
-    if (!(key in dataSelections.value)) {
-      return null;
+  function selectionToArqueroFilter(dataSelection: DataSelection) {
+    const { type, selection } = dataSelection;
+  
+    if (type === 'point') {
+      return PointSelectionToArqueroFilter(selection as PointSelection);
     }
-    const dataSelection = dataSelections.value[key];
-
-    if (!dataSelection) return null;
-    if (!dataSelection.selection) return null;
-    if (dataSelection.type === 'point') {
-      return PointSelectionToArqueroFilter(
-        dataSelection.selection as PointSelection,
-      );
-    } else {
-      return RangeSelectionToArqueroFilter(
-        dataSelection.selection as RangeSelection,
-      );
-    }
+  
+    return RangeSelectionToArqueroFilter(selection as RangeSelection);
   }
 
-  // let connection = null;
-  // let db = null;
-  // init().then(async (value: DuckDB) => {
-  //   db = value.db;
-  //   console.log(value);
-  //   connection = await db.connect();
-  // });
+  function GetMappedArqueroFilter({
+    key,
+    inTable,
+    selectionName,
+    selectionMatching = 'any',
+    selectionEntityRelationship,
+    selectionSourceKey,
+  }: {
+    key: string,
+    inTable: ColumnTable,
+    selectionName: string,
+    selectionMatching?: FilterMatch | undefined,
+    selectionEntityRelationship?: FilterEntityRelationship | null,
+    selectionSourceKey?: string,
+  }): string | null {
+    // Check that the filter is being applied
+    const dataSelection = dataSelections.value[selectionName];
+    if (!dataSelection || !dataSelection.selection) return null;
+  
+    // Pull matching values from source selection
+    const {
+      originKey,
+      targetKey,
+    } = selectionEntityRelationship || { originKey: null, targetKey: null };
+
+    const relevantFilter = selectionToArqueroFilter(dataSelection);
+  
+    // assume same-entity filtering if these are not provided
+    if (!originKey || !targetKey || !selectionSourceKey) {
+      return relevantFilter;
+    }
+
+    // Otherwise, we are doing cross-entity filtering
+  
+    // Get the relevant source table
+    const relevantTable = dataSources.value[selectionSourceKey];
+
+    if (!relevantTable || !relevantFilter) {
+      console.warn(`No relevant table or filter for mapping: ${selectionSourceKey}`);
+      return null;
+    }
+
+    // Check that the targetKey is present in the in table
+    if (!inTable.columnNames().includes(targetKey)) {
+      throw new Error(`Identifying key [${targetKey}] not found in table [${key}]. Ensure any filters relying on the [${targetKey}] column are applied before other transformations that may remove it.`);
+    }
+    
+    const totalTable = relevantTable.dest.reify();
+    const filteredTable = relevantTable.dest.filter(relevantFilter).reify();
+
+    // If the matching is 'any' or not specified, we just return the filter expression
+    if (selectionMatching != 'all') {
+      const originIds = filteredTable.array(originKey) as string[];
+
+      return originIds
+      .map((id) => `d['${targetKey}'] === '${id}'`)
+      .join(' || ');
+    }
+
+    // Otherwise, the matching is 'all', meaning we need to find entities that satisfy the filter completely 
+    
+    // Count helper
+    const toCounts = (ids: string[]) => {
+      const m = new Map<string, number>();
+      for (const id of ids) m.set(id, (m.get(id) ?? 0) + 1);
+      return m;
+    };
+    
+    // Per-entity counts
+    const totalCounts = toCounts(totalTable.array(originKey) as string[]);
+    const filteredCounts = toCounts(filteredTable.array(originKey) as string[]);
+    
+    // Entities whose entire set matches the filter
+    const exclusiveOriginIds: string[] = [];
+    for (const [id, f] of filteredCounts.entries()) {
+      const t = totalCounts.get(id) ?? 0;
+      if (f > 0 && f === t) exclusiveOriginIds.push(id);
+    }
+    
+    // Return a list of OR-ed ids as a filter string for the target table
+    const orExpression =
+      exclusiveOriginIds.length > 0
+        ? exclusiveOriginIds.map((id) => `d['${targetKey}'] === '${id}'`).join(' || ')
+        : 'false'; // nothing qualifies
+    
+    return orExpression;    
+  }
 
   const loading = ref<boolean>(true);
   const selectionHash = ref<string>('');
@@ -181,6 +256,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   }
 
   function getDataSource(key: string): DataInterface | null {
+    if (loading.value) {
+      console.warn('Data sources are still loading');
+      return null;
+    }
     if (!(key in dataSources.value)) return null;
     return dataSources.value[key] ?? null;
   }
@@ -200,9 +279,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       const namedTables = new Map();
       for (const key of keys) {
         const dataInterface = getDataSource(key);
-        if (dataInterface === null) {
-          // continue;
-          throw new Error(`key not found in data sources: [${key}]`);
+        if (!dataInterface) {
+          console.warn(`Skipping missing data source for key: ${key}`);
+          continue;
         }
         namedTables.set(key, from(dataInterface.dest.reify()));
       }
@@ -245,11 +324,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     },
   ): { data: ColumnTable; containsNamedFilter: boolean } {
     let containsNamedFilter = false;
-    // console.log('perform data transforations');
     const key = namedTables.keys().next().value ?? '';
     const table = namedTables.get(key);
     if (!table) {
-      throw new Error('table not found');
+      throw new Error(`Table not found for key: ${key}`);
     }
     const currentTable: {
       key: string;
@@ -274,7 +352,37 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     };
 
     for (const transform of dataTransformations) {
-      if ('groupby' in transform) {
+      if ('filter' in transform) {
+        const { filter, in: tableName } = transform;
+        const inTable = getInTable(tableName);
+
+        // Just apply the filter if it's a string
+        if (typeof filter === 'string') {
+          currentTable.table = inTable.filter(filter).reify();
+        } else {
+          // Otherwise, we assume it's a named filter
+          containsNamedFilter = true;
+          if (config?.skipNamedFilters) {
+            continue;
+          }
+
+          // Weird spread syntax to handle optional properties
+          const mappedFilter = GetMappedArqueroFilter({
+            key,
+            inTable,
+            selectionName: filter.name,
+            selectionSourceKey: filter.source,
+            ...(filter.match !== undefined ? { selectionMatching: filter.match } : {}),
+            ...(filter.entityRelationship !== undefined
+                ? { selectionEntityRelationship: filter.entityRelationship }
+                : {}),
+          });          
+
+          if (mappedFilter) {
+            currentTable.table = inTable.filter(mappedFilter).reify();
+          }
+        }
+      } else if ('groupby' in transform) {
         const inTable = getInTable(transform.in);
         if (Array.isArray(transform.groupby)) {
           currentTable.table = inTable.groupby(...transform.groupby);
@@ -347,25 +455,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           }
         }
         currentTable.table = inTable.derive(derive);
-      } else if ('filter' in transform) {
-        const inTable = getInTable(transform.in);
-        if (typeof transform.filter === 'string') {
-          currentTable.table = inTable.filter(transform.filter).reify();
-        } else {
-          containsNamedFilter = true;
-          if (config?.skipNamedFilters) {
-            continue;
-          }
-          const filter = GetArqueroFilter(transform.filter.name);
-          // const filter = RangeSelectionToArqueroFilter(
-          // dataSelections.value[transform.filter.name]?.selection ?? null,
-          // );
-          // console.log('filter', filter);
-          if (filter) {
-            currentTable.table = inTable.filter(filter).reify();
-          }
-          // TODO: handle multiple / different data sources
-        }
       } else if ('join' in transform) {
         const [leftKey, rightKey] = transform.in;
         const leftTable = namedTables.get(leftKey);
