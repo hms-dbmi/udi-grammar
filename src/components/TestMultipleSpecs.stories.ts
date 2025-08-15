@@ -1523,22 +1523,20 @@ export const MatchAllTestCrossEntityStripAndBarPlot = {
             },
           },
           {
-            groupby: [
-              'organ'
-            ]
+            groupby: ['organ'],
           },
           {
             rollup: {
               count: {
-                op: 'count'
-              }
-            }
+                op: 'count',
+              },
+            },
           },
           {
             orderby: {
               field: 'organ',
-              order: 'desc'
-            }
+              order: 'desc',
+            },
           },
         ],
         representation: {
@@ -1729,22 +1727,20 @@ export const MatchAnyTestCrossEntityStripAndBarPlot = {
             },
           },
           {
-            groupby: [
-              'organ'
-            ]
+            groupby: ['organ'],
           },
           {
             rollup: {
               count: {
-                op: 'count'
-              }
-            }
+                op: 'count',
+              },
+            },
           },
           {
             orderby: {
               field: 'organ',
-              order: 'desc'
-            }
+              order: 'desc',
+            },
           },
         ],
         representation: {
@@ -1936,22 +1932,20 @@ export const CrossEntityStripAndBarPlot = {
             },
           },
           {
-            groupby: [
-              'origin_samples_unique_mapped_organs'
-            ]
+            groupby: ['origin_samples_unique_mapped_organs'],
           },
           {
             rollup: {
               count: {
-                op: 'count'
-              }
-            }
+                op: 'count',
+              },
+            },
           },
           {
             orderby: {
               field: 'origin_samples_unique_mapped_organs',
-              order: 'desc'
-            }
+              order: 'desc',
+            },
           },
         ],
         representation: {
@@ -2101,22 +2095,20 @@ export const CrossEntityTableAndBarPlot = {
             },
           },
           {
-            groupby: [
-              'origin_samples_unique_mapped_organs'
-            ]
+            groupby: ['origin_samples_unique_mapped_organs'],
           },
           {
             rollup: {
               count: {
-                op: 'count'
-              }
-            }
+                op: 'count',
+              },
+            },
           },
           {
             orderby: {
               field: 'origin_samples_unique_mapped_organs',
-              order: 'desc'
-            }
+              order: 'desc',
+            },
           },
         ],
         representation: {
@@ -2225,15 +2217,17 @@ export const CrossEntityHeatmapAndBarPlot = {
           {
             mark: 'rect',
             mapping: [
-              { encoding: 'color',
+              {
+                encoding: 'color',
                 field: 'count',
                 type: 'quantitative',
-                range: [
-                  "#eafab9",
-                  "#528aeb"
-                ], 
+                range: ['#eafab9', '#528aeb'],
               },
-              { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+              {
+                encoding: 'x',
+                field: 'origin_samples_unique_mapped_organs',
+                type: 'nominal',
+              },
               { encoding: 'y', field: 'assay_category', type: 'nominal' },
             ],
             select: {
@@ -2248,12 +2242,17 @@ export const CrossEntityHeatmapAndBarPlot = {
             mark: 'text',
             mapping: [
               { encoding: 'text', field: 'count', type: 'quantitative' },
-              { encoding: 'x', field: 'origin_samples_unique_mapped_organs', type: 'nominal' },
+              {
+                encoding: 'x',
+                field: 'origin_samples_unique_mapped_organs',
+                type: 'nominal',
+              },
               { encoding: 'y', field: 'assay_category', type: 'nominal' },
             ],
           },
         ],
-      },      {
+      },
+      {
         source: {
           name: 'donors',
           source: './data/donors.csv',
@@ -2410,16 +2409,14 @@ export const CrossEntityErrorTest = {
             },
           },
           {
-            groupby: [
-              'origin_samples_unique_mapped_organs'
-            ]
+            groupby: ['origin_samples_unique_mapped_organs'],
           },
           {
             rollup: {
               count: {
-                op: 'count'
-              }
-            }
+                op: 'count',
+              },
+            },
           },
           {
             filter: {
@@ -2434,8 +2431,8 @@ export const CrossEntityErrorTest = {
           {
             orderby: {
               field: 'origin_samples_unique_mapped_organs',
-              order: 'desc'
-            }
+              order: 'desc',
+            },
           },
         ],
         representation: {
@@ -2630,6 +2627,87 @@ export const SimplePointSelection = {
             { encoding: 'x', field: 'weight_value', type: 'quantitative' },
             { encoding: 'color', field: 'sex', type: 'nominal' },
           ],
+        },
+      },
+    ],
+  },
+};
+
+export const PointSelectionCrossFilter = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'sex-select',
+            },
+          },
+          {
+            filter: {
+              name: 'height-weight-select',
+            },
+          },
+          {
+            groupby: 'sex',
+          },
+          {
+            rollup: {
+              sex_count: { op: 'count' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            { encoding: 'x', field: 'sex', type: 'nominal' },
+            { encoding: 'y', field: 'sex_count', type: 'quantitative' },
+          ],
+          select: {
+            name: 'sex-select',
+            how: {
+              type: 'point',
+            },
+            fields: 'sex',
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'sex-select',
+            },
+          },
+          {
+            filter: {
+              name: 'height-weight-select',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+            { encoding: 'color', field: 'sex', type: 'nominal' },
+          ],
+
+          select: {
+            name: 'height-weight-select',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
         },
       },
     ],
