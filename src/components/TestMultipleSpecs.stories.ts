@@ -1,5 +1,4 @@
 // import { fn } from '@storybook/test'
-import { on } from 'events';
 import TestMultipleSpecs from './TestMultipleSpecs.vue';
 
 // export const ActionsData = {

@@ -62,6 +62,24 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   const dataSources = ref<DataSourcesState>({});
   const dataSelections = ref<DataSelections>({});
 
+  function bindExternalDataSelections(
+    externalSelections: DataSelections,
+  ): void {
+    // console.log('bind');
+    for (const [selectionName, selection] of Object.entries(
+      externalSelections,
+    )) {
+      if (selectionName in dataSelections.value) {
+        console.warn(
+          `Selection ${selectionName} already exists, overwriting it.`,
+          // TODO: might need extra wiring for two-way binding here.
+        );
+      }
+      dataSelections.value[selectionName] = selection;
+    }
+    selectionHash.value = JSON.stringify(dataSelections.value);
+  }
+
   function watchDataSelection(
     dataSourceKey: string,
     selectionName: string,
@@ -107,7 +125,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   ): string | null {
     if (selection === null) return null;
     const filters: string[] = [];
-    for (const [field, [min, max]] of Object.entries(selection)) {
+    for (const [field, range] of Object.entries(selection)) {
+      // console.log('range:', range);
+      const [min, max] = range;
       if (min != null && max != null) {
         filters.push(`d['${field}'] >= ${min} && d['${field}'] <= ${max}`);
       } else if (min != null) {
@@ -136,11 +156,11 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
   function selectionToArqueroFilter(dataSelection: DataSelection) {
     const { type, selection } = dataSelection;
-  
+
     if (type === 'point') {
       return PointSelectionToArqueroFilter(selection as PointSelection);
     }
-  
+
     return RangeSelectionToArqueroFilter(selection as RangeSelection);
   }
 
@@ -152,45 +172,49 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     selectionEntityRelationship,
     selectionSourceKey,
   }: {
-    key: string,
-    inTable: ColumnTable,
-    selectionName: string,
-    selectionMatching?: FilterMatch | undefined,
-    selectionEntityRelationship?: FilterEntityRelationship | null,
-    selectionSourceKey?: string,
+    key: string;
+    inTable: ColumnTable;
+    selectionName: string;
+    selectionMatching?: FilterMatch | undefined;
+    selectionEntityRelationship?: FilterEntityRelationship | null;
+    selectionSourceKey?: string;
   }): string | null {
     // Check that the filter is being applied
     const dataSelection = dataSelections.value[selectionName];
     if (!dataSelection || !dataSelection.selection) return null;
-  
+
     // Pull matching values from source selection
-    const {
-      originKey,
-      targetKey,
-    } = selectionEntityRelationship || { originKey: null, targetKey: null };
+    const { originKey, targetKey } = selectionEntityRelationship || {
+      originKey: null,
+      targetKey: null,
+    };
 
     const relevantFilter = selectionToArqueroFilter(dataSelection);
-  
+
     // assume same-entity filtering if these are not provided
     if (!originKey || !targetKey || !selectionSourceKey) {
       return relevantFilter;
     }
 
     // Otherwise, we are doing cross-entity filtering
-  
+
     // Get the relevant source table
     const relevantTable = dataSources.value[selectionSourceKey];
 
     if (!relevantTable || !relevantFilter) {
-      console.warn(`No relevant table or filter for mapping: ${selectionSourceKey}`);
+      console.warn(
+        `No relevant table or filter for mapping: ${selectionSourceKey}`,
+      );
       return null;
     }
 
     // Check that the targetKey is present in the in table
     if (!inTable.columnNames().includes(targetKey)) {
-      throw new Error(`Identifying key [${targetKey}] not found in table [${key}]. Ensure any filters relying on the [${targetKey}] column are applied before other transformations that may remove it.`);
+      throw new Error(
+        `Identifying key [${targetKey}] not found in table [${key}]. Ensure any filters relying on the [${targetKey}] column are applied before other transformations that may remove it.`,
+      );
     }
-    
+
     const totalTable = relevantTable.dest.reify();
     const filteredTable = relevantTable.dest.filter(relevantFilter).reify();
 
@@ -199,37 +223,39 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       const originIds = filteredTable.array(originKey) as string[];
 
       return originIds
-      .map((id) => `d['${targetKey}'] === '${id}'`)
-      .join(' || ');
+        .map((id) => `d['${targetKey}'] === '${id}'`)
+        .join(' || ');
     }
 
-    // Otherwise, the matching is 'all', meaning we need to find entities that satisfy the filter completely 
-    
+    // Otherwise, the matching is 'all', meaning we need to find entities that satisfy the filter completely
+
     // Count helper
     const toCounts = (ids: string[]) => {
       const m = new Map<string, number>();
       for (const id of ids) m.set(id, (m.get(id) ?? 0) + 1);
       return m;
     };
-    
+
     // Per-entity counts
     const totalCounts = toCounts(totalTable.array(originKey) as string[]);
     const filteredCounts = toCounts(filteredTable.array(originKey) as string[]);
-    
+
     // Entities whose entire set matches the filter
     const exclusiveOriginIds: string[] = [];
     for (const [id, f] of filteredCounts.entries()) {
       const t = totalCounts.get(id) ?? 0;
       if (f > 0 && f === t) exclusiveOriginIds.push(id);
     }
-    
+
     // Return a list of OR-ed ids as a filter string for the target table
     const orExpression =
       exclusiveOriginIds.length > 0
-        ? exclusiveOriginIds.map((id) => `d['${targetKey}'] === '${id}'`).join(' || ')
+        ? exclusiveOriginIds
+            .map((id) => `d['${targetKey}'] === '${id}'`)
+            .join(' || ')
         : 'false'; // nothing qualifies
-    
-    return orExpression;    
+
+    return orExpression;
   }
 
   const loading = ref<boolean>(true);
@@ -351,6 +377,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       namedTables.set(currentTable.key, currentTable.table);
     };
 
+    // console.log('we doing it');
     for (const transform of dataTransformations) {
       if ('filter' in transform) {
         const { filter, in: tableName } = transform;
@@ -372,11 +399,13 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
             inTable,
             selectionName: filter.name,
             selectionSourceKey: filter.source,
-            ...(filter.match !== undefined ? { selectionMatching: filter.match } : {}),
+            ...(filter.match !== undefined
+              ? { selectionMatching: filter.match }
+              : {}),
             ...(filter.entityRelationship !== undefined
-                ? { selectionEntityRelationship: filter.entityRelationship }
-                : {}),
-          });          
+              ? { selectionEntityRelationship: filter.entityRelationship }
+              : {}),
+          });
 
           if (mappedFilter) {
             currentTable.table = inTable.filter(mappedFilter).reify();
@@ -615,5 +644,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     updateDataSelection,
     clearDataSelection,
     dataSelections,
+    bindExternalDataSelections,
   };
 });

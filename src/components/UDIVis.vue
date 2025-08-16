@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, defineEmits } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
 import type { UDIGrammar, VisualizationLayer } from './GrammarTypes';
-import type { RangeSelection } from './DataSourcesStore';
+import type { DataSelections, RangeSelection } from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 const dataSourcesStore = useDataSourcesStore();
 import { storeToRefs } from 'pinia';
@@ -13,7 +13,12 @@ const { loading, selectionHash } = storeToRefs(dataSourcesStore);
 
 export interface ParserProps {
   spec: UDIGrammar;
+  selections?: DataSelections;
 }
+
+const emit = defineEmits<{
+  (e: 'selectionChange', selection: DataSelections): void;
+}>();
 
 const props = defineProps<ParserProps>();
 
@@ -26,16 +31,13 @@ onMounted(() => {
 });
 
 async function render() {
-  // parse/validate grammar
-  // console.log('render');
+  // console.log('udivis render');
+  if (props.selections) {
+    dataSourcesStore.bindExternalDataSelections(props.selections);
+  }
   parsedSpec.value = parseSpecification(props.spec);
   await dataSourcesStore.initDataSources(parsedSpec.value.source);
   buildVisualization();
-
-  // if (isVegaLiteCompatible(parsedSpec.value)) {
-  //   vegaLiteSpec.value = convertToVegaSpec(parsedSpec.value);
-  //   isGoGComponent.value = true;
-  // }
 }
 
 watch(
@@ -45,9 +47,26 @@ watch(
   },
 );
 
+watch(
+  () => props.selections,
+  () => {
+    if (props.selections) {
+      dataSourcesStore.bindExternalDataSelections(props.selections);
+    }
+  },
+);
+
+watch(selectionHash, () => {
+  const currentDataSelections = dataSourcesStore.dataSelections;
+  // console.log('emit selection change');
+  // console.log(currentDataSelections);
+  emit('selectionChange', currentDataSelections);
+});
+
 watch([loading, selectionHash], () => buildVisualization());
 
 function buildVisualization(): void {
+  // console.log('udi: build vis');
   if (!parsedSpec.value) {
     return;
   }
@@ -334,6 +353,7 @@ const debugVegaData = ref();
       :spec="vegaLiteSpec"
       :signal-keys="signalKeys"
       :point-select="pointSelect"
+      :selections="props.selections"
     />
     <TableComponent :data="transformedData" :spec="parsedSpec" v-else />
     <!-- <hr />
