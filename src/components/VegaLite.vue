@@ -3,7 +3,11 @@ import { ref, onMounted } from 'vue';
 import vegaEmbed from 'vega-embed';
 import { defineProps } from 'vue';
 import { watch } from 'vue';
-import type { DataSelections } from './DataSourcesStore';
+import type {
+  DataSelection,
+  DataSelections,
+  RangeSelection,
+} from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 import type { View } from 'vega';
 import type { VisualizationSpec } from 'vega-embed';
@@ -58,6 +62,12 @@ function parseSpec(): { success: boolean; specObject?: VegaSpecShim } {
 
 const ignore = ref(false);
 
+function formatVegaSignalKey(raw: string): string {
+  // replace "-" with "_" in signalKey since Vega signals cannot contain "-"
+  // TODO: I think if the key starts with a number they prepend an underscore
+  return raw.replace(/-/g, '_');
+}
+
 function initVegaChart() {
   // console.log('init vega chart');
   const { success, specObject } = parseSpec();
@@ -74,9 +84,7 @@ function initVegaChart() {
       vegaView.value = view;
       for (const signalKey of props.signalKeys ?? []) {
         // console.log('Adding signal listener for:', signalKey);
-        // replace "-" with "_" in signalKey since Vega signals cannot contain "-"
-        // TODO: I think if the key starts with a number they prepend an underscore
-        const signalKeyFormatted = signalKey.replace(/-/g, '_');
+        const signalKeyFormatted = formatVegaSignalKey(signalKey);
         view.addSignalListener(signalKeyFormatted, (name, value) => {
           if (ignore.value) return;
           // console.log('uate from vega-lite internal');
@@ -153,33 +161,59 @@ async function updateVegaChartSelections() {
   // console.log('vega-lite selections changed');
   // only handles data changes
   if (!vegaView.value) return;
-  // console.log('blargen flargen ');
-  let testNew = props.selections['weight-select'].selection['weight_value'];
-  // testNew = [Math.min(...testNew), Math.max(...testNew)];
-  testNew = toPixelRange(testNew);
-  // check if testNew is different from existing value
-  const currentVal = vegaView.value.signal('weight_select_x');
-  // console.log('CURRENT', currentVal[0], currentVal[1]);
-  // console.log('NEW', testNew[0], testNew[1]);
-  const closeEnough = (x: number, y: number, eps = 1e-6) =>
-    Math.abs(x - y) < eps;
-  if (
-    closeEnough(Math.min(...currentVal), Math.min(...testNew)) &&
-    closeEnough(Math.max(...currentVal), Math.max(...testNew))
-  ) {
-    // console.log('No change in selection, skipping update');
-    return;
-  }
-  // console.log('signal trigger:', testNew[0], testNew[1]);
+  if (!props.selections) return; // Do I actually need to clear selections here?
   ignore.value = true;
-  vegaView.value.signal('weight_select_x', testNew);
+  // console.log('Current signals:', currentSignals);
+
+  for (const [selectionName, selection] of Object.entries(props.selections)) {
+    updateVegaChartSelection(selectionName, selection);
+  }
+
   await vegaView.value.runAsync();
   ignore.value = false;
 }
 
-function toPixelRange(dataRange: [number, number]): [number, number] {
+function updateVegaChartSelection(
+  selectionName: string,
+  selection: DataSelection,
+) {
+  if (!vegaView.value) return;
+  if (selection.type !== 'interval') return; // TODO: maybe handle point
+  const currentSignals = vegaView.value.getState().signals;
+  if (!currentSignals) return;
+  for (const [field, range] of Object.entries(
+    selection.selection as RangeSelection,
+  )) {
+    const signalKeyStart = formatVegaSignalKey(selectionName);
+    const signalTupleInfo = signalKeyStart + '_tuple_fields';
+    if (!(signalTupleInfo in currentSignals)) continue;
+    const signalTuple = currentSignals[signalTupleInfo];
+    const channel = (
+      signalTuple as Array<{ channel: string; field: string }>
+    ).find((t) => t.field === field)?.channel;
+    const signalKeyFull = `${signalKeyStart}_${channel}`;
+    let testNew = range;
+    testNew = toPixelRange(testNew, channel); // TODO: dim
+    const currentVal = vegaView.value.signal(signalKeyFull);
+    const closeEnough = (x: number, y: number, eps = 1e-6) =>
+      Math.abs(x - y) < eps;
+    if (
+      closeEnough(Math.min(...currentVal), Math.min(...testNew)) &&
+      closeEnough(Math.max(...currentVal), Math.max(...testNew))
+    ) {
+      continue;
+    }
+
+    vegaView.value.signal(signalKeyFull, testNew);
+  }
+}
+
+function toPixelRange(
+  dataRange: [number, number],
+  channel: 'x' | 'y',
+): [number, number] {
   if (!vegaView.value) return [0, 0] as any;
-  const sx = vegaView.value.scale('x'); // forward mapping data -> pixels
+  const sx = vegaView.value.scale(channel);
   return [sx(dataRange[0]), sx(dataRange[1])] as [number, number];
 }
 
