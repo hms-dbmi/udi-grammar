@@ -134,3 +134,43 @@ export const ReadWriteLinkedFilterState = {
     },
   },
 };
+
+export const ReadWriteLinkedFilterStateY = {
+  args: {
+    testType: 'linked',
+    selections: {
+      selectionName: 'height-select',
+      entity: 'donors',
+      field: 'height_value',
+      minValue: 50,
+      maxValue: 200,
+    },
+    spec: {
+      source: {
+        name: 'donors',
+        source: './data/donors.csv',
+      },
+      transformation: [
+        {
+          filter: {
+            name: 'height-select',
+          },
+        },
+      ],
+      representation: {
+        mark: 'point',
+        mapping: [
+          { encoding: 'y', field: 'height_value', type: 'quantitative' },
+          { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+        ],
+        select: {
+          name: 'height-select',
+          how: {
+            type: 'interval',
+            on: 'y',
+          },
+        },
+      },
+    },
+  },
+};
