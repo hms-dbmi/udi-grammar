@@ -2,11 +2,13 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import type { ParsedUDIGrammar } from './Parser';
 import type { DataSelections } from './DataSourcesStore';
+import TestMultipleSpecs from './TestMultipleSpecs.vue';
 
 interface TestFilterHooksProps {
   spec: ParsedUDIGrammar;
   selections?: SelectionParams[];
   testType: 'read' | 'write' | 'linked';
+  additionalSpecs?: ParsedUDIGrammar[];
 }
 
 interface SelectionParams {
@@ -148,6 +150,7 @@ function handleSelectionChange(selection: DataSelections) {
     >
     </UDIVis>
   </template>
+  <TestMultipleSpecs v-if="additionalSpecs" :specs="additionalSpecs" />
 </template>
 
 <style scoped lang="scss"></style>
