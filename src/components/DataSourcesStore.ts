@@ -144,11 +144,12 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     if (selection === null) return null;
     const filters: string[] = [];
     for (const [field, values] of Object.entries(selection)) {
+      if (values.length === 0) continue; // skip empty selections
       const innerFilters: string[] = [];
       for (const value of values) {
         innerFilters.push(`d['${field}'] === ${JSON.stringify(value)}`);
       }
-      filters.push(innerFilters.join(' || '));
+      filters.push(`(${innerFilters.join(' || ')})`);
     }
     return filters.join(' && ');
   }
