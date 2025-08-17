@@ -5,7 +5,7 @@ import { compressToEncodedURIComponent } from 'lz-string';
 
 export const useEditorStore = defineStore('EditorStore', () => {
   function getUrlWithSpec(spec: UDIGrammar): string {
-    console.log('getting url');
+    // console.log('getting url');
     const stringified = JSON.stringify(spec, null, 2);
     return getUrlWithCode(stringified);
   }

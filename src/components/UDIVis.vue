@@ -58,7 +58,7 @@ watch(
 );
 
 watch(selectionHash, () => {
-  console.log('UDI-VIS: SelectionHash changed');
+  // console.log('UDI-VIS: SelectionHash changed');
   const currentDataSelections = dataSourcesStore.dataSelections;
   // console.log('emit selection change');
   // console.log(currentDataSelections);

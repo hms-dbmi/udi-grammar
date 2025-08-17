@@ -59,7 +59,7 @@ const udiVisSelections = computed(() => {
 });
 
 function handleSelectionChange(selection: DataSelections) {
-  console.log('handle selection change: ', selection);
+  // console.log('handle selection change: ', selection);
   for (const pointFilter of pointFilters.value) {
     const selectionName = pointFilter.selectionName;
     if (!selection[selectionName] || !selection[selectionName].selection) {

@@ -69,7 +69,7 @@ function formatVegaSignalKey(raw: string): string {
 }
 
 function initVegaChart() {
-  console.log('UDI-VIS: initialized chart');
+  // console.log('UDI-VIS: initialized chart');
   // console.log('init vega chart');
   const { success, specObject } = parseSpec();
   if (!success || !specObject) return;
@@ -159,7 +159,7 @@ function updateVegaChart() {
 watch(() => props.spec, updateVegaChart);
 
 async function updateVegaChartSelections() {
-  console.log('UDI-VIS: vegaChartSelections triggered', props.selections);
+  // console.log('UDI-VIS: vegaChartSelections triggered', props.selections);
   // console.log('vega-lite selections changed');
   // only handles data changes
   if (!vegaView.value) return;
