@@ -9,7 +9,7 @@ import TestIntervalFilterHooks from './TestIntervalFilterHooks.vue';
 export default {
   component: TestIntervalFilterHooks,
   tags: ['autodocs'],
-  title: 'FilterHooks',
+  title: 'FilterHooksInterval',
   //👇 Our exports that end in "Data" are not stories.
   // excludeStories: /.*Data$/,
   // args: {
