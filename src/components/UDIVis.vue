@@ -54,9 +54,11 @@ watch(
       dataSourcesStore.bindExternalDataSelections(props.selections);
     }
   },
+  { deep: true },
 );
 
 watch(selectionHash, () => {
+  console.log('UDI-VIS: SelectionHash changed');
   const currentDataSelections = dataSourcesStore.dataSelections;
   // console.log('emit selection change');
   // console.log(currentDataSelections);
