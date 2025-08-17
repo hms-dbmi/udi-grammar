@@ -178,7 +178,7 @@ function updateVegaChartSelection(
   selection: DataSelection,
 ) {
   if (!vegaView.value) return;
-  if (selection.type !== 'interval') return; // TODO: maybe handle point
+  if (selection.type !== 'interval') return;
   const currentSignals = vegaView.value.getState().signals;
   if (!currentSignals) return;
   for (const [field, range] of Object.entries(
