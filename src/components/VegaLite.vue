@@ -217,7 +217,7 @@ function toPixelRange(
   return [sx(dataRange[0]), sx(dataRange[1])] as [number, number];
 }
 
-watch(() => props.selections, updateVegaChartSelections);
+watch(() => props.selections, updateVegaChartSelections, { deep: true });
 </script>
 
 <template>
