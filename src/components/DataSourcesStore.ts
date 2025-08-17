@@ -72,7 +72,6 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       if (selectionName in dataSelections.value) {
         console.warn(
           `Selection ${selectionName} already exists, overwriting it.`,
-          // TODO: might need extra wiring for two-way binding here.
         );
       }
       dataSelections.value[selectionName] = selection;

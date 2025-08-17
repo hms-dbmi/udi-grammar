@@ -1,5 +1,5 @@
 // import { fn } from '@storybook/test'
-import TestFilterHooks from './TestFilterHooks.vue';
+import TestIntervalFilterHooks from './TestIntervalFilterHooks.vue';
 
 // export const ActionsData = {
 //   onPinTask: fn(),
@@ -7,7 +7,7 @@ import TestFilterHooks from './TestFilterHooks.vue';
 // }
 
 export default {
-  component: TestFilterHooks,
+  component: TestIntervalFilterHooks,
   tags: ['autodocs'],
   title: 'FilterHooks',
   //👇 Our exports that end in "Data" are not stories.

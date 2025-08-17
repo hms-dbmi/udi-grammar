@@ -193,7 +193,7 @@ function updateVegaChartSelection(
     ).find((t) => t.field === field)?.channel;
     const signalKeyFull = `${signalKeyStart}_${channel}`;
     let testNew = range;
-    testNew = toPixelRange(testNew, channel); // TODO: dim
+    testNew = toPixelRange(testNew, channel);
     const currentVal = vegaView.value.signal(signalKeyFull);
     const closeEnough = (x: number, y: number, eps = 1e-6) =>
       Math.abs(x - y) < eps;

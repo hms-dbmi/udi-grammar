@@ -4,7 +4,7 @@ import type { ParsedUDIGrammar } from './Parser';
 import type { DataSelections } from './DataSourcesStore';
 import TestMultipleSpecs from './TestMultipleSpecs.vue';
 
-interface TestFilterHooksProps {
+interface TestIntervalHooksProps {
   spec: ParsedUDIGrammar;
   selections?: SelectionParams[];
   testType: 'read' | 'write' | 'linked';
@@ -19,12 +19,7 @@ interface SelectionParams {
   maxValue?: number;
 }
 
-const props = defineProps<TestFilterHooksProps>();
-
-// const rangeModel = ref({
-//   min: props?.selections?.minValue,
-//   max: props?.selections?.maxValue,
-// });
+const props = defineProps<TestIntervalHooksProps>();
 
 const rangeModels = ref<
   { min: number; max: number; selectionName: string; field: string }[]
