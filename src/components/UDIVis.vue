@@ -193,6 +193,16 @@ const transformedData = ref<object[] | null>(null);
 const transformedDataFull = ref<object[] | null>(null);
 const isTransformedDataSubset = ref<boolean>(false);
 
+// Expose data selections to parent component
+const emit = defineEmits<{
+  (e: 'selectionChange', selection: DataSelections): void;
+  (e: 'dataUpdate', payload: {
+    displayData: object[] | null;
+    allData: object[] | null;
+    isSubset: boolean;
+  }): void;
+}>();
+
 function performDataTransformation(spec: ParsedUDIGrammar) {
   transformedData.value = null;
 
@@ -204,9 +214,16 @@ function performDataTransformation(spec: ParsedUDIGrammar) {
     );
     if (dataObjects == null) return;
     const { allData, displayData, isDisplayDataSubset } = dataObjects;
+  
     transformedData.value = displayData;
     transformedDataFull.value = allData;
     isTransformedDataSubset.value = isDisplayDataSubset;
+
+    emit('dataUpdate', {
+      displayData,
+      allData,
+      isSubset: isDisplayDataSubset,
+    });
   } catch (error) {
     console.error('Failed to complete data transformation', error);
     transformError.value = error;
