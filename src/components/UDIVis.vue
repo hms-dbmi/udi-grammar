@@ -16,8 +16,14 @@ export interface ParserProps {
   selections?: DataSelections;
 }
 
+// Expose data selections to parent component
 const emit = defineEmits<{
   (e: 'selectionChange', selection: DataSelections): void;
+  (e: 'dataUpdate', payload: {
+    displayData: object[] | null;
+    allData: object[] | null;
+    isSubset: boolean;
+  }): void;
 }>();
 
 const props = defineProps<ParserProps>();
@@ -204,9 +210,16 @@ function performDataTransformation(spec: ParsedUDIGrammar) {
     );
     if (dataObjects == null) return;
     const { allData, displayData, isDisplayDataSubset } = dataObjects;
+  
     transformedData.value = displayData;
     transformedDataFull.value = allData;
     isTransformedDataSubset.value = isDisplayDataSubset;
+
+    emit('dataUpdate', {
+      displayData,
+      allData,
+      isSubset: isDisplayDataSubset,
+    });
   } catch (error) {
     console.error('Failed to complete data transformation', error);
     transformError.value = error;
