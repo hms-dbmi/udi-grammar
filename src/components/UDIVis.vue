@@ -209,15 +209,15 @@ function performDataTransformation(spec: ParsedUDIGrammar) {
       spec.transformation,
     );
     if (dataObjects == null) return;
-    const { allData, displayData, isDisplayDataSubset } = dataObjects;
+    const { allData, displayData, allDataRows, displayDataRows, isDisplayDataSubset } = dataObjects;
   
     transformedData.value = displayData;
     transformedDataFull.value = allData;
     isTransformedDataSubset.value = isDisplayDataSubset;
 
     emit('dataUpdate', {
-      displayData,
-      allData,
+      displayData: displayDataRows,
+      allData: allDataRows,
       isSubset: isDisplayDataSubset,
     });
   } catch (error) {
