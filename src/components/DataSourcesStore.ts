@@ -341,6 +341,14 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       allData = fullData.objects();
       allDataRowsObjects = fullDataRows.objects();
     }
+
+    console.log('getDataObject returning:', {
+      displayData,
+      allData,
+      displayDataRows: displayDataRowsObjects,
+      allDataRows: allDataRowsObjects,
+      isDisplayDataSubset: containsNamedFilter,
+    })
   
     return {
       displayData,

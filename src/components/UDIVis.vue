@@ -215,6 +215,12 @@ function performDataTransformation(spec: ParsedUDIGrammar) {
     transformedDataFull.value = allData;
     isTransformedDataSubset.value = isDisplayDataSubset;
 
+    console.log('emit dataUpdate', {
+      displayData: displayDataRows,
+      allData: allDataRows,
+      isSubset: isDisplayDataSubset,
+    });
+
     emit('dataUpdate', {
       displayData: displayDataRows,
       allData: allDataRows,
