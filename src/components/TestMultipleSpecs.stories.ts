@@ -1910,11 +1910,6 @@ export const CrossEntityStripAndBarPlot = {
           source: './data/samples.csv',
         },
         transformation: [
-          // {
-          //   derive: {
-          //     organ: 'd.origin_samples_unique_mapped_organs'
-          //   }
-          // },
           {
             filter: {
               name: 'age-filter',

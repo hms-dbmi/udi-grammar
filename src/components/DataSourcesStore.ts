@@ -294,15 +294,17 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     keys: string[],
     dataTransformations?: DataTransformation[],
   ): {
-    displayData: object[]; // only the data the should be displayed
-    allData: object[]; // all data (needed for full domains)
+    displayData: object[];     // only the data that should be displayed
+    allData: object[];            // all data (needed for full domains)
+    displayDataRows: object[];           // rows after named filters, before other transforms
+    allDataRows: object[];           // all rows, before any transforms
     isDisplayDataSubset: boolean; // true if the returned data is a subset of the full data
   } | null {
     if (loading.value) return null;
-
+  
     // make copy of tables from data sources
     const getNamedTables = () => {
-      const namedTables = new Map();
+      const namedTables = new Map<string, ColumnTable>();
       for (const key of keys) {
         const dataInterface = getDataSource(key);
         if (!dataInterface) {
@@ -313,34 +315,41 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       }
       return namedTables;
     };
-
-    const { data: dataTable, containsNamedFilter } = PerformDataTransformations(
+  
+    const {
+      data: dataTable,
+      dataRows,
+      containsNamedFilter,
+    } = PerformDataTransformations(
       getNamedTables(),
       dataTransformations ?? [],
-      {
-        skipNamedFilters: false,
-      },
+      { skipNamedFilters: false },
     );
+  
+    // materialize arrays of objects
     const displayData = dataTable.objects();
-
+    const displayDataRowsObjects = dataRows.objects();
+  
     let allData = displayData;
+    let allDataRowsObjects = displayDataRowsObjects;
     if (containsNamedFilter) {
-      const { data: fullData } = PerformDataTransformations(
+      const { data: fullData, dataRows: fullDataRows } = PerformDataTransformations(
         getNamedTables(),
         dataTransformations ?? [],
-        {
-          skipNamedFilters: true,
-        },
+        { skipNamedFilters: true },
       );
       allData = fullData.objects();
+      allDataRowsObjects = fullDataRows.objects();
     }
-
+  
     return {
       displayData,
       allData,
+      displayDataRows: displayDataRowsObjects,
+      allDataRows: allDataRowsObjects,
       isDisplayDataSubset: containsNamedFilter,
     };
-  }
+  }  
 
   function PerformDataTransformations(
     namedTables: Map<string, ColumnTable>,
@@ -348,7 +357,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     config?: {
       skipNamedFilters?: boolean; // if true, skip named filters in transformations
     },
-  ): { data: ColumnTable; containsNamedFilter: boolean } {
+  ): { data: ColumnTable; dataRows: ColumnTable; containsNamedFilter: boolean } {
     let containsNamedFilter = false;
     const key = namedTables.keys().next().value ?? '';
     const table = namedTables.get(key);
@@ -376,6 +385,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       }
       namedTables.set(currentTable.key, currentTable.table);
     };
+
+    let dataRows = currentTable.table;
 
     // console.log('we doing it');
     for (const transform of dataTransformations) {
@@ -411,6 +422,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
             currentTable.table = inTable.filter(mappedFilter).reify();
           }
         }
+        // Keep track of the filtered data rows (without other transformations applied) for later use
+        dataRows = currentTable.table;
       } else if ('groupby' in transform) {
         const inTable = getInTable(transform.in);
         if (Array.isArray(transform.groupby)) {
@@ -593,7 +606,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       }
       setOutTable(transform);
     }
-    return { data: currentTable.table, containsNamedFilter };
+    return { data: currentTable.table, dataRows, containsNamedFilter };
   }
 
   function getArqueroAggregateFunction(aggFunc: AggregateFunction): TableExpr {
