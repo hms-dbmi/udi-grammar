@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, defineEmits } from 'vue';
+import { ref, watch, onMounted, defineEmits, useSlots } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
@@ -19,11 +19,14 @@ export interface ParserProps {
 // Expose data selections to parent component
 const emit = defineEmits<{
   (e: 'selectionChange', selection: DataSelections): void;
-  (e: 'dataUpdate', payload: {
-    displayData: object[] | null;
-    allData: object[] | null;
-    isSubset: boolean;
-  }): void;
+  (
+    e: 'dataUpdate',
+    payload: {
+      displayData: object[] | null;
+      allData: object[] | null;
+      isSubset: boolean;
+    },
+  ): void;
 }>();
 
 const props = defineProps<ParserProps>();
@@ -209,8 +212,14 @@ function performDataTransformation(spec: ParsedUDIGrammar) {
       spec.transformation,
     );
     if (dataObjects == null) return;
-    const { allData, displayData, allDataRows, displayDataRows, isDisplayDataSubset } = dataObjects;
-  
+    const {
+      allData,
+      displayData,
+      allDataRows,
+      displayDataRows,
+      isDisplayDataSubset,
+    } = dataObjects;
+
     transformedData.value = displayData;
     transformedDataFull.value = allData;
     isTransformedDataSubset.value = isDisplayDataSubset;
@@ -362,6 +371,8 @@ const signalKeys = ref<string[]>([]);
 const pointSelect = ref<any>();
 
 const debugVegaData = ref();
+
+const slots = useSlots();
 </script>
 
 <template>
@@ -369,18 +380,23 @@ const debugVegaData = ref();
     <div class="error-message" v-if="transformError">
       {{ transformError.message }}
     </div>
-    <VegaLite
-      v-else-if="isVegaLiteComponent"
-      :spec="vegaLiteSpec"
-      :signal-keys="signalKeys"
-      :point-select="pointSelect"
-      :selections="props.selections"
-    />
-    <TableComponent :data="transformedData" :spec="parsedSpec" v-else />
-    <!-- <hr />
-    <div>
-      {{ vegaLiteSpec }}
-    </div> -->
+    <template v-if="slots.default">
+      <slot
+        :data="transformedData"
+        :allData="transformedDataFull"
+        :isSubset="isTransformedDataSubset"
+      />
+    </template>
+    <template v-else>
+      <VegaLite
+        v-if="isVegaLiteComponent"
+        :spec="vegaLiteSpec"
+        :signal-keys="signalKeys"
+        :point-select="pointSelect"
+        :selections="props.selections"
+      />
+      <TableComponent :data="transformedData" :spec="parsedSpec" v-else />
+    </template>
   </template>
   <template v-else>
     <p>Loading...</p>
