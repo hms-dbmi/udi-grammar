@@ -77,7 +77,6 @@ watch(selectionHash, () => {
 watch([loading, selectionHash], () => buildVisualization());
 
 function buildVisualization(): void {
-  // console.log('udi: build vis');
   if (!parsedSpec.value) {
     return;
   }
@@ -102,7 +101,10 @@ function buildVisualization(): void {
   } else {
     isVegaLiteComponent.value = false;
   }
+  visualizationBuilt.value = true;
 }
+
+const visualizationBuilt = ref(false);
 
 function setDefaultDomains(
   spec: ParsedUDIGrammar,
@@ -376,7 +378,7 @@ const slots = useSlots();
 </script>
 
 <template>
-  <template v-if="!dataSourcesStore.loading">
+  <template v-if="!dataSourcesStore.loading && visualizationBuilt">
     <div class="error-message" v-if="transformError">
       {{ transformError.message }}
     </div>
@@ -387,15 +389,16 @@ const slots = useSlots();
         :isSubset="isTransformedDataSubset"
       />
     </template>
-    <template v-else>
+    <template v-else-if="isVegaLiteComponent">
       <VegaLite
-        v-if="isVegaLiteComponent"
         :spec="vegaLiteSpec"
         :signal-keys="signalKeys"
         :point-select="pointSelect"
         :selections="props.selections"
       />
-      <TableComponent :data="transformedData" :spec="parsedSpec" v-else />
+    </template>
+    <template v-else>
+      <TableComponent :data="transformedData" :spec="parsedSpec" />
     </template>
   </template>
   <template v-else>
