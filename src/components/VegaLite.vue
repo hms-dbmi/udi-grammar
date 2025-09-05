@@ -78,7 +78,28 @@ function initVegaChart() {
     delete specObject.data.values;
   }
   // console.log('initializing vega chart with spec:', specObject);
-  vegaEmbed(vegaContainer.value, specObject as VisualizationSpec)
+  vegaEmbed(vegaContainer.value, specObject as VisualizationSpec, {
+    config: {
+      mark: { color: '#4e5a63' },
+      point: { shape: 'circle', filled: true },
+      range: {
+        category: [
+          '#E6A01A',
+          '#419F79',
+          '#CC7DAA',
+          '#0072B2',
+          '#57B4E9',
+          // '#ecc853',
+          // '#ad7aa1',
+          // '#ef9ba7',
+          // '#9b7461',
+          // '#bab0ac',
+        ],
+        // ordinal: { scheme: 'greens' },
+        ramp: { scheme: 'oranges' },
+      },
+    },
+  })
     .then((result) => {
       errorMessage.value = null;
       const view = result.view;
