@@ -77,6 +77,10 @@ const debouncedBuildVisualization = debounce(
 );
 
 watch([loading, selectionHash], () => {
+  if (debounceValue.value === 0) {
+    buildVisualization();
+    return;
+  }
   debouncedBuildVisualization();
 });
 
