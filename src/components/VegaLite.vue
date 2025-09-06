@@ -80,20 +80,23 @@ function initVegaChart() {
   // console.log('initializing vega chart with spec:', specObject);
   vegaEmbed(vegaContainer.value, specObject as VisualizationSpec, {
     config: {
-      mark: { color: '#4e5a63' },
+      mark: { color: '#E6A01A' },
       point: { shape: 'circle', filled: true },
       range: {
         category: [
           '#E6A01A',
           '#419F79',
-          '#CC7DAA',
           '#0072B2',
+          '#E63A46',
+          '#9769C6',
+          '#274653',
+          '#02CFAF',
+          '#D471A9',
           '#57B4E9',
-          // '#ecc853',
-          // '#ad7aa1',
-          // '#ef9ba7',
-          // '#9b7461',
-          // '#bab0ac',
+          '#FBD757',
+          '#9A6706',
+          '#83BD4C',
+          '#A4A4A3',
         ],
         // ordinal: { scheme: 'greens' },
         ramp: { scheme: 'oranges' },
