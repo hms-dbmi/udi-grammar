@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, defineEmits, useSlots } from 'vue';
+import { ref, computed, watch, onMounted, defineEmits, useSlots } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
@@ -8,6 +8,7 @@ import type { DataSelections, RangeSelection } from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 const dataSourcesStore = useDataSourcesStore();
 import { storeToRefs } from 'pinia';
+import { debounce } from 'lodash';
 
 const { loading, selectionHash } = storeToRefs(dataSourcesStore);
 
@@ -66,7 +67,18 @@ watch(selectionHash, () => {
   emit('selectionChange', currentDataSelections);
 });
 
-watch([loading, selectionHash], () => buildVisualization());
+const debounceValue = computed(() => {
+  return props.spec.config?.debounce ?? 0;
+});
+
+const debouncedBuildVisualization = debounce(
+  () => buildVisualization(),
+  debounceValue.value,
+);
+
+watch([loading, selectionHash], () => {
+  debouncedBuildVisualization();
+});
 
 function buildVisualization(): void {
   if (!parsedSpec.value) {
