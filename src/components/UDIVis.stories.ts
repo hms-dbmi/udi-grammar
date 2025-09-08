@@ -55,6 +55,25 @@ export const Default = {
   },
 };
 
+export const HideVegaLiteActions = {
+  args: {
+    spec: {
+      config: { hideActions: true },
+      source: {
+        name: 'donors',
+        source: './data/donors.csv',
+      },
+      representation: {
+        mark: 'point',
+        mapping: [
+          { encoding: 'y', field: 'height_value', type: 'quantitative' },
+          { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+        ],
+      },
+    },
+  },
+};
+
 export const Heatmap = {
   args: {
     spec: {

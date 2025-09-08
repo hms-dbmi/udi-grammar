@@ -29,6 +29,7 @@ interface PointSelect {
 
 interface VegaLiteProps {
   spec: string;
+  hideActions?: boolean;
   signalKeys?: string[];
   pointSelect?: PointSelect | null;
   selections?: DataSelections | null;
@@ -79,6 +80,7 @@ function initVegaChart() {
   }
   // console.log('initializing vega chart with spec:', specObject);
   vegaEmbed(vegaContainer.value, specObject as VisualizationSpec, {
+    actions: props.hideActions ? false : true,
     config: {
       mark: { color: '#E6A01A' },
       point: { shape: 'circle', filled: true },

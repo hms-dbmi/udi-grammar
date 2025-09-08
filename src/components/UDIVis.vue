@@ -382,6 +382,7 @@ const slots = useSlots();
     <template v-else-if="isVegaLiteComponent">
       <VegaLite
         :spec="vegaLiteSpec"
+        :hide-actions="props.spec.config?.hideActions"
         :signal-keys="signalKeys"
         :point-select="pointSelect"
         :selections="props.selections"
