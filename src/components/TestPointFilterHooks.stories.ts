@@ -70,6 +70,7 @@ export const ReadFilterStateX = {
         ],
         select: {
           name: 'race-select',
+          source: 'donors',
           how: {
             type: 'point',
           },
