@@ -1,0 +1,70 @@
+version: 0.0.1
+
+tool:
+  name: UDI Grammar
+  repo_url: https://github.com/hms-dbmi/udi-grammar
+  tool_homepage: https://hms-dbmi.github.io/udi-grammar/#/
+  documentation_url: https://github.com/hms-dbmi/udi-grammar/blob/main/README.md
+  tool_type: Library
+
+llm:
+  usesLlm: false
+  bringOwnKey: false
+
+input:
+  - name: Omics/molecular
+    dataCategory: omics-molecular
+    dataClass: tabular
+    dataType: metadata
+    format:
+      - csv
+    dataStandard:
+      - none
+    proprietary: false
+    source: https://huggingface.co/datasets/HIDIVE/DQVis
+
+output:
+  - name: Interactive visualization rendered in a browser
+    dataCategory: interactive-visualization
+    dataClass: data-viz
+    dataType: interactive-visualization
+    format:
+      - none
+    dataStandard:
+      - None
+    proprietary: false
+    source:
+
+license:
+  license_type: MIT
+  link: https://github.com/hms-dbmi/udi-grammar/blob/main/LICENSE
+
+funding:
+  source: ARPA-H
+  agreement: Not specified
+  link: ""
+
+domains:
+  - Biomedical Data Portals
+
+credit:
+  - name: UDI Harvard
+    role: Developer
+    org: Harvard University
+    url: https://hidivelab.org/
+
+target_users:
+  primary_user:
+    user_type: researcher
+    technical_literacy_level:
+      - intermediate
+    biomedical_literacy_level:
+      - expert
+
+maturity:
+  beginning_maturity: 1
+  current_maturity: 6
+
+media: [{ "link": "https://hms-dbmi.github.io/udi-grammar/#/" }]
+
+collaborations: []

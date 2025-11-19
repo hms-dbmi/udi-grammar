@@ -1,0 +1,13 @@
+on:
+  workflow_dispatch:
+    inputs:
+      python-version:
+        description: 'Python version as a string, e.g. "3.11"'
+        required: true
+        default: '3.11'
+
+jobs:
+  validate-tool:
+    uses: ARPA-H-BDF/bdfkb-schema/.github/workflows/ci-validate.yaml@main
+    with:
+      python-version: ${{ github.event.inputs.python-version }}
