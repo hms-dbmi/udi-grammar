@@ -812,12 +812,12 @@
   resolved "https://registry.npmjs.org/@storybook/components/-/components-8.5.8.tgz"
   integrity sha512-PPEMqWPXn7rX+qISaOOv9CDSuuvG538f0+4M5Ppq2LwpjXecgOG5ktqJF0ZqxmTytT+RpEaJmgjGW0dMAKZswA==
 
-"@storybook/core@8.5.8":
-  version "8.5.8"
-  resolved "https://registry.npmjs.org/@storybook/core/-/core-8.5.8.tgz"
-  integrity sha512-OT02DQhkGpBgn5P+nZOZmbzxqubC4liVqbhpjp/HOGi5cOA3+fCJzDJeSDTu+pPh7dZnopC4XnR+5dWjtOJHdA==
+"@storybook/core@8.6.15":
+  version "8.6.15"
+  resolved "https://registry.yarnpkg.com/@storybook/core/-/core-8.6.15.tgz#ba3aa59b02981136fa671d545b64d380c1188c8b"
+  integrity sha512-VFpKcphNurJpSC4fpUfKL3GTXVoL53oytghGR30QIw5jKWwaT50HVbTyb41BLOUuZjmMhUQA8weiQEew6RX0gw==
   dependencies:
-    "@storybook/csf" "0.1.12"
+    "@storybook/theming" "8.6.15"
     better-opn "^3.0.2"
     browser-assert "^1.2.1"
     esbuild "^0.18.0 || ^0.19.0 || ^0.20.0 || ^0.21.0 || ^0.22.0 || ^0.23.0 || ^0.24.0 || ^0.25.0"
@@ -901,6 +901,11 @@
   version "8.5.8"
   resolved "https://registry.npmjs.org/@storybook/theming/-/theming-8.5.8.tgz"
   integrity sha512-/Rm6BV778sCT+3Ok861VYmw9BlEV5zcCq2zg5TOVuk8HqZw7H7VHtubVsjukEuhveYCs+oF+i2tv/II6jh6jdg==
+
+"@storybook/theming@8.6.15":
+  version "8.6.15"
+  resolved "https://registry.yarnpkg.com/@storybook/theming/-/theming-8.6.15.tgz#781e6b36f113a10e76379956b9451276e8d5bda2"
+  integrity sha512-dAbL0XOekyT6XsF49R6Etj3WxQ/LpdJDIswUUeHgVJ6/yd2opZOGbPxnwA3zlmAh1c0tvpPyhSDXxSG79u8e4Q==
 
 "@storybook/vue3-vite@^8.5.8":
   version "8.5.8"
@@ -4761,12 +4766,12 @@ statuses@2.0.1:
   resolved "https://registry.npmjs.org/statuses/-/statuses-2.0.1.tgz"
   integrity sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==
 
-storybook@^8.5.8:
-  version "8.5.8"
-  resolved "https://registry.npmjs.org/storybook/-/storybook-8.5.8.tgz"
-  integrity sha512-k3QDa7z4a656oO3Mx929KNm+xIdEI2nIDCKatVl1mA6vt+ge+uwoiG+ro182J9LOEppR5XXD2mQQi4u1xNsy6A==
+storybook@^8.6.15:
+  version "8.6.15"
+  resolved "https://registry.yarnpkg.com/storybook/-/storybook-8.6.15.tgz#eb4a3bae1ac0fe875bb322a412fac9709d9b5124"
+  integrity sha512-Ob7DMlwWx8s7dMvcQ3xPc02TvUeralb+xX3oaPRk9wY9Hc6M1IBC/7cEoITkSmRS2v38DHubC+mtEKNc1u2gQg==
   dependencies:
-    "@storybook/core" "8.5.8"
+    "@storybook/core" "8.6.15"
 
 streamx@^2.15.0:
   version "2.22.0"
