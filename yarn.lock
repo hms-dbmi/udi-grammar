@@ -5221,6 +5221,14 @@ vega-expression@^5.1.2, vega-expression@~5.1.1, vega-expression@~5.1.2:
     "@types/estree" "^1.0.0"
     vega-util "^1.17.3"
 
+vega-expression@^5.2.1:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/vega-expression/-/vega-expression-5.2.1.tgz#04de5967b8f0dd0d599e5c64cc90d11d1e1d6c14"
+  integrity sha512-9KKbI2q9qTI55NSjD/dVWg3aeCtw+gwyWCiLMM47ha6iXrAN9pQ+EKRJfxOHuoDfCTlJJTaUfnnXgbqm0HEszg==
+  dependencies:
+    "@types/estree" "^1.0.0"
+    vega-util "^1.17.4"
+
 vega-force@~4.2.2:
   version "4.2.2"
   resolved "https://registry.npmjs.org/vega-force/-/vega-force-4.2.2.tgz"
@@ -5389,13 +5397,13 @@ vega-schema-url-parser@^2.2.0:
   integrity sha512-yAtdBnfYOhECv9YC70H2gEiqfIbVkq09aaE4y/9V/ovEFmH9gPKaEgzIZqgT7PSPQjKhsNkb6jk6XvSoboxOBw==
 
 vega-selections@^5.5.0:
-  version "5.5.0"
-  resolved "https://registry.npmjs.org/vega-selections/-/vega-selections-5.5.0.tgz"
-  integrity sha512-TkpklUg9yhKjnTEs3Ls0eSI2aMJ8+tRicrFAKlDyrEBNMSSEaMsSJ84Ro5xpRra+GMBkGXFYgwTPC7y3tj20Gg==
+  version "5.6.3"
+  resolved "https://registry.yarnpkg.com/vega-selections/-/vega-selections-5.6.3.tgz#408ed78b4f0f4864bb092df67774b326812b5f87"
+  integrity sha512-DXd+XVKcIjBAtSCcgtPx7cXuqG/7L98SWoFh6GKNu26EBUyn3zm0GAlZxNLPoI01Jz9Fb3YpSsewk2aIAbM68g==
   dependencies:
     d3-array "3.2.4"
-    vega-expression "^5.1.2"
-    vega-util "^1.17.3"
+    vega-expression "^5.2.1"
+    vega-util "^1.17.4"
 
 vega-statistics@^1.9.0, vega-statistics@~1.9.0:
   version "1.9.0"
@@ -5452,6 +5460,11 @@ vega-util@^1.17.2, vega-util@^1.17.3, vega-util@~1.17.2:
   version "1.17.3"
   resolved "https://registry.npmjs.org/vega-util/-/vega-util-1.17.3.tgz"
   integrity sha512-nSNpZLUrRvFo46M5OK4O6x6f08WD1yOcEzHNlqivF+sDLSsVpstaF6fdJYwrbf/debFi2L9Tkp4gZQtssup9iQ==
+
+vega-util@^1.17.4:
+  version "1.17.4"
+  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.17.4.tgz#b35781fe8e8d030e6519746682843d7ef9ff6d27"
+  integrity sha512-+y3ZW7dEqM8Ck+KRsd+jkMfxfE7MrQxUyIpNjkfhIpGEreym+aTn7XUw1DKXqclr8mqTQvbilPo16B3lnBr0wA==
 
 vega-view-transforms@~4.6.1:
   version "4.6.1"
