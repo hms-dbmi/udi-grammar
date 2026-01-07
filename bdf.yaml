@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.0.45
 
 tool:
   name: UDI Grammar
@@ -42,7 +42,7 @@ license:
 funding:
   source: ARPA-H
   agreement: Not specified
-  link: ""
+  link: ''
 
 domains:
   - Biomedical Data Portals
@@ -65,6 +65,6 @@ maturity:
   beginning_maturity: 1
   current_maturity: 6
 
-media: [{ "link": "https://hms-dbmi.github.io/udi-grammar/#/" }]
+media: [{ 'link': 'https://hms-dbmi.github.io/udi-grammar/#/' }]
 
 collaborations: []
