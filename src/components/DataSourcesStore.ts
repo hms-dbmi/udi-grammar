@@ -261,9 +261,15 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   const loading = ref<boolean>(true);
   const selectionHash = ref<string>('');
 
-  async function initDataSources(dataSources: DataSource[]): Promise<void> {
-    loading.value = true;
-    const promises = dataSources.map((dataSource) =>
+  async function initDataSources(sources: DataSource[]): Promise<void> {
+    // Only set loading if at least one source actually needs to be fetched.
+    // This avoids a "Loading..." flash when only transformations/filters changed.
+    const needsLoading = sources.some((ds) => {
+      const cached = dataSources.value[ds.name];
+      return !cached || !isEqual(cached.source, ds);
+    });
+    if (needsLoading) loading.value = true;
+    const promises = sources.map((dataSource) =>
       initDataSource(dataSource),
     );
     await Promise.all(promises);
@@ -271,7 +277,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   }
 
   async function initDataSource(dataSource: DataSource): Promise<void> {
-    const currentSource = getDataSource(dataSource.name);
+    // Check directly against the store rather than getDataSource (which
+    // returns null while loading is true, defeating the cache check).
+    const currentSource = dataSources.value[dataSource.name];
     if (currentSource && isEqual(currentSource.source, dataSource)) return;
     let delimiter = ',';
     if (dataSource.source.endsWith('.tsv')) {
