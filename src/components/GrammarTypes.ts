@@ -429,6 +429,12 @@ export interface GenericFieldMapping<Encoding> {
    * Set to true to omit the legend for this encoding.
    */
   omitLegend?: boolean;
+
+  /**
+   * Custom title for the axis or legend label of this encoding.
+   * Overrides the default field name displayed on the axis.
+   */
+  title?: string;
 }
 
 /**

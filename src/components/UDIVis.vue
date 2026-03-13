@@ -307,6 +307,9 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       if ('omitLegend' in map && map.omitLegend) {
         vegaEncoding[encoding].legend = null;
       }
+      if ('title' in map && map.title != null) {
+        vegaEncoding[encoding].title = map.title;
+      }
     }
 
     let selectParam: {
