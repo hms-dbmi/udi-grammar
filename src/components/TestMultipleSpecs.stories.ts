@@ -3034,3 +3034,51 @@ export const DebounceTest = {
     ],
   },
 };
+
+export const ScaleOnFilterFiltered = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+          ],
+          select: {
+            name: 'scatter-select',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        scaleOnFilter: 'filtered',
+        transformation: [
+          {
+            filter: {
+              name: 'scatter-select',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+          ],
+        },
+      },
+    ],
+  },
+};

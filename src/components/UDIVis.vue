@@ -99,7 +99,7 @@ function buildVisualization(): void {
     return;
   }
 
-  if (isTransformedDataSubset.value) {
+  if (isTransformedDataSubset.value && parsedSpec.value.scaleOnFilter !== 'filtered') {
     setDefaultDomains(parsedSpec.value, transformedDataFull.value);
   }
 
