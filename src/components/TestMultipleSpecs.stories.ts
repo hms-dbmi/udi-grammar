@@ -135,6 +135,7 @@ export const ScatterDetailOverview = {
           name: 'donors',
           source: './data/donors.csv',
         },
+        scaleOnFilter: 'filtered',
         transformation: [
           {
             filter: {
@@ -202,6 +203,7 @@ export const ScatterOverviewDetail = {
           name: 'donors',
           source: './data/donors.csv',
         },
+        scaleOnFilter: 'filtered',
         transformation: [
           {
             filter: {
