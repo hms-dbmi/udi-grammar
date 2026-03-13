@@ -3034,3 +3034,59 @@ export const DebounceTest = {
     ],
   },
 };
+
+export const KDEWithFilter = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+          ],
+          select: {
+            name: 'scatter-select',
+            how: {
+              type: 'interval',
+              on: 'x',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'scatter-select',
+            },
+          },
+          {
+            kde: {
+              field: 'weight_value',
+              output: {
+                sample: 'weight_value',
+                density: 'density',
+              },
+            },
+          },
+        ],
+        representation: {
+          mark: 'area',
+          mapping: [
+            { encoding: 'y', field: 'density', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+          ],
+        },
+      },
+    ],
+  },
+};
