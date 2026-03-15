@@ -19,14 +19,6 @@ export interface UDIGrammar {
    * If not specificed the default is a table witha all fields.
    */
   representation?: Representation | Representations;
-
-  /**
-   * Controls how scale domains behave when a named filter (selection) is active.
-   * - `"full"` (default): Scales are pinned to the full unfiltered data range,
-   *   preventing axes from jumping as the selection changes.
-   * - `"filtered"`: Scales adjust to reflect only the filtered data subset.
-   */
-  scaleOnFilter?: 'full' | 'filtered';
 }
 
 /**
@@ -437,6 +429,14 @@ export interface GenericFieldMapping<Encoding> {
    * Set to true to omit the legend for this encoding.
    */
   omitLegend?: boolean;
+
+  /**
+   * Controls how scale domains behave when a named filter (selection) is active.
+   * - `"full"` (default): Scale is pinned to the full unfiltered data range,
+   *   preventing the axis from jumping as the selection changes.
+   * - `"filtered"`: Scale adjusts to reflect only the filtered data subset.
+   */
+  scaleOnFilter?: 'full' | 'filtered';
 }
 
 /**

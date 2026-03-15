@@ -9,7 +9,6 @@ export interface ParsedUDIGrammar {
   source: DataSource[];
   transformation?: DataTransformation[];
   representation: Representations;
-  scaleOnFilter?: 'full' | 'filtered';
 }
 
 /**
@@ -18,7 +17,7 @@ export interface ParsedUDIGrammar {
  */
 export function parseSpecification(spec: UDIGrammar): ParsedUDIGrammar {
   let { source, representation } = spec;
-  const { transformation, scaleOnFilter } = spec;
+  const { transformation } = spec;
   if (!Array.isArray(source)) {
     source = [source];
   }
@@ -42,6 +41,5 @@ export function parseSpecification(spec: UDIGrammar): ParsedUDIGrammar {
 
   const result: ParsedUDIGrammar = { source, representation };
   if (transformation) result.transformation = transformation;
-  if (scaleOnFilter) result.scaleOnFilter = scaleOnFilter;
   return result;
 }

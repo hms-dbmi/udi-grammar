@@ -99,7 +99,7 @@ function buildVisualization(): void {
     return;
   }
 
-  if (isTransformedDataSubset.value && parsedSpec.value.scaleOnFilter !== 'filtered') {
+  if (isTransformedDataSubset.value) {
     setDefaultDomains(parsedSpec.value, transformedDataFull.value);
   }
 
@@ -133,6 +133,8 @@ function setDefaultDomains(
     for (const mapping of mappingList) {
       // @ts-expect-error: I'm checking if domain exists, don't give me a type checking saying domain might not exist.
       if (mapping.domain) continue;
+      // @ts-expect-error: I'm checking if scaleOnFilter exists
+      if (mapping.scaleOnFilter === 'filtered') continue;
       // @ts-expect-error: same, but for field.
       if (!mapping.field) continue;
       // @ts-expect-error: Again...
@@ -142,8 +144,10 @@ function setDefaultDomains(
       if (!mapping.type) continue;
       // @ts-expect-error: Again...
       const type: DataTypes = mapping.type;
+      // @ts-expect-error: checking scaleOnFilter
+      const scaleOnFilter: string | undefined = mapping.scaleOnFilter;
       if (type === 'quantitative') {
-        if (mark === 'bar') continue;
+        if (mark === 'bar' && scaleOnFilter !== 'full') continue;
         if (numberDomainCache.has(field)) {
           // @ts-expect-error: Again...
           const [min, max] = numberDomainCache.get(field);
