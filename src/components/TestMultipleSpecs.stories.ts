@@ -135,7 +135,6 @@ export const ScatterDetailOverview = {
           name: 'donors',
           source: './data/donors.csv',
         },
-        scaleOnFilter: 'filtered',
         transformation: [
           {
             filter: {
@@ -146,8 +145,18 @@ export const ScatterDetailOverview = {
         representation: {
           mark: 'point',
           mapping: [
-            { encoding: 'y', field: 'height_value', type: 'quantitative' },
-            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+            {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+              scaleOnFilter: 'filtered',
+            },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              scaleOnFilter: 'filtered',
+            },
           ],
         },
       },
@@ -203,7 +212,6 @@ export const ScatterOverviewDetail = {
           name: 'donors',
           source: './data/donors.csv',
         },
-        scaleOnFilter: 'filtered',
         transformation: [
           {
             filter: {
@@ -214,8 +222,18 @@ export const ScatterOverviewDetail = {
         representation: {
           mark: 'point',
           mapping: [
-            { encoding: 'y', field: 'height_value', type: 'quantitative' },
-            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+            {
+              encoding: 'y',
+              field: 'height_value',
+              type: 'quantitative',
+              scaleOnFilter: 'filtered',
+            },
+            {
+              encoding: 'x',
+              field: 'weight_value',
+              type: 'quantitative',
+              scaleOnFilter: 'filtered',
+            },
           ],
         },
       },
@@ -733,7 +751,8 @@ export const CrossFilterKDE = {
               encoding: 'y',
               field: 'density',
               type: 'quantitative',
-              domain: [0, 0.02],
+              // domain: [0, 0.02],
+              scaleOnFilter: 'filtered',
             },
             {
               encoding: 'x',
@@ -785,7 +804,12 @@ export const CrossFilterKDE = {
         representation: {
           mark: 'area',
           mapping: [
-            { encoding: 'y', field: 'density', type: 'quantitative' },
+            {
+              encoding: 'y',
+              field: 'density',
+              type: 'quantitative',
+              scaleOnFilter: 'filtered',
+            },
             {
               encoding: 'x',
               field: 'weight_value',
@@ -836,7 +860,12 @@ export const CrossFilterKDE = {
         representation: {
           mark: 'area',
           mapping: [
-            { encoding: 'y', field: 'density', type: 'quantitative' },
+            {
+              encoding: 'y',
+              field: 'density',
+              type: 'quantitative',
+              scaleOnFilter: 'filtered',
+            },
             {
               encoding: 'x',
               field: 'height_value',
@@ -3037,7 +3066,178 @@ export const DebounceTest = {
   },
 };
 
-export const ScaleOnFilterFiltered = {
+export const ScaleOnFilterHistogram = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'penguins',
+          source: './data/penguins.csv',
+        },
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'flipper_length_mm', type: 'quantitative' },
+            { encoding: 'x', field: 'body_mass_g', type: 'quantitative' },
+          ],
+          select: {
+            name: 'scatter-select',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'penguins',
+          source: './data/penguins.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'scatter-select',
+            },
+          },
+          {
+            groupby: {
+              start: `bin(d['body_mass_g'], ...bins(d['body_mass_g'], 10), 0)`,
+              end: `bin(d['body_mass_g'], ...bins(d['body_mass_g'], 10), 1)`,
+            },
+          },
+          {
+            rollup: {
+              count: { op: 'count' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'rect',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'start',
+              type: 'quantitative',
+              title: 'Body Mass',
+              scaleOnFilter: 'full',
+            },
+            { encoding: 'x2', field: 'end', type: 'quantitative' },
+            {
+              encoding: 'y',
+              field: 'count',
+              type: 'quantitative',
+              scaleOnFilter: 'filtered',
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const ScaleOnFilterDensity = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'penguins',
+          source: './data/penguins.csv',
+        },
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'flipper_length_mm', type: 'quantitative' },
+            { encoding: 'x', field: 'body_mass_g', type: 'quantitative' },
+          ],
+          select: {
+            name: 'scatter-select',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'penguins',
+          source: './data/penguins.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'scatter-select',
+            },
+          },
+          {
+            groupby: 'species',
+          },
+          {
+            kde: {
+              field: 'bill_length_mm',
+              samples: 100,
+              output: {
+                sample: 'bill_length_mm',
+                density: 'density',
+              },
+            },
+          },
+        ],
+        representation: [
+          {
+            mark: 'area',
+            mapping: [
+              {
+                encoding: 'x',
+                field: 'bill_length_mm',
+                type: 'quantitative',
+              },
+              {
+                encoding: 'y',
+                field: 'density',
+                type: 'quantitative',
+                scaleOnFilter: 'filtered',
+              },
+              {
+                encoding: 'color',
+                field: 'species',
+                type: 'nominal',
+              },
+              {
+                encoding: 'opacity',
+                value: 0.25,
+              },
+            ],
+          },
+          {
+            mark: 'line',
+            mapping: [
+              {
+                encoding: 'x',
+                field: 'bill_length_mm',
+                type: 'quantitative',
+              },
+              {
+                encoding: 'y',
+                field: 'density',
+                type: 'quantitative',
+                scaleOnFilter: 'filtered',
+              },
+              {
+                encoding: 'color',
+                field: 'species',
+                type: 'nominal',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+};
+
+export const ScaleOnFilterBarChartFullFull = {
   args: {
     specs: [
       {
@@ -3065,19 +3265,172 @@ export const ScaleOnFilterFiltered = {
           name: 'donors',
           source: './data/donors.csv',
         },
-        scaleOnFilter: 'filtered',
         transformation: [
           {
             filter: {
               name: 'scatter-select',
             },
           },
+          {
+            groupby: 'race',
+          },
+          {
+            rollup: {
+              count: { op: 'count', field: 'weight_value' },
+            },
+          },
         ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'race',
+              type: 'nominal',
+              scaleOnFilter: 'full',
+              title: 'Scale on Filter = full',
+            },
+            {
+              encoding: 'x',
+              field: 'count',
+              type: 'quantitative',
+              scaleOnFilter: 'full',
+              title: 'Scale on Filter = full',
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const ScaleOnFilterBarChartFullFiltered = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
         representation: {
           mark: 'point',
           mapping: [
             { encoding: 'y', field: 'height_value', type: 'quantitative' },
             { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+          ],
+          select: {
+            name: 'scatter-select',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'scatter-select',
+            },
+          },
+          {
+            groupby: 'race',
+          },
+          {
+            rollup: {
+              count: { op: 'count', field: 'weight_value' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'race',
+              type: 'nominal',
+              scaleOnFilter: 'filtered',
+              title: 'Scale on Filter = Filtered',
+            },
+            {
+              encoding: 'x',
+              field: 'count',
+              type: 'quantitative',
+              scaleOnFilter: 'full',
+              title: 'Scale on Filter = full',
+            },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const ScaleOnFilterBarChartFilteredFiltered = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+          ],
+          select: {
+            name: 'scatter-select',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'scatter-select',
+            },
+          },
+          {
+            groupby: 'race',
+          },
+          {
+            rollup: {
+              count: { op: 'count', field: 'weight_value' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'bar',
+          mapping: [
+            {
+              encoding: 'y',
+              field: 'race',
+              type: 'nominal',
+              scaleOnFilter: 'filtered',
+              title: 'Scale on Filter = filtered',
+            },
+            {
+              encoding: 'x',
+              field: 'count',
+              type: 'quantitative',
+              scaleOnFilter: 'filtered',
+              title: 'Scale on Filter = filtered',
+            },
           ],
         },
       },
