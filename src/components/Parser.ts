@@ -38,9 +38,8 @@ export function parseSpecification(spec: UDIGrammar): ParsedUDIGrammar {
   if (!Array.isArray(representation)) {
     representation = [representation] as Representations;
   }
-  if (transformation) {
-    return { source, transformation, representation };
-  }
 
-  return { source, representation };
+  const result: ParsedUDIGrammar = { source, representation };
+  if (transformation) result.transformation = transformation;
+  return result;
 }
