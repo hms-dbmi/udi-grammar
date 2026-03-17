@@ -437,6 +437,12 @@ export interface GenericFieldMapping<Encoding> {
    * - `"filtered"`: Scale adjusts to reflect only the filtered data subset.
    */
   domainWhenFiltered?: 'full' | 'filtered';
+  
+  /**
+   * Custom title for the axis or legend label of this encoding.
+   * Overrides the default field name displayed on the axis.
+   */
+  title?: string;
 }
 
 /**
