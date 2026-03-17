@@ -436,7 +436,7 @@ export interface GenericFieldMapping<Encoding> {
    *   preventing the axis from jumping as the selection changes.
    * - `"filtered"`: Scale adjusts to reflect only the filtered data subset.
    */
-  scaleOnFilter?: 'full' | 'filtered';
+  domainWhenFiltered?: 'full' | 'filtered';
 }
 
 /**
