@@ -429,6 +429,20 @@ export interface GenericFieldMapping<Encoding> {
    * Set to true to omit the legend for this encoding.
    */
   omitLegend?: boolean;
+
+  /**
+   * Controls how scale domains behave when a named filter (selection) is active.
+   * - `"full"` (default): Scale is pinned to the full unfiltered data range,
+   *   preventing the axis from jumping as the selection changes.
+   * - `"filtered"`: Scale adjusts to reflect only the filtered data subset.
+   */
+  domainWhenFiltered?: 'full' | 'filtered';
+  
+  /**
+   * Custom title for the axis or legend label of this encoding.
+   * Overrides the default field name displayed on the axis.
+   */
+  title?: string;
 }
 
 /**

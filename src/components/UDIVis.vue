@@ -133,6 +133,8 @@ function setDefaultDomains(
     for (const mapping of mappingList) {
       // @ts-expect-error: I'm checking if domain exists, don't give me a type checking saying domain might not exist.
       if (mapping.domain) continue;
+      // @ts-expect-error: I'm checking if domainWhenFiltered exists
+      if (mapping.domainWhenFiltered === 'filtered') continue;
       // @ts-expect-error: same, but for field.
       if (!mapping.field) continue;
       // @ts-expect-error: Again...
@@ -142,8 +144,10 @@ function setDefaultDomains(
       if (!mapping.type) continue;
       // @ts-expect-error: Again...
       const type: DataTypes = mapping.type;
+      // @ts-expect-error: checking domainWhenFiltered
+      const domainWhenFiltered: string | undefined = mapping.domainWhenFiltered;
       if (type === 'quantitative') {
-        if (mark === 'bar') continue;
+        if (mark === 'bar' && domainWhenFiltered !== 'full') continue;
         if (numberDomainCache.has(field)) {
           // @ts-expect-error: Again...
           const [min, max] = numberDomainCache.get(field);
@@ -306,6 +310,9 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       }
       if ('omitLegend' in map && map.omitLegend) {
         vegaEncoding[encoding].legend = null;
+      }
+      if ('title' in map && map.title != null) {
+        vegaEncoding[encoding].title = map.title;
       }
     }
 
