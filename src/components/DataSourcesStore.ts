@@ -569,8 +569,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         const minVal = agg(inTable, op.min(field));
         const maxVal = agg(inTable, op.max(field));
 
-        // Guard: if min/max are not finite, skip KDE computation
-        if (!Number.isFinite(minVal) || !Number.isFinite(maxVal)) {
+        // Guard: if min/max are not finite or equal (density1d divides by
+        // zero in bin1d when extent has zero width, producing NaN/Infinity)
+        if (!Number.isFinite(minVal) || !Number.isFinite(maxVal) || minVal === maxVal) {
           currentTable.table = from({ [sample]: [], [density]: [] });
           setOutTable(transform);
           continue;
