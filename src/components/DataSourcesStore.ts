@@ -546,24 +546,44 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         const inTable = getInTable(transform.in);
         const { field, samples } = transform.kde;
         let { bandwidth } = transform.kde;
+        const { sample = 'sample', density = 'density' } = transform.kde
+          .output ?? { sample: 'sample', density: 'density' };
+
+        // Guard: if the table has fewer than 2 rows, KDE cannot be computed.
+        // Return an empty table with the expected output columns.
+        if (inTable.numRows() < 2) {
+          currentTable.table = from({ [sample]: [], [density]: [] });
+          setOutTable(transform);
+          continue;
+        }
+
         if (bandwidth == null) {
           bandwidth = nrd(inTable.array(field), (x: number) => x);
         }
-        bandwidth = bandwidth ?? 1;
-        const { sample = 'sample', density = 'density' } = transform.kde
-          .output ?? { sample: 'sample', density: 'density' };
+        // nrd can return NaN or 0 for degenerate data; fall back to 1
+        if (bandwidth == null || !Number.isFinite(bandwidth) || bandwidth <= 0) {
+          bandwidth = 1;
+        }
         let kdeTable;
 
         const minVal = agg(inTable, op.min(field));
         const maxVal = agg(inTable, op.max(field));
-        // console.log({ minVal, maxVal });
+
+        // Guard: if min/max are not finite or equal (density1d divides by
+        // zero in bin1d when extent has zero width, producing NaN/Infinity)
+        if (!Number.isFinite(minVal) || !Number.isFinite(maxVal) || minVal === maxVal) {
+          currentTable.table = from({ [sample]: [], [density]: [] });
+          setOutTable(transform);
+          continue;
+        }
+
         const partitions = inTable.partitions();
         for (let i = 0; i < partitions.length; i++) {
           const partition = partitions[i];
           // partition is a list of indices that define a group
           // if no grouping is present, partition is an array of all indices
-          if (!partition) {
-            throw new Error('partition is undefined');
+          if (!partition || partition.length < 2) {
+            continue; // skip empty or single-element partitions
           }
           const values = partition.map((i) => inTable.get(field, i));
           const densityEstimates = density1d(values, {
@@ -595,8 +615,9 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
             kdeTable = kdeTable.concat(groupTable);
           }
         }
+        // If all partitions were skipped, return an empty table
         if (!kdeTable) {
-          throw new Error('kdeTable is undefined');
+          kdeTable = from({ [sample]: [], [density]: [] });
         }
         currentTable.table = kdeTable;
       }
