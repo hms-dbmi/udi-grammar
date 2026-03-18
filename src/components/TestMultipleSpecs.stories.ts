@@ -3526,7 +3526,7 @@ export const ScaleOnFilterBarChartFilteredFiltered = {
   },
 };
 
-export const HistogramFilterScatterplot = {
+export const HistogramFilterScatterplotExplicitHowField = {
   args: {
     specs: [
       {
@@ -3583,6 +3583,56 @@ export const HistogramFilterScatterplot = {
           {
             filter: {
               name: 'histogram-select',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'color', field: 'sex', type: 'nominal' },
+          ],
+        },
+      },
+    ],
+  },
+};
+
+export const ScatterplotFilterExplicitHowField = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'color', field: 'sex', type: 'nominal' },
+          ],
+          select: {
+            name: 'scatter-select',
+            how: {
+              type: 'interval',
+              on: 'xy',
+              field: ['weight_value', 'height_value'],
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'scatter-select',
             },
           },
         ],

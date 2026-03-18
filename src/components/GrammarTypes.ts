@@ -437,7 +437,7 @@ export interface GenericFieldMapping<Encoding> {
    * - `"filtered"`: Scale adjusts to reflect only the filtered data subset.
    */
   domainWhenFiltered?: 'full' | 'filtered';
-  
+
   /**
    * Custom title for the axis or legend label of this encoding.
    * Overrides the default field name displayed on the axis.
@@ -865,7 +865,7 @@ export interface DataSelectionInterval {
    * The source field to use for filtering. If specified, this field drives
    * the filter logic instead of the field mapped to the encoding.
    */
-  field?: string;
+  field?: string | [string, string];
 }
 
 /**

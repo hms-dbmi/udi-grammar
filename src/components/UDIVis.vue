@@ -348,13 +348,19 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
           layer.select.how.field
         ) {
           const axes = layer.select.how.on.split('');
+          const overrideField = layer.select.how.field;
           const fieldRemap: Record<string, string> = {};
-          for (const axis of axes) {
+          for (let i = 0; i < axes.length; i++) {
             const encodingMatch = mapping.find(
-              (m) => m.encoding === axis && 'field' in m,
+              (m) => m.encoding === axes[i] && 'field' in m,
             );
             if (encodingMatch && 'field' in encodingMatch) {
-              fieldRemap[encodingMatch.field] = layer.select.how.field;
+              const target = Array.isArray(overrideField)
+                ? overrideField[i]
+                : overrideField;
+              if (target) {
+                fieldRemap[encodingMatch.field] = target;
+              }
             }
           }
           signalFieldMap.value[layer.select.name] = fieldRemap;
