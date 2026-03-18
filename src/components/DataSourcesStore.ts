@@ -549,10 +549,22 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         const { sample = 'sample', density = 'density' } = transform.kde
           .output ?? { sample: 'sample', density: 'density' };
 
+        // Build an empty table matching the shape of normal KDE output:
+        // sample + density columns, plus any group columns from the input.
+        const emptyKdeColumns: Record<string, never[]> = {
+          [sample]: [],
+          [density]: [],
+        };
+        if (inTable.isGrouped()) {
+          for (const name of inTable.groups().names) {
+            if (name != null) emptyKdeColumns[name] = [];
+          }
+        }
+
         // Guard: if the table has fewer than 2 rows, KDE cannot be computed.
         // Return an empty table with the expected output columns.
         if (inTable.numRows() < 2) {
-          currentTable.table = from({ [sample]: [], [density]: [] });
+          currentTable.table = from(emptyKdeColumns);
           setOutTable(transform);
           continue;
         }
@@ -572,7 +584,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         // Guard: if min/max are not finite or equal (density1d divides by
         // zero in bin1d when extent has zero width, producing NaN/Infinity)
         if (!Number.isFinite(minVal) || !Number.isFinite(maxVal) || minVal === maxVal) {
-          currentTable.table = from({ [sample]: [], [density]: [] });
+          currentTable.table = from(emptyKdeColumns);
           setOutTable(transform);
           continue;
         }
@@ -617,7 +629,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
         }
         // If all partitions were skipped, return an empty table
         if (!kdeTable) {
-          kdeTable = from({ [sample]: [], [density]: [] });
+          kdeTable = from(emptyKdeColumns);
         }
         currentTable.table = kdeTable;
       }

@@ -3148,7 +3148,7 @@ export const ScaleOnFilterDensity = {
           mark: 'point',
           mapping: [
             { encoding: 'y', field: 'flipper_length_mm', type: 'quantitative' },
-            { encoding: 'x', field: 'body_mass_g', type: 'quantitative' },
+            { encoding: 'x', field: 'bill_length_mm', type: 'quantitative' },
           ],
           select: {
             name: 'scatter-select',
@@ -3228,6 +3228,94 @@ export const ScaleOnFilterDensity = {
                 encoding: 'color',
                 field: 'species',
                 type: 'nominal',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+};
+
+export const ScaleOnFilterDensityDonors = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+          ],
+          select: {
+            name: 'scatter-select',
+            how: {
+              type: 'interval',
+              on: 'xy',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'scatter-select',
+            },
+          },
+          {
+            kde: {
+              field: 'weight_value',
+              samples: 100,
+              output: {
+                sample: 'weight_value',
+                density: 'density',
+              },
+            },
+          },
+        ],
+        representation: [
+          {
+            mark: 'area',
+            mapping: [
+              {
+                encoding: 'x',
+                field: 'weight_value',
+                type: 'quantitative',
+              },
+              {
+                encoding: 'y',
+                field: 'density',
+                type: 'quantitative',
+                domainWhenFiltered: 'filtered',
+              },
+              {
+                encoding: 'opacity',
+                value: 0.25,
+              },
+            ],
+          },
+          {
+            mark: 'line',
+            mapping: [
+              {
+                encoding: 'x',
+                field: 'weight_value',
+                type: 'quantitative',
+              },
+              {
+                encoding: 'y',
+                field: 'density',
+                type: 'quantitative',
+                domainWhenFiltered: 'filtered',
               },
             ],
           },
