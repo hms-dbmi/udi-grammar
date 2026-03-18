@@ -343,6 +343,22 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       );
       if (selectParam.select.type === 'interval') {
         signalKeys.value = [layer.select.name];
+        if (
+          layer.select.how.type === 'interval' &&
+          layer.select.how.field
+        ) {
+          const axes = layer.select.how.on.split('');
+          const fieldRemap: Record<string, string> = {};
+          for (const axis of axes) {
+            const encodingMatch = mapping.find(
+              (m) => m.encoding === axis && 'field' in m,
+            );
+            if (encodingMatch && 'field' in encodingMatch) {
+              fieldRemap[encodingMatch.field] = layer.select.how.field;
+            }
+          }
+          signalFieldMap.value[layer.select.name] = fieldRemap;
+        }
       } else {
         pointSelect.value = layer.select;
       }
@@ -367,6 +383,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   return JSON.stringify(vegaSpec);
 }
 const signalKeys = ref<string[]>([]);
+const signalFieldMap = ref<Record<string, Record<string, string>>>({});
 const pointSelect = ref<any>();
 
 const debugVegaData = ref();
@@ -391,6 +408,7 @@ const slots = useSlots();
         :spec="vegaLiteSpec"
         :hide-actions="props.spec.config?.hideActions"
         :signal-keys="signalKeys"
+        :signal-field-map="signalFieldMap"
         :point-select="pointSelect"
         :selections="props.selections"
       />

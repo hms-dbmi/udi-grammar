@@ -31,6 +31,7 @@ interface VegaLiteProps {
   spec: string;
   hideActions?: boolean;
   signalKeys?: string[];
+  signalFieldMap?: Record<string, Record<string, string>>;
   pointSelect?: PointSelect | null;
   selections?: DataSelections | null;
 }
@@ -118,7 +119,16 @@ function initVegaChart() {
           //   JSON.stringify(value),
           // );
           // ignore.value = true;
-          dataSourcesStore.updateDataSelection(signalKey, value);
+          const fieldMap = props.signalFieldMap?.[signalKey];
+          if (fieldMap && value != null && typeof value === 'object') {
+            const remapped: Record<string, unknown> = {};
+            for (const [k, v] of Object.entries(value)) {
+              remapped[fieldMap[k] ?? k] = v;
+            }
+            dataSourcesStore.updateDataSelection(signalKey, remapped);
+          } else {
+            dataSourcesStore.updateDataSelection(signalKey, value);
+          }
           // ignore.value = false;
         });
       }

@@ -3525,3 +3525,76 @@ export const ScaleOnFilterBarChartFilteredFiltered = {
     ],
   },
 };
+
+export const HistogramFilterScatterplot = {
+  args: {
+    specs: [
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            binby: {
+              field: 'weight_value',
+              bins: 10,
+              nice: true,
+              output: {
+                bin_start: 'start',
+                bin_end: 'end',
+              },
+            },
+          },
+          {
+            rollup: {
+              count: { op: 'count' },
+            },
+          },
+        ],
+        representation: {
+          mark: 'rect',
+          mapping: [
+            {
+              encoding: 'x',
+              field: 'start',
+              type: 'quantitative',
+              title: 'weight_value',
+            },
+            { encoding: 'x2', field: 'end', type: 'quantitative' },
+            { encoding: 'y', field: 'count', type: 'quantitative' },
+          ],
+          select: {
+            name: 'histogram-select',
+            how: {
+              type: 'interval',
+              on: 'x',
+              field: 'weight_value',
+            },
+          },
+        },
+      },
+      {
+        source: {
+          name: 'donors',
+          source: './data/donors.csv',
+        },
+        transformation: [
+          {
+            filter: {
+              name: 'histogram-select',
+            },
+          },
+        ],
+        representation: {
+          mark: 'point',
+          mapping: [
+            { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+            { encoding: 'y', field: 'height_value', type: 'quantitative' },
+            { encoding: 'color', field: 'sex', type: 'nominal' },
+          ],
+        },
+      },
+    ],
+  },
+};
