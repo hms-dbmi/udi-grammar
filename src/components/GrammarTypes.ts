@@ -860,6 +860,12 @@ export interface DataSelectionInterval {
    * The axis or axes to apply the selection on ('x', 'y', or both ('xy')).
    */
   on: 'x' | 'y' | 'xy';
+
+  /**
+   * The source field to use for filtering. If specified, this field drives
+   * the filter logic instead of the field mapped to the encoding.
+   */
+  field?: string;
 }
 
 /**
