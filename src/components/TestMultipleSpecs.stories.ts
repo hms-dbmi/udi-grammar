@@ -3569,7 +3569,7 @@ export const HistogramFilterScatterplotExplicitHowField = {
             how: {
               type: 'interval',
               on: 'x',
-              field: 'weight_value',
+              field: ['weight_value'],
             },
           },
         },

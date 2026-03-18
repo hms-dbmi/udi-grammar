@@ -289,6 +289,76 @@ export const WriteFilterStateXY = {
   },
 };
 
+export const ReadWriteFilterStateXHistogram = {
+  args: {
+    testType: 'linked',
+    selections: [
+      {
+        selectionName: 'weight-select',
+        entity: 'donors',
+        field: 'weight_value',
+        minValue: 0,
+        maxValue: 160,
+      },
+    ],
+    spec: {
+      source: {
+        name: 'donors',
+        source: './data/donors.csv',
+      },
+      transformation: [
+        {
+          filter: {
+            name: 'weight-select',
+          },
+        },
+        {
+          binby: {
+            field: 'weight_value',
+            bins: 10,
+            nice: true,
+            output: {
+              bin_start: 'start',
+              bin_end: 'end',
+            },
+          },
+        },
+        {
+          rollup: {
+            count: { op: 'count' },
+          },
+        },
+      ],
+      representation: {
+        mark: 'rect',
+        mapping: [
+          {
+            encoding: 'x',
+            field: 'start',
+            type: 'quantitative',
+            title: 'weight_value',
+          },
+          { encoding: 'x2', field: 'end', type: 'quantitative' },
+          {
+            encoding: 'y',
+            field: 'count',
+            type: 'quantitative',
+            domainWhenFiltered: 'filtered',
+          },
+        ],
+        select: {
+          name: 'weight-select',
+          how: {
+            type: 'interval',
+            on: 'x',
+            field: ['weight_value'],
+          },
+        },
+      },
+    },
+  },
+};
+
 export const ReadWriteFilterStateX = {
   args: {
     testType: 'linked',

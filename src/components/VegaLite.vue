@@ -215,16 +215,27 @@ function updateVegaChartSelection(
   if (selection.type !== 'interval') return;
   const currentSignals = vegaView.value.getState().signals;
   if (!currentSignals) return;
+
+  // Build reverse field map: remapped field -> encoding field
+  const reverseFieldMap: Record<string, string> = {};
+  const fmap = props.signalFieldMap?.[selectionName];
+  if (fmap) {
+    for (const [encodingField, remappedField] of Object.entries(fmap)) {
+      reverseFieldMap[remappedField] = encodingField;
+    }
+  }
+
   for (const [field, range] of Object.entries(
     selection.selection as RangeSelection,
   )) {
+    const vegaField = reverseFieldMap[field] ?? field;
     const signalKeyStart = formatVegaSignalKey(selectionName);
     const signalTupleInfo = signalKeyStart + '_tuple_fields';
     if (!(signalTupleInfo in currentSignals)) continue;
     const signalTuple = currentSignals[signalTupleInfo];
     const channel = (
       signalTuple as Array<{ channel: string; field: string }>
-    ).find((t) => t.field === field)?.channel;
+    ).find((t) => t.field === vegaField)?.channel;
     const signalKeyFull = `${signalKeyStart}_${channel}`;
     let testNew = range;
     testNew = toPixelRange(testNew, channel);
