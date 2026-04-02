@@ -7,14 +7,10 @@
  */
 import './dom-shim.mjs';
 import { UDIVisElement } from '../dist/ce.js';
+import { check } from './check.mjs';
+
 
 const errors = [];
-
-function check(name, value) {
-  if (value == null) {
-    errors.push(`${name} is ${value}`);
-  }
-}
 
 check('UDIVisElement', UDIVisElement);
 
