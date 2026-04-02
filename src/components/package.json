@@ -33,7 +33,7 @@
   "scripts": {
     "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
-    "test": "echo \"No test specified\" && exit 0",
+    "test": "npm run build:all && node test/smoke-vue.mjs && node test/smoke-ce.mjs && node test/smoke-react.mjs && node test/smoke-exports.mjs",
     "build": "vite build",
     "build:ce": "vite build --config vite.config.ce.ts",
     "build:react": "vite build --config vite.config.react.ts",
@@ -101,7 +101,7 @@
     "access": "public"
   },
   "engines": {
-    "node": "^28 || ^26 || ^24 || ^22 || ^20 || ^18",
+    "node": "^28 || ^26 || ^24 || ^22 || ^20",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   },

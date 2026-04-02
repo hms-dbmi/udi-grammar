@@ -1,0 +1,70 @@
+name: Test Builds
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/components/**'
+      - '.github/workflows/test-builds.yaml'
+  pull_request:
+    paths:
+      - 'src/components/**'
+      - '.github/workflows/test-builds.yaml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: .
+
+      - name: Install toolkit dependencies
+        run: npm ci
+        working-directory: src/components
+
+      - name: Build all targets (Vue, CE, React)
+        run: npm run build:all
+        working-directory: src/components
+
+      - name: Smoke test — Vue build
+        run: node test/smoke-vue.mjs
+        working-directory: src/components
+
+      - name: Smoke test — Custom Element build
+        run: node test/smoke-ce.mjs
+        working-directory: src/components
+
+      - name: Smoke test — React wrapper build
+        run: node test/smoke-react.mjs
+        working-directory: src/components
+
+      - name: Smoke test — package exports map
+        run: node test/smoke-exports.mjs
+        working-directory: src/components
+
+      - name: Verify dist file sizes
+        working-directory: src/components
+        run: |
+          echo "=== Build output ==="
+          ls -lh dist/index.js dist/ce.js dist/react.js
+          echo ""
+          # Fail if any expected file is missing
+          test -f dist/index.js    || { echo "FAIL: dist/index.js missing"; exit 1; }
+          test -f dist/index.cjs   || { echo "FAIL: dist/index.cjs missing"; exit 1; }
+          test -f dist/ce.js       || { echo "FAIL: dist/ce.js missing"; exit 1; }
+          test -f dist/ce.umd.cjs  || { echo "FAIL: dist/ce.umd.cjs missing"; exit 1; }
+          test -f dist/react.js    || { echo "FAIL: dist/react.js missing"; exit 1; }
+          test -f dist/index.css   || { echo "FAIL: dist/index.css missing"; exit 1; }
+          test -f dist/index.d.ts  || { echo "FAIL: dist/index.d.ts missing"; exit 1; }
+          echo "All expected files present ✓"
