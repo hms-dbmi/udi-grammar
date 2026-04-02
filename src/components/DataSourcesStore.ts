@@ -38,14 +38,14 @@ export interface DataSourcesState {
   [key: string]: DataInterface;
 }
 
-export interface DataSelection {
+export interface ActiveDataSelection {
   dataSourceKey: string;
   selection: null | RangeSelection | PointSelection;
   type: 'interval' | 'point';
 }
 
 export interface DataSelections {
-  [key: string]: DataSelection;
+  [key: string]: ActiveDataSelection;
 }
 
 export interface RangeSelection {
@@ -154,7 +154,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     return filters.join(' && ');
   }
 
-  function selectionToArqueroFilter(dataSelection: DataSelection) {
+  function selectionToArqueroFilter(dataSelection: ActiveDataSelection) {
     const { type, selection } = dataSelection;
 
     if (type === 'point') {

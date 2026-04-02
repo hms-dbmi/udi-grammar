@@ -4,7 +4,7 @@ import vegaEmbed from 'vega-embed';
 import { defineProps } from 'vue';
 import { watch } from 'vue';
 import type {
-  DataSelection,
+  ActiveDataSelection,
   DataSelections,
   RangeSelection,
 } from './DataSourcesStore';
@@ -209,7 +209,7 @@ async function updateVegaChartSelections() {
 
 function updateVegaChartSelection(
   selectionName: string,
-  selection: DataSelection,
+  selection: ActiveDataSelection,
 ) {
   if (!vegaView.value) return;
   if (selection.type !== 'interval') return;

@@ -19,3 +19,22 @@ const UDIToolkit = {
   },
 };
 export { UDIToolkit, UDIVis, TableComponent, VegaLite };
+
+// Grammar spec types
+export type {
+  UDIGrammar,
+  Representation,
+  Representations,
+  DataSource,
+  DataTransformation,
+  DataSelection,
+  VisualizationLayer,
+  RowLayer,
+} from './GrammarTypes';
+
+export type {
+  ActiveDataSelection,
+  DataSelections,
+  RangeSelection,
+  PointSelection,
+} from './DataSourcesStore';
