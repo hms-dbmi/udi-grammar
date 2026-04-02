@@ -29,6 +29,7 @@ export default defineConfig({
         globals: {
           react: 'React',
         },
+        chunkFileNames: '[name].js',
       },
     },
   },

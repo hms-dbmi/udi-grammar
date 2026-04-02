@@ -5,11 +5,9 @@
  *
  * Run from src/components/ after `npm run build:all`.
  */
-import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const require = createRequire(import.meta.url);
 const pkgPath = resolve(import.meta.dirname, '..', 'package.json');
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
 
