@@ -15,23 +15,19 @@ export default defineConfig({
       // Heavy visualization deps stay external — consumers bring their own.
       // Vue and Pinia are bundled so non-Vue consumers don't need them.
       external: [
-        'fast-kde',
         'arquero',
         'vega',
         'vega-embed',
         'vega-lite',
         'ag-grid-community',
-        'ag-grid-vue3',
       ],
       output: {
         globals: {
-          'fast-kde': 'fastKDE',
           'vega-embed': 'vegaEmbed',
           'vega-lite': 'vegaLite',
           vega: 'vega',
           arquero: 'arquero',
           'ag-grid-community': 'agGrid',
-          'ag-grid-vue3': 'AgGridVue3',
         },
       },
     },

@@ -17,13 +17,11 @@ export default defineConfig({
       // Vue and Pinia are bundled (via ce-entry → UDIVis.vue chain).
       external: [
         'react',
-        'fast-kde',
         'arquero',
         'vega',
         'vega-embed',
         'vega-lite',
         'ag-grid-community',
-        'ag-grid-vue3',
       ],
       output: {
         globals: {
