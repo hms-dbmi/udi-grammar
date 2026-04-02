@@ -24,7 +24,14 @@
       "types": "./dist/react-wrapper/index.d.ts",
       "import": "./dist/react.js"
     },
-    "./style.css": "./dist/index.css"
+    "./style.css": "./dist/index.css",
+    "./dist/index.css": "./dist/index.css",
+    "./dist/DataSourcesStore.d.ts": "./dist/DataSourcesStore.d.ts",
+    "./dist/GrammarTypes": {
+      "types": "./dist/GrammarTypes.d.ts",
+      "default": "./dist/GrammarTypes.d.ts"
+    },
+    "./dist/GrammarTypes.d.ts": "./dist/GrammarTypes.d.ts"
   },
   "files": [
     "dist",
