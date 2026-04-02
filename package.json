@@ -71,6 +71,16 @@
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   },
+  "resolutions": {
+    "flatted": "3.4.2",
+    "node-forge": "1.4.0",
+    "path-to-regexp": "0.1.13",
+    "**/anymatch/picomatch": "2.3.2",
+    "**/readdirp/picomatch": "2.3.2",
+    "**/micromatch/picomatch": "2.3.2",
+    "**/rollup-plugin-visualizer/picomatch": "4.0.4",
+    "**/tinyglobby/picomatch": "4.0.4"
+  },
   "eslintConfig": {
     "extends": [
       "plugin:storybook/recommended"
