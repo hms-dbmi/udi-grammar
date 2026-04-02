@@ -20,6 +20,7 @@ export interface ParserProps {
 // Expose data selections to parent component
 const emit = defineEmits<{
   (e: 'selectionChange', selection: DataSelections): void;
+  (e: 'dataReady', payload: { data: object[] | null; allData: object[] | null; isSubset: boolean }): void;
 }>();
 
 const props = defineProps<ParserProps>();
@@ -110,6 +111,14 @@ function buildVisualization(): void {
     isVegaLiteComponent.value = false;
   }
   visualizationBuilt.value = true;
+
+  if (!slots.default) {
+    emit('dataReady', {
+      data: transformedData.value,
+      allData: transformedDataFull.value,
+      isSubset: isTransformedDataSubset.value,
+    });
+  }
 }
 
 const visualizationBuilt = ref(false);

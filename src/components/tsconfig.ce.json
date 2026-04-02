@@ -6,7 +6,10 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "moduleResolution": "nodenext",
+    "module": "nodenext",
+    "target": "es2022",
     "baseUrl": "."
   },
-  "exclude": ["*.stories.ts", "react-wrapper/**/*", "vite.config.ce.ts", "vite.config.react.ts", "ce-entry.ts"]
+  "include": ["ce-entry.ts", "GrammarTypes.ts", "DataSourcesStore.ts"],
+  "exclude": []
 }
