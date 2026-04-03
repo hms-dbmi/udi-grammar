@@ -65,18 +65,29 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   function bindExternalDataSelections(
     externalSelections: DataSelections,
   ): void {
-    // console.log('bind');
+    let changed = false;
     for (const [selectionName, selection] of Object.entries(
       externalSelections,
     )) {
-      if (selectionName in dataSelections.value) {
-        console.warn(
-          `Selection ${selectionName} already exists, overwriting it.`,
-        );
+      if (
+        selectionName in dataSelections.value &&
+        isEqual(dataSelections.value[selectionName], selection)
+      ) {
+        continue; // identical — skip to avoid reactive churn
       }
       dataSelections.value[selectionName] = selection;
+      changed = true;
     }
-    selectionHash.value = JSON.stringify(dataSelections.value);
+    if (changed) {
+      // Serialize only the selection payloads (not the full ActiveDataSelection
+      // objects which may reference reactive proxies) to avoid cyclic-object
+      // errors and to keep the hash lightweight.
+      const hashObj: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(dataSelections.value)) {
+        hashObj[k] = v?.selection ?? null;
+      }
+      selectionHash.value = JSON.stringify(hashObj);
+    }
   }
 
   function watchDataSelection(
@@ -102,8 +113,14 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     if (!(selectionName in dataSelections.value)) {
       throw new Error(`Selection name ${selectionName} not found`);
     }
+    const current = dataSelections.value[selectionName]!.selection;
+    if (isEqual(current, selection)) return; // no change — skip reactive churn
     dataSelections.value[selectionName]!.selection = selection;
-    selectionHash.value = JSON.stringify(dataSelections.value);
+    const hashObj: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(dataSelections.value)) {
+      hashObj[k] = v?.selection ?? null;
+    }
+    selectionHash.value = JSON.stringify(hashObj);
   }
 
   function clearDataSelection(selectionName: string): void {

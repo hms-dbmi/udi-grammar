@@ -250,7 +250,7 @@ function performDataTransformation(spec: ParsedUDIGrammar) {
 function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const vegaSpec: any = {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
     // data: { url: './data/penguins.csv' },
     width: 'container',
     // height: 'container',
