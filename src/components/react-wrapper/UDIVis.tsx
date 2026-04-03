@@ -47,20 +47,29 @@ export function UDIVis({ spec, selections, onSelectionChange, onDataReady, class
     }
   }, [selections]);
 
-  // Listen for selection-change custom event
+  // Listen for selection-change custom event.
+  // Vue CE wraps emit args in an array: detail = [arg0, arg1, ...].
   React.useEffect(() => {
     const el = elRef.current;
     if (!el || !onSelectionChange) return;
-    const handler = (e: Event) => onSelectionChange((e as CustomEvent).detail);
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const payload = Array.isArray(detail) ? detail[0] : detail;
+      onSelectionChange(payload);
+    };
     el.addEventListener('selection-change', handler);
     return () => el.removeEventListener('selection-change', handler);
   }, [onSelectionChange]);
 
-  // Listen for data-ready custom event
+  // Listen for data-ready custom event.
   React.useEffect(() => {
     const el = elRef.current;
     if (!el || !onDataReady) return;
-    const handler = (e: Event) => onDataReady((e as CustomEvent).detail);
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const payload = Array.isArray(detail) ? detail[0] : detail;
+      onDataReady(payload);
+    };
     el.addEventListener('data-ready', handler);
     return () => el.removeEventListener('data-ready', handler);
   }, [onDataReady]);
