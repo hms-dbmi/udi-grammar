@@ -35,6 +35,7 @@ onMounted(() => {
 
 async function render() {
   // console.log('udivis render');
+  if (!props.spec) return; // CE may mount before spec prop is set
   if (props.selections) {
     dataSourcesStore.bindExternalDataSelections(props.selections);
   }
@@ -69,7 +70,7 @@ watch(selectionHash, () => {
 });
 
 const debounceValue = computed(() => {
-  return props.spec.config?.debounce ?? 0;
+  return props.spec?.config?.debounce ?? 0;
 });
 
 const debouncedBuildVisualization = debounce(
