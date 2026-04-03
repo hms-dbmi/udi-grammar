@@ -31,14 +31,17 @@ export function UDIVis({ spec, selections, onSelectionChange, onDataReady, class
     ensureCERegistered();
   }, []);
 
-  // Set complex object props via JS properties (not HTML attributes)
-  React.useEffect(() => {
+  // Set complex object props via JS properties (not HTML attributes).
+  // useLayoutEffect ensures the property is set synchronously after the DOM
+  // update, before the browser paints — this avoids a race where the Vue CE
+  // processes connectedCallback before the prop is available.
+  React.useLayoutEffect(() => {
     if (elRef.current) {
       (elRef.current as any).spec = spec;
     }
   }, [spec]);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (elRef.current) {
       (elRef.current as any).selections = selections;
     }
