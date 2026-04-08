@@ -113,6 +113,20 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     if (!(selectionName in dataSelections.value)) {
       throw new Error(`Selection name ${selectionName} not found`);
     }
+    // Vega emits degenerate ranges like [Infinity, -Infinity] at the start of
+    // a brush interaction before the user has dragged.  Treat these as "no
+    // selection" so they don't propagate as filters that wipe all data.
+    if (selection != null && dataSelections.value[selectionName]!.type === 'interval') {
+      for (const range of Object.values(selection)) {
+        if (
+          Array.isArray(range) &&
+          range.some((v) => typeof v === 'number' && !isFinite(v))
+        ) {
+          selection = null;
+          break;
+        }
+      }
+    }
     const current = dataSelections.value[selectionName]!.selection;
     if (isEqual(current, selection)) return; // no change — skip reactive churn
     dataSelections.value[selectionName]!.selection = selection;
