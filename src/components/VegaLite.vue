@@ -125,8 +125,9 @@ function initVegaChart() {
             const channelSignal = `${signalKeyFormatted}_${tf.channel}`;
             const pixelRange = view.signal(channelSignal) as [number, number] | undefined;
             if (pixelRange == null) continue;
-            // Convert pixel coordinates back to data coordinates
             const dataRange = fromPixelRange(pixelRange, tf.channel as 'x' | 'y');
+            // Skip degenerate ranges (single-point click before drag starts)
+            if (Math.abs(dataRange[1] - dataRange[0]) < 1e-9) continue;
             const dataField = fieldMap?.[tf.field] ?? tf.field;
             combined[dataField] = dataRange;
           }
@@ -305,7 +306,10 @@ function fromPixelRange(
 ): [number, number] {
   if (!vegaView.value) return [0, 0];
   const sx = vegaView.value.scale(channel);
-  return [sx.invert(pixelRange[0]), sx.invert(pixelRange[1])] as [number, number];
+  const a = sx.invert(pixelRange[0]) as number;
+  const b = sx.invert(pixelRange[1]) as number;
+  // Y-axis pixels are inverted (0 = top), so always normalize to [min, max]
+  return [Math.min(a, b), Math.max(a, b)];
 }
 
 watch(() => props.selections, updateVegaChartSelections, { deep: true });
