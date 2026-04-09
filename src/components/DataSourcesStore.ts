@@ -353,8 +353,14 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       return namedTables;
     };
 
+    const namedTables = getNamedTables();
+    // All requested sources may not be loaded yet (e.g. another UDIVis
+    // instance sharing this store triggered the watcher).  Return null
+    // so the caller treats it like "still loading" instead of crashing.
+    if (namedTables.size === 0) return null;
+
     const { data: dataTable, containsNamedFilter } = PerformDataTransformations(
-      getNamedTables(),
+      namedTables,
       dataTransformations ?? [],
       { skipNamedFilters: false },
     );

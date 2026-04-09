@@ -26,6 +26,11 @@ const emit = defineEmits<{
 const props = defineProps<ParserProps>();
 
 const parsedSpec = ref<ParsedUDIGrammar | null>(null);
+// Per-instance flag: true once this instance's own data sources have been
+// loaded via initDataSources.  The shared [loading, selectionHash] watcher
+// must not trigger buildVisualization before this — other UDIVis instances
+// sharing the same Pinia store can flip `loading` before our data is ready.
+const instanceReady = ref(false);
 
 const isVegaLiteComponent = ref<boolean>(false);
 const vegaLiteSpec = ref<string>('');
@@ -36,11 +41,16 @@ onMounted(() => {
 async function render() {
   // console.log('udivis render');
   if (!props.spec) return; // CE may mount before spec prop is set
+  instanceReady.value = false;
+  parsedSpec.value = parseSpecification(props.spec);
+  // Load data sources BEFORE binding selections — binding can change
+  // selectionHash which triggers the [loading, selectionHash] watcher.
+  // If data isn't loaded yet that watcher would hit empty dataSources.
+  await dataSourcesStore.initDataSources(parsedSpec.value.source);
+  instanceReady.value = true;
   if (props.selections) {
     dataSourcesStore.bindExternalDataSelections(props.selections);
   }
-  parsedSpec.value = parseSpecification(props.spec);
-  await dataSourcesStore.initDataSources(parsedSpec.value.source);
   buildVisualization();
 }
 
@@ -79,6 +89,9 @@ const debouncedBuildVisualization = debounce(
 );
 
 watch([loading, selectionHash], () => {
+  // Don't react to store-wide loading changes until this instance's own
+  // data sources have been loaded (see instanceReady above).
+  if (!instanceReady.value) return;
   if (debounceValue.value === 0) {
     buildVisualization();
     return;
