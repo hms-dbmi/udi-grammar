@@ -103,11 +103,6 @@ function buildVisualization(): void {
   if (!parsedSpec.value) {
     return;
   }
-  // // parse/validate grammar
-  // parsedSpec.value = parseSpecification(props.spec);
-  // for (const dataSource of parsedSpec.value.dataSource) {
-  //   dataSourcesStore.initDataSource(dataSource);
-  // }
 
   performDataTransformation(parsedSpec.value);
   if (transformedData.value == null) {
@@ -240,14 +235,13 @@ const transformedDataFull = ref<object[] | null>(null);
 const isTransformedDataSubset = ref<boolean>(false);
 
 function performDataTransformation(spec: ParsedUDIGrammar) {
-  transformedData.value = null;
-
   try {
     transformError.value = null;
     const dataObjects = dataSourcesStore.getDataObject(
       spec.source.map((x) => x.name),
       spec.transformation,
     );
+    // Keep previous data visible while loading/null — avoids "Loading..." flash
     if (dataObjects == null) return;
     const { allData, displayData, isDisplayDataSubset } = dataObjects;
 
@@ -258,7 +252,6 @@ function performDataTransformation(spec: ParsedUDIGrammar) {
     console.error('Failed to complete data transformation', error);
     transformError.value = error;
   }
-  return;
 }
 
 function convertToVegaSpec(spec: ParsedUDIGrammar): string {
@@ -314,6 +307,10 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
           vegaEncoding[encoding].scale = {};
         }
         vegaEncoding[encoding].scale['zero'] = false;
+        // Add padding so marks at the data extremes don't sit right at the axis edge
+        if ((encoding === 'x' || encoding === 'y') && vegaEncoding[encoding].type === 'quantitative') {
+          vegaEncoding[encoding].scale['padding'] = 5;
+        }
       }
       if (layer.mark === 'area' && encoding === 'y') {
         vegaEncoding[encoding].stack = false;

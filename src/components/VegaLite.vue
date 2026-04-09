@@ -107,30 +107,68 @@ function initVegaChart() {
       const view = result.view;
       vegaView.value = view;
       for (const signalKey of props.signalKeys ?? []) {
-        // console.log('Adding signal listener for:', signalKey);
         const signalKeyFormatted = formatVegaSignalKey(signalKey);
-        view.addSignalListener(signalKeyFormatted, (name, value) => {
-          if (ignore.value) return;
-          // console.log('uate from vega-lite internal');
-          // console.log('signal listener', signalKeyFormatted);
-          // console.log(
-          //   'signal listener: ',
-          //   signalKeyFormatted,
-          //   JSON.stringify(value),
-          // );
-          // ignore.value = true;
-          const fieldMap = props.signalFieldMap?.[signalKey];
-          if (fieldMap && value != null && typeof value === 'object') {
-            const remapped: Record<string, unknown> = {};
-            for (const [k, v] of Object.entries(value)) {
-              remapped[fieldMap[k] ?? k] = v;
-            }
-            dataSourcesStore.updateDataSelection(signalKey, remapped);
-          } else {
-            dataSourcesStore.updateDataSelection(signalKey, value);
+        // Vega-Lite stores per-channel ranges in separate signals
+        // ({name}_x, {name}_y). Read _tuple_fields to discover which
+        // channels exist, then listen on each and combine into a
+        // single multi-field selection update.
+        const tupleFieldsKey = signalKeyFormatted + '_tuple_fields';
+        const tupleFields = view.signal(tupleFieldsKey) as
+          | Array<{ channel: string; field: string }>
+          | undefined;
+        const channels = (tupleFields ?? []).map((t) => t.channel);
+        const fieldMap = props.signalFieldMap?.[signalKey];
+
+        const buildCombinedSelection = (): RangeSelection | null => {
+          const combined: RangeSelection = {};
+          for (const tf of tupleFields ?? []) {
+            const channelSignal = `${signalKeyFormatted}_${tf.channel}`;
+            const pixelRange = view.signal(channelSignal) as [number, number] | undefined;
+            if (pixelRange == null) continue;
+            // Convert pixel coordinates back to data coordinates
+            const dataRange = fromPixelRange(pixelRange, tf.channel as 'x' | 'y');
+            const dataField = fieldMap?.[tf.field] ?? tf.field;
+            combined[dataField] = dataRange;
           }
-          // ignore.value = false;
-        });
+          return Object.keys(combined).length > 0 ? combined : null;
+        };
+
+        // Debounce selection updates so that dragging doesn't trigger
+        // a data re-render on every mouse-move (which would destroy the
+        // brush interaction). Only propagate after the drag settles.
+        let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+        const DEBOUNCE_MS = 250;
+        const debouncedUpdate = (sel: RangeSelection | null) => {
+          if (debounceTimer) clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            dataSourcesStore.updateDataSelection(signalKey, sel);
+          }, DEBOUNCE_MS);
+        };
+
+        if (channels.length > 0) {
+          // Listen on each per-channel signal and combine all channels
+          for (const channel of channels) {
+            const channelSignal = `${signalKeyFormatted}_${channel}`;
+            view.addSignalListener(channelSignal, () => {
+              if (ignore.value) return;
+              debouncedUpdate(buildCombinedSelection());
+            });
+          }
+        } else {
+          // Fallback: listen on the main signal (1D selections or legacy)
+          view.addSignalListener(signalKeyFormatted, (name, value) => {
+            if (ignore.value) return;
+            if (fieldMap && value != null && typeof value === 'object') {
+              const remapped: RangeSelection = {};
+              for (const [k, v] of Object.entries(value)) {
+                remapped[fieldMap[k] ?? k] = v as [number, number];
+              }
+              debouncedUpdate(remapped);
+            } else {
+              debouncedUpdate(value as RangeSelection | null);
+            }
+          });
+        }
       }
       if (props.pointSelect) {
         // if the signal is a point selection we I couldn't get signals
@@ -173,7 +211,7 @@ onMounted(() => {
 });
 
 function updateVegaChart() {
-  // only handles data changes
+  // only handles data changes — does NOT resize, since layout hasn't changed
   if (!vegaView.value) return;
   const { success, specObject } = parseSpec();
   if (!success || isEmpty(specObject)) return;
@@ -184,7 +222,6 @@ function updateVegaChart() {
         .remove(() => true)
         .insert(specObject.data.values ?? []),
     )
-    .resize()
     .runAsync();
 }
 
@@ -260,6 +297,15 @@ function toPixelRange(
   if (!vegaView.value) return [0, 0] as any;
   const sx = vegaView.value.scale(channel);
   return [sx(dataRange[0]), sx(dataRange[1])] as [number, number];
+}
+
+function fromPixelRange(
+  pixelRange: [number, number],
+  channel: 'x' | 'y',
+): [number, number] {
+  if (!vegaView.value) return [0, 0];
+  const sx = vegaView.value.scale(channel);
+  return [sx.invert(pixelRange[0]), sx.invert(pixelRange[1])] as [number, number];
 }
 
 watch(() => props.selections, updateVegaChartSelections, { deep: true });
