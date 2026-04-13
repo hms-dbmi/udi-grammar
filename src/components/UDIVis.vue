@@ -42,7 +42,11 @@ async function render() {
   // console.log('udivis render');
   if (!props.spec) return; // CE may mount before spec prop is set
   instanceReady.value = false;
-  parsedSpec.value = parseSpecification(props.spec);
+  // Deep clone props.spec so internal mutations (e.g. setDefaultDomains
+  // adding mapping.domain) don't leak back through the CE props to the
+  // host (React) — which would otherwise trigger a re-mount and lose
+  // the brush/selection state.
+  parsedSpec.value = parseSpecification(JSON.parse(JSON.stringify(props.spec)));
   // Load data sources BEFORE binding selections — binding can change
   // selectionHash which triggers the [loading, selectionHash] watcher.
   // If data isn't loaded yet that watcher would hit empty dataSources.
@@ -100,15 +104,21 @@ watch([loading, selectionHash], () => {
 });
 
 function buildVisualization(): void {
-  if (!parsedSpec.value) {
+  if (!props.spec) {
     return;
   }
+  // Re-parse from a fresh clone so any prior domain mutations (from
+  // setDefaultDomains during a previous subset state) don't persist
+  // when the filter is cleared.
+  parsedSpec.value = parseSpecification(JSON.parse(JSON.stringify(props.spec)));
 
   performDataTransformation(parsedSpec.value);
   if (transformedData.value == null) {
     return;
   }
 
+  // Lock axis domains to the full data extent so axes don't zoom when
+  // cross-chart filters reduce the displayed dataset.
   if (isTransformedDataSubset.value) {
     setDefaultDomains(parsedSpec.value, transformedDataFull.value);
   }

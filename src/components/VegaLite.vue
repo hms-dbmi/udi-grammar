@@ -211,19 +211,45 @@ onMounted(() => {
   initVegaChart();
 });
 
-function updateVegaChart() {
-  // only handles data changes — does NOT resize, since layout hasn't changed
+// Update data in the existing Vega view, preserving brush/selection state.
+async function updateVegaChart() {
   if (!vegaView.value) return;
   const { success, specObject } = parseSpec();
   if (!success || isEmpty(specObject)) return;
-  vegaView.value
-    .change(
-      'udi_data',
-      changeset()
-        .remove(() => true)
-        .insert(specObject.data.values ?? []),
-    )
-    .runAsync();
+
+  // Save per-channel selection signals so the brush survives the data swap
+  const savedSignals: Record<string, unknown> = {};
+  for (const signalKey of props.signalKeys ?? []) {
+    const sk = formatVegaSignalKey(signalKey);
+    const tupleFieldsKey = sk + '_tuple_fields';
+    const state = vegaView.value.getState().signals;
+    if (!state) continue;
+    const tupleFields = state[tupleFieldsKey] as
+      | Array<{ channel: string; field: string }>
+      | undefined;
+    for (const tf of tupleFields ?? []) {
+      const channelSignal = `${sk}_${tf.channel}`;
+      if (channelSignal in state) {
+        savedSignals[channelSignal] = state[channelSignal];
+      }
+    }
+  }
+
+  ignore.value = true;
+  vegaView.value.change(
+    'udi_data',
+    changeset()
+      .remove(() => true)
+      .insert(specObject.data.values ?? []),
+  );
+
+  // Restore selection signals so the brush is preserved
+  for (const [key, value] of Object.entries(savedSignals)) {
+    vegaView.value.signal(key, value);
+  }
+
+  await vegaView.value.runAsync();
+  ignore.value = false;
 }
 
 watch(() => props.spec, updateVegaChart);
