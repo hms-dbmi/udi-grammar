@@ -307,17 +307,36 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     loading.value = false;
   }
 
+  // Deduplication map: prevents concurrent initDataSource calls for the same
+  // source from firing multiple network requests.
+  const pendingLoads = new Map<string, Promise<void>>();
+
   async function initDataSource(dataSource: DataSource): Promise<void> {
     // Check directly against the store rather than getDataSource (which
     // returns null while loading is true, defeating the cache check).
     const currentSource = dataSources.value[dataSource.name];
     if (currentSource && isEqual(currentSource.source, dataSource)) return;
-    let delimiter = ',';
-    if (dataSource.source.endsWith('.tsv')) {
-      delimiter = '\t';
+
+    // If another caller is already loading this exact source, share its promise
+    const key = dataSource.name + '\0' + dataSource.source;
+    const pending = pendingLoads.get(key);
+    if (pending) return pending;
+
+    const promise = (async () => {
+      let delimiter = ',';
+      if (dataSource.source.endsWith('.tsv')) {
+        delimiter = '\t';
+      }
+      const dest: ColumnTable = await loadCSV(dataSource.source, { delimiter });
+      dataSources.value[dataSource.name] = { source: dataSource, dest };
+    })();
+
+    pendingLoads.set(key, promise);
+    try {
+      await promise;
+    } finally {
+      pendingLoads.delete(key);
     }
-    const dest: ColumnTable = await loadCSV(dataSource.source, { delimiter });
-    dataSources.value[dataSource.name] = { source: dataSource, dest };
   }
 
   function getDataSource(key: string): DataInterface | null {
