@@ -55,7 +55,7 @@ async function render() {
   if (props.selections) {
     dataSourcesStore.bindExternalDataSelections(props.selections);
   }
-  buildVisualization();
+  scheduleBuild();
 }
 
 watch(
@@ -92,12 +92,28 @@ const debouncedBuildVisualization = debounce(
   debounceValue.value,
 );
 
+// Coalesce multiple rapid triggers (selectionHash change, spec prop change,
+// etc.) into a single build on the next microtask.  Without this, a brush
+// can trigger buildVisualization three times: once for selectionHash,
+// once for the subsequent spec change (from updateSpecFilters), and
+// potentially once more from the selections prop.  Only the last version
+// of props.spec matters — earlier ones may still have stale transformations.
+let buildScheduled = false;
+function scheduleBuild() {
+  if (buildScheduled) return;
+  buildScheduled = true;
+  queueMicrotask(() => {
+    buildScheduled = false;
+    buildVisualization();
+  });
+}
+
 watch([loading, selectionHash], () => {
   // Don't react to store-wide loading changes until this instance's own
   // data sources have been loaded (see instanceReady above).
   if (!instanceReady.value) return;
   if (debounceValue.value === 0) {
-    buildVisualization();
+    scheduleBuild();
     return;
   }
   debouncedBuildVisualization();
@@ -117,11 +133,12 @@ function buildVisualization(): void {
     return;
   }
 
-  // Lock axis domains to the full data extent so axes don't zoom when
-  // cross-chart filters reduce the displayed dataset.
-  if (isTransformedDataSubset.value) {
-    setDefaultDomains(parsedSpec.value, transformedDataFull.value);
-  }
+  // Always lock axis domains to the full data extent. If we only did this
+  // when isTransformedDataSubset is true, the initial chart would have a
+  // dynamic scale, and when a filter later shrinks the data the scale
+  // would recalculate — mismapping the brush pixel coordinates so the
+  // brush rectangle appears to disappear / jump around.
+  setDefaultDomains(parsedSpec.value, transformedDataFull.value);
 
   if (isVegaLiteCompatible(parsedSpec.value)) {
     vegaLiteSpec.value = convertToVegaSpec(parsedSpec.value);
