@@ -304,6 +304,10 @@ function performDataTransformation(spec: ParsedUDIGrammar) {
   } catch (error) {
     console.error('Failed to complete data transformation', error);
     transformError.value = error;
+    // Clear stale data so the chart renders empty instead of keeping
+    // the last successful state.
+    transformedData.value = [];
+    transformedDataFull.value = [];
   }
 }
 
