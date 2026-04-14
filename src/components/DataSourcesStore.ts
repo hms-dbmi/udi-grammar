@@ -303,15 +303,26 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   const loading = ref<boolean>(true);
   const selectionHash = ref<string>('');
 
-  async function initDataSources(sources: DataSource[]): Promise<void> {
+  async function initDataSources(
+    sources: DataSource[],
+    sourceResolver?: Record<string, string>,
+  ): Promise<void> {
+    // Apply sourceResolver: override spec URLs with consumer-provided URLs.
+    const resolved = sourceResolver
+      ? sources.map((ds) => {
+          const url = sourceResolver[ds.name];
+          return url ? { ...ds, source: url } : ds;
+        })
+      : sources;
+
     // Only set loading if at least one source actually needs to be fetched.
     // This avoids a "Loading..." flash when only transformations/filters changed.
-    const needsLoading = sources.some((ds) => {
+    const needsLoading = resolved.some((ds) => {
       const cached = dataSources.value[ds.name];
       return !cached || !isEqual(cached.source, ds);
     });
     if (needsLoading) loading.value = true;
-    const promises = sources.map((dataSource) =>
+    const promises = resolved.map((dataSource) =>
       initDataSource(dataSource),
     );
     await Promise.all(promises);

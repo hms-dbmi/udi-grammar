@@ -15,6 +15,8 @@ const { loading, selectionHash } = storeToRefs(dataSourcesStore);
 export interface ParserProps {
   spec: UDIGrammar;
   selections?: DataSelections;
+  /** Map entity names to canonical data URLs, overriding whatever the spec contains. */
+  sourceResolver?: Record<string, string>;
 }
 
 // Expose data selections to parent component
@@ -50,7 +52,7 @@ async function render() {
   // Load data sources BEFORE binding selections — binding can change
   // selectionHash which triggers the [loading, selectionHash] watcher.
   // If data isn't loaded yet that watcher would hit empty dataSources.
-  await dataSourcesStore.initDataSources(parsedSpec.value.source);
+  await dataSourcesStore.initDataSources(parsedSpec.value.source, props.sourceResolver);
   instanceReady.value = true;
   if (props.selections) {
     dataSourcesStore.bindExternalDataSelections(props.selections);

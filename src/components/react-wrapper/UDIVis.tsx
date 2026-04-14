@@ -5,6 +5,8 @@ import type { DataSelections } from '../DataSourcesStore';
 export interface UDIVisProps {
   spec: UDIGrammar;
   selections?: DataSelections;
+  /** Map entity names to canonical data URLs, overriding whatever the spec contains. */
+  sourceResolver?: Record<string, string>;
   onSelectionChange?: (selections: DataSelections) => void;
   onDataReady?: (payload: { data: object[] | null; allData: object[] | null; isSubset: boolean }) => void;
   className?: string;
@@ -23,7 +25,7 @@ async function ensureCERegistered() {
   ceRegistered = true;
 }
 
-export function UDIVis({ spec, selections, onSelectionChange, onDataReady, className, style }: UDIVisProps) {
+export function UDIVis({ spec, selections, sourceResolver, onSelectionChange, onDataReady, className, style }: UDIVisProps) {
   const elRef: React.RefObject<HTMLElement | null> = React.useRef<HTMLElement>(null);
 
   // Register the custom element on first render
@@ -46,6 +48,12 @@ export function UDIVis({ spec, selections, onSelectionChange, onDataReady, class
       (elRef.current as any).selections = selections;
     }
   }, [selections]);
+
+  React.useLayoutEffect(() => {
+    if (elRef.current) {
+      (elRef.current as any).sourceResolver = sourceResolver;
+    }
+  }, [sourceResolver]);
 
   // Listen for selection-change custom event.
   // Vue CE wraps emit args in an array: detail = [arg0, arg1, ...].

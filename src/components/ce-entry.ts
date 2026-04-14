@@ -47,12 +47,13 @@ export interface QueryDataResult {
 export async function queryData(
   spec: QueryDataSpec,
   selections?: DataSelections,
+  sourceResolver?: Record<string, string>,
 ): Promise<QueryDataResult | null> {
   const store = useDataSourcesStore(pinia);
 
   const sources: DataSource[] = Array.isArray(spec.source) ? spec.source : [spec.source];
 
-  await store.initDataSources(sources);
+  await store.initDataSources(sources, sourceResolver);
 
   if (selections) {
     store.bindExternalDataSelections(selections);
