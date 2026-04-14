@@ -224,6 +224,15 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
     // assume same-entity filtering if these are not provided
     if (!originKey || !targetKey || !selectionSourceKey) {
+      // Skip filter when the selection references columns that don't exist in
+      // the target table (e.g. a brush on one dataset applied to another).
+      if (relevantFilter) {
+        const cols = new Set(inTable.columnNames());
+        const selectionFields = Object.keys(dataSelection.selection!);
+        if (selectionFields.some((f) => !cols.has(f))) {
+          return null;
+        }
+      }
       return relevantFilter;
     }
 
@@ -252,6 +261,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     // If the matching is 'any' or not specified, we just return the filter expression
     if (selectionMatching != 'all') {
       const originIds = filteredTable.array(originKey) as string[];
+
+      if (originIds.length === 0) return null;
 
       return originIds
         .map((id) => `d['${targetKey}'] === '${id}'`)
