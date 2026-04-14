@@ -262,7 +262,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     if (selectionMatching != 'all') {
       const originIds = filteredTable.array(originKey) as string[];
 
-      if (originIds.length === 0) return null;
+      if (originIds.length === 0) return 'false';
 
       return originIds
         .map((id) => `d['${targetKey}'] === '${id}'`)
