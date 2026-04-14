@@ -177,7 +177,12 @@ function setDefaultDomains(
       : [representation.mapping];
     for (const mapping of mappingList) {
       // @ts-expect-error: I'm checking if domain exists, don't give me a type checking saying domain might not exist.
-      if (mapping.domain) continue;
+      if (mapping.domain) {
+        // For point marks, verify the pre-set domain covers the data extent
+        // and widen it if needed (e.g. when the LLM emits stale domain bounds).
+        // For other marks, trust the pre-set domain as-is.
+        if (mark !== 'point') continue;
+      }
       // @ts-expect-error: I'm checking if domainWhenFiltered exists
       if (mapping.domainWhenFiltered === 'filtered') continue;
       // @ts-expect-error: same, but for field.
@@ -206,10 +211,9 @@ function setDefaultDomains(
         } else {
           const values = data
             // @ts-expect-error: Again...
-            .filter((d) => d[field] != null)
-            // @ts-expect-error: Again...
-            .map((d) => d[field]);
-          // const min = minBy(data, (d) => 0);
+            .map((d) => Number(d[field]))
+            .filter((v: number) => isFinite(v));
+          if (values.length === 0) continue;
           let min = Math.min(...values);
           // @ts-expect-error: Again...
           if (mark === 'bar') {
@@ -222,8 +226,30 @@ function setDefaultDomains(
           let paddedMin = min;
           if (min !== 0) {
             paddedMin = min - padding;
+            // Don't cross zero if the data is strictly non-negative.
+            // Otherwise an all-positive field (e.g. counts, ages) gets
+            // an axis extending to negative values purely from padding.
+            if (min >= 0 && paddedMin < 0) {
+              paddedMin = 0;
+            }
+            // Mirror behavior for strictly non-positive data.
+            if (max <= 0 && paddedMin > 0) {
+              paddedMin = min;
+            }
           }
-          const paddedMax = max + padding;
+          let paddedMax = max + padding;
+          if (max <= 0 && paddedMax > 0) {
+            paddedMax = 0;
+          }
+          // If the mapping already had a pre-set domain (point marks only),
+          // widen to encompass both the pre-set range and the data extent.
+          // @ts-expect-error: checking existing domain
+          if (Array.isArray(mapping.domain) && mapping.domain.length === 2) {
+            // @ts-expect-error: reading existing domain
+            paddedMin = Math.min(paddedMin, mapping.domain[0]);
+            // @ts-expect-error: reading existing domain
+            paddedMax = Math.max(paddedMax, mapping.domain[1]);
+          }
           if (mark === 'row') {
             // @ts-expect-error: Again...
             mapping.domain = { min: paddedMin, max: paddedMax };
@@ -334,10 +360,10 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
           vegaEncoding[encoding].scale = {};
         }
         vegaEncoding[encoding].scale['zero'] = false;
-        // Add padding so marks at the data extremes don't sit right at the axis edge
-        if ((encoding === 'x' || encoding === 'y') && vegaEncoding[encoding].type === 'quantitative') {
-          vegaEncoding[encoding].scale['padding'] = 5;
-        }
+        // Note: no scale.padding here. setDefaultDomains already adds 5% padding
+        // on each side for non-bar quantitative encodings. Adding scale.padding
+        // on top of that caused axis ranges to extend well beyond the data
+        // (e.g., a count axis starting at -20 for all-positive data).
       }
       if (layer.mark === 'area' && encoding === 'y') {
         vegaEncoding[encoding].stack = false;
@@ -417,12 +443,13 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       }
     }
     const outputLayer: {
-      mark: VisualizationLayer['mark'];
+      mark: { type: VisualizationLayer['mark']; tooltip: boolean };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       encoding: any;
       params?: (typeof selectParam)[];
     } = {
-      mark: layer.mark,
+      // tooltip: true shows a tooltip with all encoded field values on hover
+      mark: { type: layer.mark, tooltip: true },
       encoding: vegaEncoding,
     };
     if (selectParam && selectParam.select.type === 'interval') {

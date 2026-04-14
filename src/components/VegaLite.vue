@@ -245,7 +245,10 @@ async function updateVegaChart() {
   const { success, specObject } = parseSpec();
   if (!success || isEmpty(specObject)) return;
 
-  // Save per-channel selection signals so the brush survives the data swap
+  // Save per-channel selection signals ONLY when there's an active brush.
+  // Saving empty/cleared signals and re-applying them can leave Vega's
+  // dataflow in a stale state where points render at wrong positions after
+  // the brush is cleared.
   const savedSignals: Record<string, unknown> = {};
   for (const signalKey of props.signalKeys ?? []) {
     const sk = formatVegaSignalKey(signalKey);
@@ -257,8 +260,17 @@ async function updateVegaChart() {
       | undefined;
     for (const tf of tupleFields ?? []) {
       const channelSignal = `${sk}_${tf.channel}`;
-      if (channelSignal in state) {
-        savedSignals[channelSignal] = state[channelSignal];
+      const val = state[channelSignal];
+      // Only save truly active brush ranges: non-empty 2-tuple with
+      // distinct endpoints. This avoids preserving stale or cleared state.
+      if (
+        Array.isArray(val) &&
+        val.length === 2 &&
+        typeof val[0] === 'number' &&
+        typeof val[1] === 'number' &&
+        val[0] !== val[1]
+      ) {
+        savedSignals[channelSignal] = val;
       }
     }
   }
@@ -271,12 +283,17 @@ async function updateVegaChart() {
       .insert(specObject.data.values ?? []),
   );
 
-  // Restore selection signals so the brush is preserved
+  // Restore only the verified-active brush signals
   for (const [key, value] of Object.entries(savedSignals)) {
     vegaView.value.signal(key, value);
   }
 
-  await vegaView.value.runAsync();
+  // .resize() forces the view to recompute layout (scale ranges, axis
+  // positions, etc.) based on current state. Without it, Vega can leave
+  // stale derived state after a data changeset — manifesting as points
+  // rendered at positions that don't match the axis (e.g. after a brush
+  // is dismissed).
+  await vegaView.value.resize().runAsync();
   ignore.value = false;
 }
 
