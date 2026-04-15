@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted, defineEmits, useSlots } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
-import type { UDIGrammar, VisualizationLayer } from './GrammarTypes';
+import type { DataSelection, UDIGrammar, VisualizationLayer } from './GrammarTypes';
 import type { DataSelections, RangeSelection } from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 const dataSourcesStore = useDataSourcesStore();
@@ -470,7 +470,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
 }
 const signalKeys = ref<string[]>([]);
 const signalFieldMap = ref<Record<string, Record<string, string>>>({});
-const pointSelect = ref<any>();
+const pointSelect = ref<DataSelection>();
 
 const debugVegaData = ref();
 

@@ -1,14 +1,15 @@
-import { createPinia, getActivePinia } from 'pinia';
+import { createPinia, getActivePinia, type Pinia } from 'pinia';
+import type { App } from 'vue';
 import UDIVis from './UDIVis.vue';
 import TableComponent from './TableComponent.vue';
 import VegaLite from './VegaLite.vue';
 import UDICellRenderer from './UDICellRenderer.vue';
 
 const UDIToolkit = {
-  install(app: any) {
+  install(app: App) {
     // Ensure Pinia is initialized before adding components
     if (!getActivePinia()) {
-      const pinia = createPinia();
+      const pinia: Pinia = createPinia();
       app.use(pinia);
     }
 

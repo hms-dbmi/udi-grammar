@@ -366,7 +366,7 @@ function toPixelRange(
   dataRange: [number, number],
   channel: 'x' | 'y',
 ): [number, number] {
-  if (!vegaView.value) return [0, 0] as any;
+  if (!vegaView.value) return [0, 0];
   const sx = vegaView.value.scale(channel);
   return [sx(dataRange[0]), sx(dataRange[1])] as [number, number];
 }
