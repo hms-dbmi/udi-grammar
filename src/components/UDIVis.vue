@@ -145,6 +145,32 @@ function buildVisualization(): void {
 
 const visualizationBuilt = ref(false);
 
+// Collect quantitative fields used on x/y/size by any bar layer. In
+// layered specs those scales are shared, so sibling layers must not
+// inject scale.zero=false or scale.domain on the same field — doing so
+// would push the bar's 0 baseline off the scale and collapse bar widths.
+function getBarZeroFields(spec: ParsedUDIGrammar): Set<string> {
+  const out = new Set<string>();
+  for (const representation of spec.representation) {
+    if (representation.mark !== 'bar') continue;
+    if (!representation.mapping) continue;
+    const mappings = Array.isArray(representation.mapping)
+      ? representation.mapping
+      : [representation.mapping];
+    for (const m of mappings as Array<{
+      encoding: string;
+      field?: string;
+      type?: string;
+    }>) {
+      if (m.encoding !== 'x' && m.encoding !== 'y' && m.encoding !== 'size')
+        continue;
+      if (!m.field || m.type !== 'quantitative') continue;
+      out.add(m.field);
+    }
+  }
+  return out;
+}
+
 function setDefaultDomains(
   spec: ParsedUDIGrammar,
   data: object[] | null,
@@ -154,6 +180,7 @@ function setDefaultDomains(
   const fields = Object.keys(firstObject);
   const numberDomainCache = new Map<string, [number, number]>();
   const catDomainCache = new Map<string, unknown[]>();
+  const barZeroFields = getBarZeroFields(spec);
 
   for (const representation of spec.representation) {
     const mark = representation.mark;
@@ -184,6 +211,9 @@ function setDefaultDomains(
       const domainWhenFiltered: string | undefined = mapping.domainWhenFiltered;
       if (type === 'quantitative') {
         if (mark === 'bar' && domainWhenFiltered !== 'full') continue;
+        // In layered specs, sibling layers share a scale with any bar
+        // layer using this field — overriding that scale pushes the bar's 0 baseline off-screen.
+        if (barZeroFields.has(field)) continue;
         if (numberDomainCache.has(field)) {
           // @ts-expect-error: Again...
           const [min, max] = numberDomainCache.get(field);
@@ -299,6 +329,8 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     throw new Error('invalid spec passed to vega conversion');
   }
 
+  const barZeroFields = getBarZeroFields(spec);
+
   const outputLayers = inputLayers.map((layer) => {
     const mapping = Array.isArray(layer.mapping)
       ? layer.mapping
@@ -320,10 +352,23 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
           type: map.type,
         };
       }
-      if (encoding === 'x' || encoding === 'y' || encoding === 'size') {
+      if (
+        (encoding === 'x' || encoding === 'y' || encoding === 'size') &&
+        !('value' in map) &&
+        map.type === 'quantitative' &&
+        layer.mark !== 'bar' &&
+        !barZeroFields.has(map.field)
+      ) {
         if (vegaEncoding[encoding].scale == null) {
           vegaEncoding[encoding].scale = {};
         }
+        // scale.zero only applies to continuous scales; setting it on a
+        // band (nominal) scale triggers "zero is dropped" in Vega-Lite v6
+        // and breaks layered specs that mix quantitative + nominal axes.
+        // Bar marks also need zero in their scale so the bar baseline
+        // maps correctly — otherwise bars collapse to zero width when
+        // the data range excludes 0. The shared-scale check via
+        // barZeroFields extends that to sibling layers in layered specs.
         vegaEncoding[encoding].scale['zero'] = false;
         // Note: no scale.padding here. setDefaultDomains already adds 5% padding
         // on each side for non-bar quantitative encodings. Adding scale.padding
