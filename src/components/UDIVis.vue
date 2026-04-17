@@ -57,7 +57,7 @@ async function render() {
   if (props.selections) {
     dataSourcesStore.bindExternalDataSelections(props.selections);
   }
-  scheduleBuild();
+  buildVisualization();
 }
 
 watch(
@@ -94,28 +94,12 @@ const debouncedBuildVisualization = debounce(
   debounceValue.value,
 );
 
-// Coalesce multiple rapid triggers (selectionHash change, spec prop change,
-// etc.) into a single build on the next microtask.  Without this, a brush
-// can trigger buildVisualization three times: once for selectionHash,
-// once for the subsequent spec change (from updateSpecFilters), and
-// potentially once more from the selections prop.  Only the last version
-// of props.spec matters — earlier ones may still have stale transformations.
-let buildScheduled = false;
-function scheduleBuild() {
-  if (buildScheduled) return;
-  buildScheduled = true;
-  queueMicrotask(() => {
-    buildScheduled = false;
-    buildVisualization();
-  });
-}
-
 watch([loading, selectionHash], () => {
   // Don't react to store-wide loading changes until this instance's own
   // data sources have been loaded (see instanceReady above).
   if (!instanceReady.value) return;
   if (debounceValue.value === 0) {
-    scheduleBuild();
+    buildVisualization();
     return;
   }
   debouncedBuildVisualization();
@@ -174,17 +158,17 @@ function setDefaultDomains(
   for (const representation of spec.representation) {
     const mark = representation.mark;
     if (!representation.mapping) continue;
+    // Arc marks (pie/donut) rely on Vega-Lite's implicit theta stacking,
+    // which requires the scale to start at 0. Computing a padded domain
+    // here would override that and collapse small slices — notably
+    // regressed with the vega-lite v5 → v6 bump.
+    if (mark === 'arc') continue;
     const mappingList = Array.isArray(representation.mapping)
       ? representation.mapping
       : [representation.mapping];
     for (const mapping of mappingList) {
       // @ts-expect-error: I'm checking if domain exists, don't give me a type checking saying domain might not exist.
-      if (mapping.domain) {
-        // For point marks, verify the pre-set domain covers the data extent
-        // and widen it if needed (e.g. when the LLM emits stale domain bounds).
-        // For other marks, trust the pre-set domain as-is.
-        if (mark !== 'point') continue;
-      }
+      if (mapping.domain) continue;
       // @ts-expect-error: I'm checking if domainWhenFiltered exists
       if (mapping.domainWhenFiltered === 'filtered') continue;
       // @ts-expect-error: same, but for field.
@@ -225,33 +209,8 @@ function setDefaultDomains(
           const max = Math.max(...values);
           const extent = max - min;
           const padding = extent * 0.05;
-          let paddedMin = min;
-          if (min !== 0) {
-            paddedMin = min - padding;
-            // Don't cross zero if the data is strictly non-negative.
-            // Otherwise an all-positive field (e.g. counts, ages) gets
-            // an axis extending to negative values purely from padding.
-            if (min >= 0 && paddedMin < 0) {
-              paddedMin = 0;
-            }
-            // Mirror behavior for strictly non-positive data.
-            if (max <= 0 && paddedMin > 0) {
-              paddedMin = min;
-            }
-          }
-          let paddedMax = max + padding;
-          if (max <= 0 && paddedMax > 0) {
-            paddedMax = 0;
-          }
-          // If the mapping already had a pre-set domain (point marks only),
-          // widen to encompass both the pre-set range and the data extent.
-          // @ts-expect-error: checking existing domain
-          if (Array.isArray(mapping.domain) && mapping.domain.length === 2) {
-            // @ts-expect-error: reading existing domain
-            paddedMin = Math.min(paddedMin, mapping.domain[0]);
-            // @ts-expect-error: reading existing domain
-            paddedMax = Math.max(paddedMax, mapping.domain[1]);
-          }
+          const paddedMin = min === 0 ? 0 : min - padding;
+          const paddedMax = max + padding;
           if (mark === 'row') {
             // @ts-expect-error: Again...
             mapping.domain = { min: paddedMin, max: paddedMax };
