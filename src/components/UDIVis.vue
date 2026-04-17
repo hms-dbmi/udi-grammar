@@ -145,14 +145,17 @@ function buildVisualization(): void {
 
 const visualizationBuilt = ref(false);
 
-// Collect quantitative fields used on x/y/size by any bar layer. In
-// layered specs those scales are shared, so sibling layers must not
-// inject scale.zero=false or scale.domain on the same field — doing so
-// would push the bar's 0 baseline off the scale and collapse bar widths.
-function getBarZeroFields(spec: ParsedUDIGrammar): Set<string> {
+// Collect quantitative fields used on x/y/size by any bar or rect layer.
+// Both rely on a zero-inclusive baseline (and rect additionally unions
+// x with x2 automatically when no explicit domain is set). In layered
+// specs those scales are shared, so sibling layers must not inject
+// scale.zero=false or scale.domain on the same field — doing so would
+// push the zero baseline off the scale and collapse mark widths.
+function getZeroBaselineFields(spec: ParsedUDIGrammar): Set<string> {
   const out = new Set<string>();
   for (const representation of spec.representation) {
-    if (representation.mark !== 'bar') continue;
+    if (representation.mark !== 'bar' && representation.mark !== 'rect')
+      continue;
     if (!representation.mapping) continue;
     const mappings = Array.isArray(representation.mapping)
       ? representation.mapping
@@ -180,7 +183,7 @@ function setDefaultDomains(
   const fields = Object.keys(firstObject);
   const numberDomainCache = new Map<string, [number, number]>();
   const catDomainCache = new Map<string, unknown[]>();
-  const barZeroFields = getBarZeroFields(spec);
+  const zeroBaselineFields = getZeroBaselineFields(spec);
 
   for (const representation of spec.representation) {
     const mark = representation.mark;
@@ -211,9 +214,14 @@ function setDefaultDomains(
       const domainWhenFiltered: string | undefined = mapping.domainWhenFiltered;
       if (type === 'quantitative') {
         if (mark === 'bar' && domainWhenFiltered !== 'full') continue;
+        // Rect marks (histograms) union x with x2 and y with y2 when
+        // no explicit domain is set; injecting a padded domain here
+        // would clip the x2/y2 side and push the zero baseline off.
+        if (mark === 'rect') continue;
         // In layered specs, sibling layers share a scale with any bar
-        // layer using this field — overriding that scale pushes the bar's 0 baseline off-screen.
-        if (barZeroFields.has(field)) continue;
+        // or rect layer using this field — overriding that scale
+        // pushes the zero baseline off-screen.
+        if (zeroBaselineFields.has(field)) continue;
         if (numberDomainCache.has(field)) {
           // @ts-expect-error: Again...
           const [min, max] = numberDomainCache.get(field);
@@ -312,14 +320,10 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     data: { name: 'udi_data', values: [] },
   };
 
-  // add data
-  try {
-    transformError.value = null;
-    vegaSpec.data!.values = transformedData.value;
-  } catch (error) {
-    console.error('Failed to complete data transformation', error);
-    transformError.value = error;
-  }
+  // add data. Don't reset transformError here — performDataTransformation
+  // owns it, and resetting would swallow an error set earlier in this
+  // same buildVisualization cycle.
+  vegaSpec.data!.values = transformedData.value;
 
   debugVegaData.value = vegaSpec.data.values;
 
@@ -329,7 +333,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     throw new Error('invalid spec passed to vega conversion');
   }
 
-  const barZeroFields = getBarZeroFields(spec);
+  const zeroBaselineFields = getZeroBaselineFields(spec);
 
   const outputLayers = inputLayers.map((layer) => {
     const mapping = Array.isArray(layer.mapping)
@@ -357,7 +361,8 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
         !('value' in map) &&
         map.type === 'quantitative' &&
         layer.mark !== 'bar' &&
-        !barZeroFields.has(map.field)
+        layer.mark !== 'rect' &&
+        !zeroBaselineFields.has(map.field)
       ) {
         if (vegaEncoding[encoding].scale == null) {
           vegaEncoding[encoding].scale = {};
@@ -368,7 +373,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
         // Bar marks also need zero in their scale so the bar baseline
         // maps correctly — otherwise bars collapse to zero width when
         // the data range excludes 0. The shared-scale check via
-        // barZeroFields extends that to sibling layers in layered specs.
+        // zeroBaselineFields extends that to sibling layers in layered specs.
         vegaEncoding[encoding].scale['zero'] = false;
         // Note: no scale.padding here. setDefaultDomains already adds 5% padding
         // on each side for non-bar quantitative encodings. Adding scale.padding

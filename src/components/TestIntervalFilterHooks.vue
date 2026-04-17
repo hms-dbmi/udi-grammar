@@ -59,19 +59,18 @@ const udiVisSelections = computed(() => {
 });
 
 function handleSelectionChange(selection: DataSelections) {
-  // console.log('handle selection change: ', selection);
   for (const rangeModel of rangeModels.value) {
     const selectionName = rangeModel.selectionName;
-    if (selection[selectionName]) {
-      const updatedRange =
-        selection[selectionName].selection[
-          props.selections?.find((s) => s.field === rangeModel.field)?.field ??
-            'UNKNOWN_FIELD'
-        ];
-      if (updatedRange) {
-        rangeModel.min = updatedRange[0];
-        rangeModel.max = updatedRange[1];
-      }
+    const active = selection[selectionName];
+    if (!active || !active.selection) continue;
+    const updatedRange =
+      active.selection[
+        props.selections?.find((s) => s.field === rangeModel.field)?.field ??
+          'UNKNOWN_FIELD'
+      ];
+    if (updatedRange) {
+      rangeModel.min = updatedRange[0];
+      rangeModel.max = updatedRange[1];
     }
   }
 }

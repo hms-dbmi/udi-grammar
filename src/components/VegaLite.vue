@@ -106,29 +106,6 @@ function initVegaChart() {
       errorMessage.value = null;
       const view = result.view;
       vegaView.value = view;
-      // Track drag state so we don't apply selections mid-drag (even if
-      // the user pauses mouse movement long enough to trip the debounce).
-      const isDragging = { current: false };
-      const pendingSelections = new Map<string, RangeSelection | null>();
-
-      const flushPendingSelections = () => {
-        for (const [signalKey, sel] of pendingSelections.entries()) {
-          dataSourcesStore.updateDataSelection(signalKey, sel);
-        }
-        pendingSelections.clear();
-      };
-
-      vegaContainer.value.addEventListener('pointerdown', () => {
-        isDragging.current = true;
-      });
-      const onPointerUp = () => {
-        if (!isDragging.current) return;
-        isDragging.current = false;
-        flushPendingSelections();
-      };
-      // Listen on window so we catch pointer-up even if released outside the chart
-      window.addEventListener('pointerup', onPointerUp);
-
       for (const signalKey of props.signalKeys ?? []) {
         const signalKeyFormatted = formatVegaSignalKey(signalKey);
         // Vega-Lite stores per-channel ranges in separate signals
@@ -157,30 +134,20 @@ function initVegaChart() {
           return Object.keys(combined).length > 0 ? combined : null;
         };
 
-        // Debounce selection updates so that a quick burst of signals
-        // (e.g. at drag end) doesn't fire multiple updates. The drag-aware
-        // gate below ensures we never apply mid-drag.
-        let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-        const DEBOUNCE_MS = 150;
-        const debouncedUpdate = (sel: RangeSelection | null) => {
-          if (debounceTimer) clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            if (isDragging.current) {
-              // Hold the update until pointerup flushes it
-              pendingSelections.set(signalKey, sel);
-            } else {
-              dataSourcesStore.updateDataSelection(signalKey, sel);
-            }
-          }, DEBOUNCE_MS);
-        };
-
+        // Fire updates directly on each signal change so cross-chart
+        // filtering stays live during drag. updateDataSelection already
+        // short-circuits on equal selections via isEqual, and the
+        // ignore flag prevents feedback loops during spec re-renders.
         if (channels.length > 0) {
           // Listen on each per-channel signal and combine all channels
           for (const channel of channels) {
             const channelSignal = `${signalKeyFormatted}_${channel}`;
             view.addSignalListener(channelSignal, () => {
               if (ignore.value) return;
-              debouncedUpdate(buildCombinedSelection());
+              dataSourcesStore.updateDataSelection(
+                signalKey,
+                buildCombinedSelection(),
+              );
             });
           }
         } else {
@@ -192,9 +159,12 @@ function initVegaChart() {
               for (const [k, v] of Object.entries(value)) {
                 remapped[fieldMap[k] ?? k] = v as [number, number];
               }
-              debouncedUpdate(remapped);
+              dataSourcesStore.updateDataSelection(signalKey, remapped);
             } else {
-              debouncedUpdate(value as RangeSelection | null);
+              dataSourcesStore.updateDataSelection(
+                signalKey,
+                value as RangeSelection | null,
+              );
             }
           });
         }
