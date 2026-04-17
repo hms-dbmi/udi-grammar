@@ -487,7 +487,12 @@ const slots = useSlots();
 </script>
 
 <template>
-  <template v-if="!dataSourcesStore.loading && visualizationBuilt">
+  <!-- Gate on per-instance readiness, not the shared dataSourcesStore.loading
+       flag. Other consumers (e.g. queryData from a React host) can flip
+       loading=true mid-session for their own fetches, which would otherwise
+       make every mounted UDIVis flash back to "Loading..." even though its
+       own data is already cached. -->
+  <template v-if="instanceReady && visualizationBuilt">
     <div class="error-message" v-if="transformError">
       {{ transformError.message }}
     </div>
