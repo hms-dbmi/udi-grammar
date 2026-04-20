@@ -4,7 +4,7 @@ import vegaEmbed from 'vega-embed';
 import { defineProps } from 'vue';
 import { watch } from 'vue';
 import type {
-  DataSelection,
+  ActiveDataSelection,
   DataSelections,
   RangeSelection,
 } from './DataSourcesStore';
@@ -107,30 +107,67 @@ function initVegaChart() {
       const view = result.view;
       vegaView.value = view;
       for (const signalKey of props.signalKeys ?? []) {
-        // console.log('Adding signal listener for:', signalKey);
         const signalKeyFormatted = formatVegaSignalKey(signalKey);
-        view.addSignalListener(signalKeyFormatted, (name, value) => {
-          if (ignore.value) return;
-          // console.log('uate from vega-lite internal');
-          // console.log('signal listener', signalKeyFormatted);
-          // console.log(
-          //   'signal listener: ',
-          //   signalKeyFormatted,
-          //   JSON.stringify(value),
-          // );
-          // ignore.value = true;
-          const fieldMap = props.signalFieldMap?.[signalKey];
-          if (fieldMap && value != null && typeof value === 'object') {
-            const remapped: Record<string, unknown> = {};
-            for (const [k, v] of Object.entries(value)) {
-              remapped[fieldMap[k] ?? k] = v;
-            }
-            dataSourcesStore.updateDataSelection(signalKey, remapped);
-          } else {
-            dataSourcesStore.updateDataSelection(signalKey, value);
+        // Vega-Lite stores per-channel ranges in separate signals
+        // ({name}_x, {name}_y). Read _tuple_fields to discover which
+        // channels exist, then listen on each and combine into a
+        // single multi-field selection update.
+        const tupleFieldsKey = signalKeyFormatted + '_tuple_fields';
+        const tupleFields = view.signal(tupleFieldsKey) as
+          | Array<{ channel: string; field: string }>
+          | undefined;
+        const channels = (tupleFields ?? []).map((t) => t.channel);
+        const fieldMap = props.signalFieldMap?.[signalKey];
+
+        const buildCombinedSelection = (): RangeSelection | null => {
+          const combined: RangeSelection = {};
+          for (const tf of tupleFields ?? []) {
+            const channelSignal = `${signalKeyFormatted}_${tf.channel}`;
+            const pixelRange = view.signal(channelSignal) as [number, number] | undefined;
+            if (pixelRange == null) continue;
+            const dataRange = fromPixelRange(pixelRange, tf.channel as 'x' | 'y');
+            // Skip degenerate ranges (single-point click before drag starts)
+            if (Math.abs(dataRange[1] - dataRange[0]) < 1e-9) continue;
+            const dataField = fieldMap?.[tf.field] ?? tf.field;
+            combined[dataField] = dataRange;
           }
-          // ignore.value = false;
-        });
+          return Object.keys(combined).length > 0 ? combined : null;
+        };
+
+        // Fire updates directly on each signal change so cross-chart
+        // filtering stays live during drag. updateDataSelection already
+        // short-circuits on equal selections via isEqual, and the
+        // ignore flag prevents feedback loops during spec re-renders.
+        if (channels.length > 0) {
+          // Listen on each per-channel signal and combine all channels
+          for (const channel of channels) {
+            const channelSignal = `${signalKeyFormatted}_${channel}`;
+            view.addSignalListener(channelSignal, () => {
+              if (ignore.value) return;
+              dataSourcesStore.updateDataSelection(
+                signalKey,
+                buildCombinedSelection(),
+              );
+            });
+          }
+        } else {
+          // Fallback: listen on the main signal (1D selections or legacy)
+          view.addSignalListener(signalKeyFormatted, (name, value) => {
+            if (ignore.value) return;
+            if (fieldMap && value != null && typeof value === 'object') {
+              const remapped: RangeSelection = {};
+              for (const [k, v] of Object.entries(value)) {
+                remapped[fieldMap[k] ?? k] = v as [number, number];
+              }
+              dataSourcesStore.updateDataSelection(signalKey, remapped);
+            } else {
+              dataSourcesStore.updateDataSelection(
+                signalKey,
+                value as RangeSelection | null,
+              );
+            }
+          });
+        }
       }
       if (props.pointSelect) {
         // if the signal is a point selection we I couldn't get signals
@@ -172,20 +209,62 @@ onMounted(() => {
   initVegaChart();
 });
 
-function updateVegaChart() {
-  // only handles data changes
+// Update data in the existing Vega view, preserving brush/selection state.
+async function updateVegaChart() {
   if (!vegaView.value) return;
   const { success, specObject } = parseSpec();
   if (!success || isEmpty(specObject)) return;
-  vegaView.value
-    .change(
-      'udi_data',
-      changeset()
-        .remove(() => true)
-        .insert(specObject.data.values ?? []),
-    )
-    .resize()
-    .runAsync();
+
+  // Save per-channel selection signals ONLY when there's an active brush.
+  // Saving empty/cleared signals and re-applying them can leave Vega's
+  // dataflow in a stale state where points render at wrong positions after
+  // the brush is cleared.
+  const savedSignals: Record<string, unknown> = {};
+  for (const signalKey of props.signalKeys ?? []) {
+    const sk = formatVegaSignalKey(signalKey);
+    const tupleFieldsKey = sk + '_tuple_fields';
+    const state = vegaView.value.getState().signals;
+    if (!state) continue;
+    const tupleFields = state[tupleFieldsKey] as
+      | Array<{ channel: string; field: string }>
+      | undefined;
+    for (const tf of tupleFields ?? []) {
+      const channelSignal = `${sk}_${tf.channel}`;
+      const val = state[channelSignal];
+      // Only save truly active brush ranges: non-empty 2-tuple with
+      // distinct endpoints. This avoids preserving stale or cleared state.
+      if (
+        Array.isArray(val) &&
+        val.length === 2 &&
+        typeof val[0] === 'number' &&
+        typeof val[1] === 'number' &&
+        val[0] !== val[1]
+      ) {
+        savedSignals[channelSignal] = val;
+      }
+    }
+  }
+
+  ignore.value = true;
+  vegaView.value.change(
+    'udi_data',
+    changeset()
+      .remove(() => true)
+      .insert(specObject.data.values ?? []),
+  );
+
+  // Restore only the verified-active brush signals
+  for (const [key, value] of Object.entries(savedSignals)) {
+    vegaView.value.signal(key, value);
+  }
+
+  // .resize() forces the view to recompute layout (scale ranges, axis
+  // positions, etc.) based on current state. Without it, Vega can leave
+  // stale derived state after a data changeset — manifesting as points
+  // rendered at positions that don't match the axis (e.g. after a brush
+  // is dismissed).
+  await vegaView.value.resize().runAsync();
+  ignore.value = false;
 }
 
 watch(() => props.spec, updateVegaChart);
@@ -209,7 +288,7 @@ async function updateVegaChartSelections() {
 
 function updateVegaChartSelection(
   selectionName: string,
-  selection: DataSelection,
+  selection: ActiveDataSelection,
 ) {
   if (!vegaView.value) return;
   if (selection.type !== 'interval') return;
@@ -257,9 +336,21 @@ function toPixelRange(
   dataRange: [number, number],
   channel: 'x' | 'y',
 ): [number, number] {
-  if (!vegaView.value) return [0, 0] as any;
+  if (!vegaView.value) return [0, 0];
   const sx = vegaView.value.scale(channel);
   return [sx(dataRange[0]), sx(dataRange[1])] as [number, number];
+}
+
+function fromPixelRange(
+  pixelRange: [number, number],
+  channel: 'x' | 'y',
+): [number, number] {
+  if (!vegaView.value) return [0, 0];
+  const sx = vegaView.value.scale(channel);
+  const a = sx.invert(pixelRange[0]) as number;
+  const b = sx.invert(pixelRange[1]) as number;
+  // Y-axis pixels are inverted (0 = top), so always normalize to [min, max]
+  return [Math.min(a, b), Math.max(a, b)];
 }
 
 watch(() => props.selections, updateVegaChartSelections, { deep: true });

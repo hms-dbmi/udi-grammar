@@ -8,5 +8,5 @@
     "moduleResolution": "nodenext",
     "baseUrl": "."
   },
-  "exclude": ["*.stories.ts"]
+  "exclude": ["*.stories.ts", "react-wrapper/**/*", "vite.config.ce.ts", "vite.config.react.ts", "ce-entry.ts"]
 }

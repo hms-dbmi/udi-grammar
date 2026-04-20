@@ -38,14 +38,14 @@ export interface DataSourcesState {
   [key: string]: DataInterface;
 }
 
-export interface DataSelection {
+export interface ActiveDataSelection {
   dataSourceKey: string;
   selection: null | RangeSelection | PointSelection;
   type: 'interval' | 'point';
 }
 
 export interface DataSelections {
-  [key: string]: DataSelection;
+  [key: string]: ActiveDataSelection;
 }
 
 export interface RangeSelection {
@@ -65,18 +65,29 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   function bindExternalDataSelections(
     externalSelections: DataSelections,
   ): void {
-    // console.log('bind');
+    let changed = false;
     for (const [selectionName, selection] of Object.entries(
       externalSelections,
     )) {
-      if (selectionName in dataSelections.value) {
-        console.warn(
-          `Selection ${selectionName} already exists, overwriting it.`,
-        );
+      if (
+        selectionName in dataSelections.value &&
+        isEqual(dataSelections.value[selectionName], selection)
+      ) {
+        continue; // identical — skip to avoid reactive churn
       }
       dataSelections.value[selectionName] = selection;
+      changed = true;
     }
-    selectionHash.value = JSON.stringify(dataSelections.value);
+    if (changed) {
+      // Serialize only the selection payloads (not the full ActiveDataSelection
+      // objects which may reference reactive proxies) to avoid cyclic-object
+      // errors and to keep the hash lightweight.
+      const hashObj: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(dataSelections.value)) {
+        hashObj[k] = v?.selection ?? null;
+      }
+      selectionHash.value = JSON.stringify(hashObj);
+    }
   }
 
   function watchDataSelection(
@@ -102,8 +113,28 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     if (!(selectionName in dataSelections.value)) {
       throw new Error(`Selection name ${selectionName} not found`);
     }
+    // Vega emits degenerate ranges like [Infinity, -Infinity] at the start of
+    // a brush interaction before the user has dragged.  Treat these as "no
+    // selection" so they don't propagate as filters that wipe all data.
+    if (selection != null && dataSelections.value[selectionName]!.type === 'interval') {
+      for (const range of Object.values(selection)) {
+        if (
+          Array.isArray(range) &&
+          range.some((v) => typeof v === 'number' && !isFinite(v))
+        ) {
+          selection = null;
+          break;
+        }
+      }
+    }
+    const current = dataSelections.value[selectionName]!.selection;
+    if (isEqual(current, selection)) return; // no change — skip reactive churn
     dataSelections.value[selectionName]!.selection = selection;
-    selectionHash.value = JSON.stringify(dataSelections.value);
+    const hashObj: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(dataSelections.value)) {
+      hashObj[k] = v?.selection ?? null;
+    }
+    selectionHash.value = JSON.stringify(hashObj);
   }
 
   function clearDataSelection(selectionName: string): void {
@@ -154,7 +185,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     return filters.join(' && ');
   }
 
-  function selectionToArqueroFilter(dataSelection: DataSelection) {
+  function selectionToArqueroFilter(dataSelection: ActiveDataSelection) {
     const { type, selection } = dataSelection;
 
     if (type === 'point') {
@@ -193,6 +224,15 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
     // assume same-entity filtering if these are not provided
     if (!originKey || !targetKey || !selectionSourceKey) {
+      // Skip filter when the selection references columns that don't exist in
+      // the target table (e.g. a brush on one dataset applied to another).
+      if (relevantFilter) {
+        const cols = new Set(inTable.columnNames());
+        const selectionFields = Object.keys(dataSelection.selection!);
+        if (selectionFields.some((f) => !cols.has(f))) {
+          return null;
+        }
+      }
       return relevantFilter;
     }
 
@@ -221,6 +261,8 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     // If the matching is 'any' or not specified, we just return the filter expression
     if (selectionMatching != 'all') {
       const originIds = filteredTable.array(originKey) as string[];
+
+      if (originIds.length === 0) return 'false';
 
       return originIds
         .map((id) => `d['${targetKey}'] === '${id}'`)
@@ -261,32 +303,62 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   const loading = ref<boolean>(true);
   const selectionHash = ref<string>('');
 
-  async function initDataSources(sources: DataSource[]): Promise<void> {
+  async function initDataSources(
+    sources: DataSource[],
+    sourceResolver?: Record<string, string>,
+  ): Promise<void> {
+    // Apply sourceResolver: override spec URLs with consumer-provided URLs.
+    const resolved = sourceResolver
+      ? sources.map((ds) => {
+          const url = sourceResolver[ds.name];
+          return url ? { ...ds, source: url } : ds;
+        })
+      : sources;
+
     // Only set loading if at least one source actually needs to be fetched.
     // This avoids a "Loading..." flash when only transformations/filters changed.
-    const needsLoading = sources.some((ds) => {
+    const needsLoading = resolved.some((ds) => {
       const cached = dataSources.value[ds.name];
       return !cached || !isEqual(cached.source, ds);
     });
     if (needsLoading) loading.value = true;
-    const promises = sources.map((dataSource) =>
+    const promises = resolved.map((dataSource) =>
       initDataSource(dataSource),
     );
     await Promise.all(promises);
     loading.value = false;
   }
 
+  // Deduplication map: prevents concurrent initDataSource calls for the same
+  // source from firing multiple network requests.
+  const pendingLoads = new Map<string, Promise<void>>();
+
   async function initDataSource(dataSource: DataSource): Promise<void> {
     // Check directly against the store rather than getDataSource (which
     // returns null while loading is true, defeating the cache check).
     const currentSource = dataSources.value[dataSource.name];
     if (currentSource && isEqual(currentSource.source, dataSource)) return;
-    let delimiter = ',';
-    if (dataSource.source.endsWith('.tsv')) {
-      delimiter = '\t';
+
+    // If another caller is already loading this exact source, share its promise
+    const key = dataSource.name + '\0' + dataSource.source;
+    const pending = pendingLoads.get(key);
+    if (pending) return pending;
+
+    const promise = (async () => {
+      let delimiter = ',';
+      if (dataSource.source.endsWith('.tsv')) {
+        delimiter = '\t';
+      }
+      const dest: ColumnTable = await loadCSV(dataSource.source, { delimiter });
+      dataSources.value[dataSource.name] = { source: dataSource, dest };
+    })();
+
+    pendingLoads.set(key, promise);
+    try {
+      await promise;
+    } finally {
+      pendingLoads.delete(key);
     }
-    const dest: ColumnTable = await loadCSV(dataSource.source, { delimiter });
-    dataSources.value[dataSource.name] = { source: dataSource, dest };
   }
 
   function getDataSource(key: string): DataInterface | null {
@@ -322,8 +394,14 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       return namedTables;
     };
 
+    const namedTables = getNamedTables();
+    // All requested sources may not be loaded yet (e.g. another UDIVis
+    // instance sharing this store triggered the watcher).  Return null
+    // so the caller treats it like "still loading" instead of crashing.
+    if (namedTables.size === 0) return null;
+
     const { data: dataTable, containsNamedFilter } = PerformDataTransformations(
-      getNamedTables(),
+      namedTables,
       dataTransformations ?? [],
       { skipNamedFilters: false },
     );

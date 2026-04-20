@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted, defineEmits, useSlots } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
-import type { UDIGrammar, VisualizationLayer } from './GrammarTypes';
+import type { DataSelection, UDIGrammar, VisualizationLayer } from './GrammarTypes';
 import type { DataSelections, RangeSelection } from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 const dataSourcesStore = useDataSourcesStore();
@@ -15,16 +15,24 @@ const { loading, selectionHash } = storeToRefs(dataSourcesStore);
 export interface ParserProps {
   spec: UDIGrammar;
   selections?: DataSelections;
+  /** Map entity names to canonical data URLs, overriding whatever the spec contains. */
+  sourceResolver?: Record<string, string>;
 }
 
 // Expose data selections to parent component
 const emit = defineEmits<{
   (e: 'selectionChange', selection: DataSelections): void;
+  (e: 'dataReady', payload: { data: object[] | null; allData: object[] | null; isSubset: boolean }): void;
 }>();
 
 const props = defineProps<ParserProps>();
 
 const parsedSpec = ref<ParsedUDIGrammar | null>(null);
+// Per-instance flag: true once this instance's own data sources have been
+// loaded via initDataSources.  The shared [loading, selectionHash] watcher
+// must not trigger buildVisualization before this — other UDIVis instances
+// sharing the same Pinia store can flip `loading` before our data is ready.
+const instanceReady = ref(false);
 
 const isVegaLiteComponent = ref<boolean>(false);
 const vegaLiteSpec = ref<string>('');
@@ -34,11 +42,21 @@ onMounted(() => {
 
 async function render() {
   // console.log('udivis render');
+  if (!props.spec) return; // CE may mount before spec prop is set
+  instanceReady.value = false;
+  // Deep clone props.spec so internal mutations (e.g. setDefaultDomains
+  // adding mapping.domain) don't leak back through the CE props to the
+  // host (React) — which would otherwise trigger a re-mount and lose
+  // the brush/selection state.
+  parsedSpec.value = parseSpecification(JSON.parse(JSON.stringify(props.spec)));
+  // Load data sources BEFORE binding selections — binding can change
+  // selectionHash which triggers the [loading, selectionHash] watcher.
+  // If data isn't loaded yet that watcher would hit empty dataSources.
+  await dataSourcesStore.initDataSources(parsedSpec.value.source, props.sourceResolver);
+  instanceReady.value = true;
   if (props.selections) {
     dataSourcesStore.bindExternalDataSelections(props.selections);
   }
-  parsedSpec.value = parseSpecification(props.spec);
-  await dataSourcesStore.initDataSources(parsedSpec.value.source);
   buildVisualization();
 }
 
@@ -47,6 +65,20 @@ watch(
   () => {
     render();
   },
+);
+
+// Re-run render() if the host swaps in a new sourceResolver — e.g. if the
+// consumer's data package finishes loading after this UDIVis has already
+// mounted, or points at a different set of URLs. Without this watcher, the
+// resolver's URLs only take effect on the next spec change, and the initial
+// fetch has already gone out against the URL baked in the spec, which
+// sometimes mismatches during local development.
+watch(
+  () => props.sourceResolver,
+  () => {
+    render();
+  },
+  { deep: true },
 );
 
 watch(
@@ -68,7 +100,7 @@ watch(selectionHash, () => {
 });
 
 const debounceValue = computed(() => {
-  return props.spec.config?.debounce ?? 0;
+  return props.spec?.config?.debounce ?? 0;
 });
 
 const debouncedBuildVisualization = debounce(
@@ -77,6 +109,9 @@ const debouncedBuildVisualization = debounce(
 );
 
 watch([loading, selectionHash], () => {
+  // Don't react to store-wide loading changes until this instance's own
+  // data sources have been loaded (see instanceReady above).
+  if (!instanceReady.value) return;
   if (debounceValue.value === 0) {
     buildVisualization();
     return;
@@ -85,23 +120,25 @@ watch([loading, selectionHash], () => {
 });
 
 function buildVisualization(): void {
-  if (!parsedSpec.value) {
+  if (!props.spec) {
     return;
   }
-  // // parse/validate grammar
-  // parsedSpec.value = parseSpecification(props.spec);
-  // for (const dataSource of parsedSpec.value.dataSource) {
-  //   dataSourcesStore.initDataSource(dataSource);
-  // }
+  // Re-parse from a fresh clone so any prior domain mutations (from
+  // setDefaultDomains during a previous subset state) don't persist
+  // when the filter is cleared.
+  parsedSpec.value = parseSpecification(JSON.parse(JSON.stringify(props.spec)));
 
   performDataTransformation(parsedSpec.value);
   if (transformedData.value == null) {
     return;
   }
 
-  if (isTransformedDataSubset.value) {
-    setDefaultDomains(parsedSpec.value, transformedDataFull.value);
-  }
+  // Always lock axis domains to the full data extent. If we only did this
+  // when isTransformedDataSubset is true, the initial chart would have a
+  // dynamic scale, and when a filter later shrinks the data the scale
+  // would recalculate — mismapping the brush pixel coordinates so the
+  // brush rectangle appears to disappear / jump around.
+  setDefaultDomains(parsedSpec.value, transformedDataFull.value);
 
   if (isVegaLiteCompatible(parsedSpec.value)) {
     vegaLiteSpec.value = convertToVegaSpec(parsedSpec.value);
@@ -110,9 +147,46 @@ function buildVisualization(): void {
     isVegaLiteComponent.value = false;
   }
   visualizationBuilt.value = true;
+
+  if (!slots.default) {
+    emit('dataReady', {
+      data: transformedData.value,
+      allData: transformedDataFull.value,
+      isSubset: isTransformedDataSubset.value,
+    });
+  }
 }
 
 const visualizationBuilt = ref(false);
+
+// Collect quantitative fields used on x/y/size by any bar or rect layer.
+// Both rely on a zero-inclusive baseline (and rect additionally unions
+// x with x2 automatically when no explicit domain is set). In layered
+// specs those scales are shared, so sibling layers must not inject
+// scale.zero=false or scale.domain on the same field — doing so would
+// push the zero baseline off the scale and collapse mark widths.
+function getZeroBaselineFields(spec: ParsedUDIGrammar): Set<string> {
+  const out = new Set<string>();
+  for (const representation of spec.representation) {
+    if (representation.mark !== 'bar' && representation.mark !== 'rect')
+      continue;
+    if (!representation.mapping) continue;
+    const mappings = Array.isArray(representation.mapping)
+      ? representation.mapping
+      : [representation.mapping];
+    for (const m of mappings as Array<{
+      encoding: string;
+      field?: string;
+      type?: string;
+    }>) {
+      if (m.encoding !== 'x' && m.encoding !== 'y' && m.encoding !== 'size')
+        continue;
+      if (!m.field || m.type !== 'quantitative') continue;
+      out.add(m.field);
+    }
+  }
+  return out;
+}
 
 function setDefaultDomains(
   spec: ParsedUDIGrammar,
@@ -123,10 +197,16 @@ function setDefaultDomains(
   const fields = Object.keys(firstObject);
   const numberDomainCache = new Map<string, [number, number]>();
   const catDomainCache = new Map<string, unknown[]>();
+  const zeroBaselineFields = getZeroBaselineFields(spec);
 
   for (const representation of spec.representation) {
     const mark = representation.mark;
     if (!representation.mapping) continue;
+    // Arc marks (pie/donut) rely on Vega-Lite's implicit theta stacking,
+    // which requires the scale to start at 0. Computing a padded domain
+    // here would override that and collapse small slices — notably
+    // regressed with the vega-lite v5 → v6 bump.
+    if (mark === 'arc') continue;
     const mappingList = Array.isArray(representation.mapping)
       ? representation.mapping
       : [representation.mapping];
@@ -148,6 +228,14 @@ function setDefaultDomains(
       const domainWhenFiltered: string | undefined = mapping.domainWhenFiltered;
       if (type === 'quantitative') {
         if (mark === 'bar' && domainWhenFiltered !== 'full') continue;
+        // Rect marks (histograms) union x with x2 and y with y2 when
+        // no explicit domain is set; injecting a padded domain here
+        // would clip the x2/y2 side and push the zero baseline off.
+        if (mark === 'rect') continue;
+        // In layered specs, sibling layers share a scale with any bar
+        // or rect layer using this field — overriding that scale
+        // pushes the zero baseline off-screen.
+        if (zeroBaselineFields.has(field)) continue;
         if (numberDomainCache.has(field)) {
           // @ts-expect-error: Again...
           const [min, max] = numberDomainCache.get(field);
@@ -161,12 +249,10 @@ function setDefaultDomains(
         } else {
           const values = data
             // @ts-expect-error: Again...
-            .filter((d) => d[field] != null)
-            // @ts-expect-error: Again...
-            .map((d) => d[field]);
-          // const min = minBy(data, (d) => 0);
+            .map((d) => Number(d[field]))
+            .filter((v: number) => isFinite(v));
+          if (values.length === 0) continue;
           let min = Math.min(...values);
-          // @ts-expect-error: Again...
           if (mark === 'bar') {
             min = Math.min(min, 0);
           }
@@ -174,10 +260,7 @@ function setDefaultDomains(
           const max = Math.max(...values);
           const extent = max - min;
           const padding = extent * 0.05;
-          let paddedMin = min;
-          if (min !== 0) {
-            paddedMin = min - padding;
-          }
+          const paddedMin = min === 0 ? 0 : min - padding;
           const paddedMax = max + padding;
           if (mark === 'row') {
             // @ts-expect-error: Again...
@@ -217,14 +300,13 @@ const transformedDataFull = ref<object[] | null>(null);
 const isTransformedDataSubset = ref<boolean>(false);
 
 function performDataTransformation(spec: ParsedUDIGrammar) {
-  transformedData.value = null;
-
   try {
     transformError.value = null;
     const dataObjects = dataSourcesStore.getDataObject(
       spec.source.map((x) => x.name),
       spec.transformation,
     );
+    // Keep previous data visible while loading/null — avoids "Loading..." flash
     if (dataObjects == null) return;
     const { allData, displayData, isDisplayDataSubset } = dataObjects;
 
@@ -234,28 +316,27 @@ function performDataTransformation(spec: ParsedUDIGrammar) {
   } catch (error) {
     console.error('Failed to complete data transformation', error);
     transformError.value = error;
+    // Clear stale data so the chart renders empty instead of keeping
+    // the last successful state.
+    transformedData.value = [];
+    transformedDataFull.value = [];
   }
-  return;
 }
 
 function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const vegaSpec: any = {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
     // data: { url: './data/penguins.csv' },
     width: 'container',
     // height: 'container',
     data: { name: 'udi_data', values: [] },
   };
 
-  // add data
-  try {
-    transformError.value = null;
-    vegaSpec.data!.values = transformedData.value;
-  } catch (error) {
-    console.error('Failed to complete data transformation', error);
-    transformError.value = error;
-  }
+  // add data. Don't reset transformError here — performDataTransformation
+  // owns it, and resetting would swallow an error set earlier in this
+  // same buildVisualization cycle.
+  vegaSpec.data!.values = transformedData.value;
 
   debugVegaData.value = vegaSpec.data.values;
 
@@ -264,6 +345,8 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
   if (!Array.isArray(inputLayers)) {
     throw new Error('invalid spec passed to vega conversion');
   }
+
+  const zeroBaselineFields = getZeroBaselineFields(spec);
 
   const outputLayers = inputLayers.map((layer) => {
     const mapping = Array.isArray(layer.mapping)
@@ -286,11 +369,29 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
           type: map.type,
         };
       }
-      if (encoding === 'x' || encoding === 'y' || encoding === 'size') {
+      if (
+        (encoding === 'x' || encoding === 'y' || encoding === 'size') &&
+        !('value' in map) &&
+        map.type === 'quantitative' &&
+        layer.mark !== 'bar' &&
+        layer.mark !== 'rect' &&
+        !zeroBaselineFields.has(map.field)
+      ) {
         if (vegaEncoding[encoding].scale == null) {
           vegaEncoding[encoding].scale = {};
         }
+        // scale.zero only applies to continuous scales; setting it on a
+        // band (nominal) scale triggers "zero is dropped" in Vega-Lite v6
+        // and breaks layered specs that mix quantitative + nominal axes.
+        // Bar marks also need zero in their scale so the bar baseline
+        // maps correctly — otherwise bars collapse to zero width when
+        // the data range excludes 0. The shared-scale check via
+        // zeroBaselineFields extends that to sibling layers in layered specs.
         vegaEncoding[encoding].scale['zero'] = false;
+        // Note: no scale.padding here. setDefaultDomains already adds 5% padding
+        // on each side for non-bar quantitative encodings. Adding scale.padding
+        // on top of that caused axis ranges to extend well beyond the data
+        // (e.g., a count axis starting at -20 for all-positive data).
       }
       if (layer.mark === 'area' && encoding === 'y') {
         vegaEncoding[encoding].stack = false;
@@ -370,12 +471,13 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       }
     }
     const outputLayer: {
-      mark: VisualizationLayer['mark'];
+      mark: { type: VisualizationLayer['mark']; tooltip: boolean };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       encoding: any;
       params?: (typeof selectParam)[];
     } = {
-      mark: layer.mark,
+      // tooltip: true shows a tooltip with all encoded field values on hover
+      mark: { type: layer.mark, tooltip: true },
       encoding: vegaEncoding,
     };
     if (selectParam && selectParam.select.type === 'interval') {
@@ -390,7 +492,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
 }
 const signalKeys = ref<string[]>([]);
 const signalFieldMap = ref<Record<string, Record<string, string>>>({});
-const pointSelect = ref<any>();
+const pointSelect = ref<DataSelection>();
 
 const debugVegaData = ref();
 
@@ -398,7 +500,12 @@ const slots = useSlots();
 </script>
 
 <template>
-  <template v-if="!dataSourcesStore.loading && visualizationBuilt">
+  <!-- Gate on per-instance readiness, not the shared dataSourcesStore.loading
+       flag. Other consumers (e.g. queryData from a React host) can flip
+       loading=true mid-session for their own fetches, which would otherwise
+       make every mounted UDIVis flash back to "Loading..." even though its
+       own data is already cached. -->
+  <template v-if="instanceReady && visualizationBuilt">
     <div class="error-message" v-if="transformError">
       {{ transformError.message }}
     </div>

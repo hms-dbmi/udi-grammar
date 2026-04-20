@@ -33,5 +33,12 @@ export default defineConfig({
       },
     },
   },
-  plugins: [vue(), tsConfigPaths(), dts({ tsconfigPath: 'tsconfig.lib.json' })],
+  plugins: [
+    vue(),
+    tsConfigPaths(),
+    dts({
+      tsconfigPath: 'tsconfig.lib.json',
+      exclude: ['react-wrapper/**', 'ce-entry.ts', 'vite.config.ce.ts', 'vite.config.react.ts'],
+    }),
+  ],
 });

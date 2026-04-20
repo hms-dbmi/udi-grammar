@@ -141,7 +141,83 @@ These data transformations can get more complex. For instance to create a relati
 
 ![Stacked relative bar chart.](./docs/stacked_relative_bar_chart.png)
 
-## 🚅 Quick start for developers
+## Using udi-toolkit
+
+The `udi-toolkit` npm package (built from `src/components/`) renders UDI grammar specs as interactive visualizations. It supports three consumption modes:
+
+### Vue
+
+```bash
+npm install udi-toolkit
+```
+
+```ts
+import { UDIToolkit, UDIVis } from 'udi-toolkit';
+import 'udi-toolkit/style.css';
+
+// As a Vue plugin (registers components globally)
+app.use(UDIToolkit);
+
+// Or import the component directly
+// <UDIVis :spec="spec" :selections="selections" @selection-change="onSelect" />
+```
+
+### Custom Element (any framework)
+
+```bash
+npm install udi-toolkit vega vega-lite vega-embed arquero ag-grid-community
+```
+
+```html
+<script type="module">
+  import 'udi-toolkit/ce';
+</script>
+
+<udi-vis id="chart"></udi-vis>
+
+<script>
+  document.getElementById('chart').spec = {
+    source: { name: 'donors', source: './data/donors.csv' },
+    representation: {
+      mark: 'point',
+      mapping: [
+        { encoding: 'x', field: 'weight_value', type: 'quantitative' },
+        { encoding: 'y', field: 'height_value', type: 'quantitative' },
+      ],
+    },
+  };
+</script>
+```
+
+### React
+
+```bash
+npm install udi-toolkit vega vega-lite vega-embed arquero ag-grid-community react
+```
+
+```tsx
+import { UDIVis } from 'udi-toolkit/react';
+
+function App() {
+  return (
+    <UDIVis
+      spec={spec}
+      selections={selections}
+      onSelectionChange={setSelections}
+    />
+  );
+}
+```
+
+### Building the library
+
+```bash
+cd src/components
+yarn build:all    # Builds Vue, Custom Element, and React targets
+yarn test         # Builds + runs smoke tests
+```
+
+## Quick start for developers
 
 1.  **Clone the repository.**
 
