@@ -37,6 +37,19 @@ export function UDIVis({ spec, selections, sourceResolver, onSelectionChange, on
   // useLayoutEffect ensures the property is set synchronously after the DOM
   // update, before the browser paints — this avoids a race where the Vue CE
   // processes connectedCallback before the prop is available.
+  //
+  // Order matters: sourceResolver must be set BEFORE spec. UDIVis.vue
+  // reacts to spec changes by running render() → initDataSources, which
+  // reads props.sourceResolver. If spec arrives first, the initial fetch
+  // goes out against whatever URL the spec itself contains (e.g. a fallback URL, 
+  // or a URL from the default spec) before the host-provided resolver has a
+  // chance to override it.
+  React.useLayoutEffect(() => {
+    if (elRef.current) {
+      (elRef.current as any).sourceResolver = sourceResolver;
+    }
+  }, [sourceResolver]);
+
   React.useLayoutEffect(() => {
     if (elRef.current) {
       (elRef.current as any).spec = spec;
@@ -48,12 +61,6 @@ export function UDIVis({ spec, selections, sourceResolver, onSelectionChange, on
       (elRef.current as any).selections = selections;
     }
   }, [selections]);
-
-  React.useLayoutEffect(() => {
-    if (elRef.current) {
-      (elRef.current as any).sourceResolver = sourceResolver;
-    }
-  }, [sourceResolver]);
 
   // Listen for selection-change custom event.
   // Vue CE wraps emit args in an array: detail = [arg0, arg1, ...].

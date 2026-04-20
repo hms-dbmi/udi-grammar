@@ -67,6 +67,20 @@ watch(
   },
 );
 
+// Re-run render() if the host swaps in a new sourceResolver — e.g. if the
+// consumer's data package finishes loading after this UDIVis has already
+// mounted, or points at a different set of URLs. Without this watcher, the
+// resolver's URLs only take effect on the next spec change, and the initial
+// fetch has already gone out against the URL baked in the spec, which
+// sometimes mismatches during local development.
+watch(
+  () => props.sourceResolver,
+  () => {
+    render();
+  },
+  { deep: true },
+);
+
 watch(
   () => props.selections,
   () => {
@@ -239,7 +253,6 @@ function setDefaultDomains(
             .filter((v: number) => isFinite(v));
           if (values.length === 0) continue;
           let min = Math.min(...values);
-          // @ts-expect-error: Again...
           if (mark === 'bar') {
             min = Math.min(min, 0);
           }
