@@ -15,7 +15,6 @@ import {
   agg,
   op,
   from,
-  bin,
   rolling,
   escape,
   desc,
@@ -436,6 +435,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     data: ColumnTable;
     containsNamedFilter: boolean;
   } {
+    // Snapshot the source tables so a binby transform can re-run prior
+    // transforms with named filters skipped and compute stable bin extents
+    // from the unfiltered data at that pipeline stage.
+    const originalNamedTables = new Map(namedTables);
     let containsNamedFilter = false;
     const key = namedTables.keys().next().value ?? '';
     const table = namedTables.get(key);
@@ -465,7 +468,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     };
 
     // console.log('we doing it');
-    for (const transform of dataTransformations) {
+    for (const [transformIndex, transform] of dataTransformations.entries()) {
       if ('filter' in transform) {
         const { filter, in: tableName } = transform;
         const inTable = getInTable(tableName);
@@ -514,9 +517,31 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           bin_end: 'end',
         };
 
-        const groupbyObject: { [key: string]: string } = {};
-        groupbyObject[bin_start] = bin(field, { maxbins: bins, nice });
-        groupbyObject[bin_end] = bin(field, { maxbins: bins, nice, offset: 1 });
+        // Compute bin extent from the *unfiltered* pipeline state at this
+        // point, so interactive (named) filters downstream of the brush
+        // don't shift bin edges. If we're already in a skipNamedFilters
+        // pass the current inTable is unfiltered; otherwise re-run the
+        // prior transforms with named filters skipped against a fresh
+        // copy of the original source tables.
+        let extentTable = inTable;
+        if (!config?.skipNamedFilters) {
+          const { data: unfilteredInTable } = PerformDataTransformations(
+            new Map(originalNamedTables),
+            dataTransformations.slice(0, transformIndex),
+            { skipNamedFilters: true },
+          );
+          extentTable = unfilteredInTable;
+        }
+        const [binMin, binMax, binStep] = agg(
+          extentTable,
+          op.bins(field, bins, nice),
+        ) as [number, number, number];
+
+        const fieldKey = JSON.stringify(field);
+        const groupbyObject: { [key: string]: string } = {
+          [bin_start]: `d => op.bin(d[${fieldKey}], ${binMin}, ${binMax}, ${binStep}, 0)`,
+          [bin_end]: `d => op.bin(d[${fieldKey}], ${binMin}, ${binMax}, ${binStep}, 1)`,
+        };
 
         currentTable.table = inTable.groupby(groupbyObject);
       } else if ('rollup' in transform) {

@@ -3,7 +3,11 @@ import { ref, computed, watch, onMounted, defineEmits, useSlots } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
-import type { DataSelection, UDIGrammar, VisualizationLayer } from './GrammarTypes';
+import type {
+  DataSelection,
+  UDIGrammar,
+  VisualizationLayer,
+} from './GrammarTypes';
 import type { DataSelections, RangeSelection } from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 const dataSourcesStore = useDataSourcesStore();
@@ -22,7 +26,14 @@ export interface ParserProps {
 // Expose data selections to parent component
 const emit = defineEmits<{
   (e: 'selectionChange', selection: DataSelections): void;
-  (e: 'dataReady', payload: { data: object[] | null; allData: object[] | null; isSubset: boolean }): void;
+  (
+    e: 'dataReady',
+    payload: {
+      data: object[] | null;
+      allData: object[] | null;
+      isSubset: boolean;
+    },
+  ): void;
 }>();
 
 const props = defineProps<ParserProps>();
@@ -52,7 +63,10 @@ async function render() {
   // Load data sources BEFORE binding selections — binding can change
   // selectionHash which triggers the [loading, selectionHash] watcher.
   // If data isn't loaded yet that watcher would hit empty dataSources.
-  await dataSourcesStore.initDataSources(parsedSpec.value.source, props.sourceResolver);
+  await dataSourcesStore.initDataSources(
+    parsedSpec.value.source,
+    props.sourceResolver,
+  );
   instanceReady.value = true;
   if (props.selections) {
     dataSourcesStore.bindExternalDataSelections(props.selections);
@@ -228,10 +242,46 @@ function setDefaultDomains(
       const domainWhenFiltered: string | undefined = mapping.domainWhenFiltered;
       if (type === 'quantitative') {
         if (mark === 'bar' && domainWhenFiltered !== 'full') continue;
-        // Rect marks (histograms) union x with x2 and y with y2 when
-        // no explicit domain is set; injecting a padded domain here
-        // would clip the x2/y2 side and push the zero baseline off.
-        if (mark === 'rect') continue;
+        // Rect marks (histograms) pair x with x2 and y with y2 on the
+        // same scale. Without an explicit domain, vega-lite auto-fits
+        // the scale to the *filtered* values flowing into the chart,
+        // which collapses the x-axis as the brush narrows. Compute a
+        // domain that unions both ends from allData so bin edges stay
+        // anchored. Skip the partner encoding (x2/y2) — it shares the
+        // x/y scale and doesn't need its own domain.
+        if (mark === 'rect') {
+          // @ts-expect-error: encoding is statically known
+          const encoding: string = mapping.encoding;
+          if (encoding === 'x2' || encoding === 'y2') continue;
+          const partnerEncoding =
+            encoding === 'x' ? 'x2' : encoding === 'y' ? 'y2' : null;
+          const partner = partnerEncoding
+            ? (mappingList as Array<{ encoding: string; field?: string }>).find(
+                (m) => m.encoding === partnerEncoding,
+              )
+            : undefined;
+          const partnerField = partner?.field;
+          const valuesPrimary = data
+            // @ts-expect-error: dynamic field access
+            .map((d) => Number(d[field]))
+            .filter((v: number) => isFinite(v));
+          const valuesPartner = partnerField
+            ? data
+                // @ts-expect-error: dynamic field access
+                .map((d) => Number(d[partnerField]))
+                .filter((v: number) => isFinite(v))
+            : [];
+          const combined = [...valuesPrimary, ...valuesPartner];
+          if (combined.length === 0) continue;
+          let rectMin = Math.min(...combined);
+          const rectMax = Math.max(...combined);
+          // y on rect (histogram count) should include zero so bars
+          // don't float off the baseline.
+          if (encoding === 'y') rectMin = Math.min(rectMin, 0);
+          // @ts-expect-error: mapping.domain assignment
+          mapping.domain = [rectMin, rectMax];
+          continue;
+        }
         // In layered specs, sibling layers share a scale with any bar
         // or rect layer using this field — overriding that scale
         // pushes the zero baseline off-screen.
@@ -287,6 +337,60 @@ function setDefaultDomains(
       }
     }
   }
+}
+
+// Pin axis tick values to the union of the two paired bin-boundary fields
+// (e.g. x=start, x2=end for a histogram) so vega-lite's default "nice" step
+// can't land ticks mid-bar. Reads from transformedDataFull so ticks reflect
+// all bins, not just the filtered subset. No-op if data isn't ready or the
+// fields aren't numeric.
+function alignAxisToBinBoundaries(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  vegaEncoding: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapping: any[],
+  primary: 'x' | 'y',
+  partner: 'x2' | 'y2',
+): void {
+  const fullData = transformedDataFull.value;
+  if (!fullData || fullData.length === 0) return;
+  const primaryMap = mapping.find((m) => m.encoding === primary);
+  const partnerMap = mapping.find((m) => m.encoding === partner);
+  if (!primaryMap?.field || !partnerMap?.field) return;
+  const boundaries = new Set<number>();
+  for (const row of fullData) {
+    const a = Number((row as Record<string, unknown>)[primaryMap.field]);
+    const b = Number((row as Record<string, unknown>)[partnerMap.field]);
+    if (Number.isFinite(a)) boundaries.add(a);
+    if (Number.isFinite(b)) boundaries.add(b);
+  }
+  if (boundaries.size === 0) return;
+  const observed = Array.from(boundaries).sort((a, b) => a - b);
+  // Fill in boundaries for empty bins: rows for empty bins are absent from
+  // the rollup output, so consecutive-boundary gaps in `observed` that are
+  // larger than the smallest gap represent skipped bins. Infer the bin
+  // width from the smallest positive gap (bins are uniform) and emit a
+  // tick at every multiple-of-step inside the full range.
+  let step = Infinity;
+  for (let i = 1; i < observed.length; i++) {
+    const diff = observed[i]! - observed[i - 1]!;
+    if (diff > 0 && diff < step) step = diff;
+  }
+  let values = observed;
+  if (Number.isFinite(step) && step > 0 && observed.length >= 2) {
+    const first = observed[0]!;
+    const last = observed[observed.length - 1]!;
+    const filled: number[] = [];
+    // Accumulate by step count to avoid float drift from repeated +step.
+    const n = Math.round((last - first) / step);
+    for (let i = 0; i <= n; i++) filled.push(first + i * step);
+    values = filled;
+  }
+  if (vegaEncoding[primary].axis == null) {
+    vegaEncoding[primary].axis = {};
+  }
+  vegaEncoding[primary].axis.values = values;
+  vegaEncoding[primary].axis.labelOverlap = 'parity';
 }
 
 function isVegaLiteCompatible(spec: ParsedUDIGrammar): boolean {
@@ -444,10 +548,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       );
       if (selectParam.select.type === 'interval') {
         signalKeys.value = [layer.select.name];
-        if (
-          layer.select.how.type === 'interval' &&
-          layer.select.how.field
-        ) {
+        if (layer.select.how.type === 'interval' && layer.select.how.field) {
           const axes = layer.select.how.on.split('');
           const overrideField = layer.select.how.field;
           const fieldRemap: Record<string, string> = {};
@@ -470,6 +571,36 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
         pointSelect.value = layer.select;
       }
     }
+    // For rect histograms (x/x2 or y/y2 pair), inset both anchors by a pixel
+    // so adjacent bars have a symmetric 2px gap rather than touching or being
+    // trimmed from one side only. Mirrors (and doubles) the default bin
+    // spacing that vega-lite's `bar + bin: true` applies for free — rect
+    // + explicit binby doesn't get it otherwise.
+    // Also pin axis ticks to every bin boundary so tick marks line up with
+    // bar edges instead of vega-lite's default "nice" step (which lands in
+    // the middle of bars at coarse steps or oversamples at fine steps).
+    // labelOverlap: 'parity' lets vega-lite drop crowded labels while
+    // keeping all boundary ticks visible.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const markConfig: any = { type: layer.mark, tooltip: true };
+    if (layer.mark === 'rect') {
+      const hasXPair =
+        mapping.some((m) => m.encoding === 'x') &&
+        mapping.some((m) => m.encoding === 'x2');
+      const hasYPair =
+        mapping.some((m) => m.encoding === 'y') &&
+        mapping.some((m) => m.encoding === 'y2');
+      if (hasXPair) {
+        markConfig.xOffset = 1;
+        markConfig.x2Offset = -1;
+        alignAxisToBinBoundaries(vegaEncoding, mapping, 'x', 'x2');
+      }
+      if (hasYPair) {
+        markConfig.yOffset = 1;
+        markConfig.y2Offset = -1;
+        alignAxisToBinBoundaries(vegaEncoding, mapping, 'y', 'y2');
+      }
+    }
     const outputLayer: {
       mark: { type: VisualizationLayer['mark']; tooltip: boolean };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -477,7 +608,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       params?: (typeof selectParam)[];
     } = {
       // tooltip: true shows a tooltip with all encoded field values on hover
-      mark: { type: layer.mark, tooltip: true },
+      mark: markConfig,
       encoding: vegaEncoding,
     };
     if (selectParam && selectParam.select.type === 'interval') {
