@@ -15,7 +15,6 @@ import {
   agg,
   op,
   from,
-  bin,
   rolling,
   escape,
   desc,
@@ -56,63 +55,6 @@ export interface PointSelection {
   // the field is the name of thing selected, e.g. "species"
   // and the values are the selected values, e.g. ["setosa", "versicolor"]
   [field: string]: string[];
-}
-
-// Port of arquero's internal util/bins.js. Given the min/max of the data and
-// a target bin count, returns the [start, stop, step] of a "nice" uniform
-// binning scheme. Matches arquero's op.bins so expressions built with these
-// values produce the same bin edges arquero would at runtime.
-function computeBinRange(
-  minVal: number,
-  maxVal: number,
-  maxbins = 10,
-  nice = true,
-  minstep = 0,
-): [number, number, number] {
-  const base = 10;
-  const logb = Math.LN10;
-
-  const level = Math.ceil(Math.log(maxbins) / logb);
-  const span = maxVal - minVal || Math.abs(minVal) || 1;
-  const div = [5, 2];
-
-  let step = Math.max(
-    minstep,
-    Math.pow(base, Math.round(Math.log(span) / logb) - level),
-  );
-
-  while (Math.ceil(span / step) > maxbins) {
-    step *= base;
-  }
-
-  for (let i = 0; i < div.length; ++i) {
-    const v = step / div[i]!;
-    if (v >= minstep && span / v <= maxbins) {
-      step = v;
-    }
-  }
-
-  let lo = minVal;
-  let hi = maxVal;
-  if (nice) {
-    let v = Math.log(step);
-    const precision = v >= 0 ? 0 : ~~(-v / logb) + 1;
-    const eps = Math.pow(base, -precision - 1);
-    v = Math.floor(lo / step + eps) * step;
-    lo = lo < v ? v - step : v;
-    hi = Math.ceil(hi / step) * step;
-  }
-
-  return [lo, hi === lo ? lo + step : hi, step];
-}
-
-function stableBinExpr(
-  field: string,
-  binRange: [number, number, number],
-  offset: number,
-): string {
-  const [lo, hi, step] = binRange;
-  return `d => op.bin(d[${JSON.stringify(field)}], ${lo}, ${hi}, ${step}, ${offset})`;
 }
 
 export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
@@ -457,30 +399,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     // so the caller treats it like "still loading" instead of crashing.
     if (namedTables.size === 0) return null;
 
-    // Pre-compute bin extents from the unfiltered pipeline so histogram bin
-    // edges stay stable as interactive (named) filters narrow the data.
-    const hasNamedFilter = (dataTransformations ?? []).some(
-      (t) => 'filter' in t && typeof t.filter !== 'string',
-    );
-    const binExtents = new Map<number, [number, number, number]>();
-    let cachedFullData: ColumnTable | null = null;
-    if (hasNamedFilter) {
-      const { data: fullData } = PerformDataTransformations(
-        getNamedTables(),
-        dataTransformations ?? [],
-        {
-          skipNamedFilters: true,
-          precomputeBinExtents: true,
-          binExtents,
-        },
-      );
-      cachedFullData = fullData;
-    }
-
     const { data: dataTable, containsNamedFilter } = PerformDataTransformations(
       namedTables,
       dataTransformations ?? [],
-      { skipNamedFilters: false, binExtents },
+      { skipNamedFilters: false },
     );
 
     // materialize arrays of objects
@@ -488,7 +410,12 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
     let allData = displayData;
     if (containsNamedFilter) {
-      allData = (cachedFullData ?? dataTable).objects();
+      const { data: fullData } = PerformDataTransformations(
+        getNamedTables(),
+        dataTransformations ?? [],
+        { skipNamedFilters: true },
+      );
+      allData = fullData.objects();
     }
 
     return {
@@ -503,20 +430,15 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     dataTransformations: DataTransformation[],
     config?: {
       skipNamedFilters?: boolean; // if true, skip named filters in transformations
-      // Map from transform index -> [binMin, binMax, binStep] for stable
-      // histogram bins. If a value is present for a binby transform, its bin
-      // edges use the precomputed extent instead of recomputing from the
-      // (possibly filtered) inTable.
-      binExtents?: Map<number, [number, number, number]>;
-      // When true, populate binExtents from the unfiltered inTable as each
-      // binby transform is processed. Intended for a pre-pass with
-      // skipNamedFilters=true.
-      precomputeBinExtents?: boolean;
     },
   ): {
     data: ColumnTable;
     containsNamedFilter: boolean;
   } {
+    // Snapshot the source tables so a binby transform can re-run prior
+    // transforms with named filters skipped and compute stable bin extents
+    // from the unfiltered data at that pipeline stage.
+    const originalNamedTables = new Map(namedTables);
     let containsNamedFilter = false;
     const key = namedTables.keys().next().value ?? '';
     const table = namedTables.get(key);
@@ -546,12 +468,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     };
 
     // console.log('we doing it');
-    for (
-      let transformIndex = 0;
-      transformIndex < dataTransformations.length;
-      transformIndex++
-    ) {
-      const transform = dataTransformations[transformIndex]!;
+    for (const [transformIndex, transform] of dataTransformations.entries()) {
       if ('filter' in transform) {
         const { filter, in: tableName } = transform;
         const inTable = getInTable(tableName);
@@ -600,35 +517,31 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
           bin_end: 'end',
         };
 
-        // Resolve a stable bin range [min, max, step] from the unfiltered
-        // table when possible, so interactive filters don't shift bin edges.
-        let binRange = config?.binExtents?.get(transformIndex);
-        if (!binRange && config?.precomputeBinExtents) {
-          const minVal = agg(inTable, op.min(field));
-          const maxVal = agg(inTable, op.max(field));
-          if (
-            typeof minVal === 'number' &&
-            typeof maxVal === 'number' &&
-            Number.isFinite(minVal) &&
-            Number.isFinite(maxVal)
-          ) {
-            binRange = computeBinRange(minVal, maxVal, bins, nice);
-            config.binExtents?.set(transformIndex, binRange);
-          }
+        // Compute bin extent from the *unfiltered* pipeline state at this
+        // point, so interactive (named) filters downstream of the brush
+        // don't shift bin edges. If we're already in a skipNamedFilters
+        // pass the current inTable is unfiltered; otherwise re-run the
+        // prior transforms with named filters skipped against a fresh
+        // copy of the original source tables.
+        let extentTable = inTable;
+        if (!config?.skipNamedFilters) {
+          const { data: unfilteredInTable } = PerformDataTransformations(
+            new Map(originalNamedTables),
+            dataTransformations.slice(0, transformIndex),
+            { skipNamedFilters: true },
+          );
+          extentTable = unfilteredInTable;
         }
+        const [binMin, binMax, binStep] = agg(
+          extentTable,
+          op.bins(field, bins, nice),
+        ) as [number, number, number];
 
-        const groupbyObject: { [key: string]: string } = {};
-        if (binRange) {
-          groupbyObject[bin_start] = stableBinExpr(field, binRange, 0);
-          groupbyObject[bin_end] = stableBinExpr(field, binRange, 1);
-        } else {
-          groupbyObject[bin_start] = bin(field, { maxbins: bins, nice });
-          groupbyObject[bin_end] = bin(field, {
-            maxbins: bins,
-            nice,
-            offset: 1,
-          });
-        }
+        const fieldKey = JSON.stringify(field);
+        const groupbyObject: { [key: string]: string } = {
+          [bin_start]: `d => op.bin(d[${fieldKey}], ${binMin}, ${binMax}, ${binStep}, 0)`,
+          [bin_end]: `d => op.bin(d[${fieldKey}], ${binMin}, ${binMax}, ${binStep}, 1)`,
+        };
 
         currentTable.table = inTable.groupby(groupbyObject);
       } else if ('rollup' in transform) {
