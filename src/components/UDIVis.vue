@@ -228,10 +228,45 @@ function setDefaultDomains(
       const domainWhenFiltered: string | undefined = mapping.domainWhenFiltered;
       if (type === 'quantitative') {
         if (mark === 'bar' && domainWhenFiltered !== 'full') continue;
-        // Rect marks (histograms) union x with x2 and y with y2 when
-        // no explicit domain is set; injecting a padded domain here
-        // would clip the x2/y2 side and push the zero baseline off.
-        if (mark === 'rect') continue;
+        // Rect marks (histograms) pair x with x2 and y with y2 on the
+        // same scale. Without an explicit domain, vega-lite auto-fits
+        // the scale to the *filtered* values flowing into the chart,
+        // which collapses the x-axis as the brush narrows. Compute a
+        // domain that unions both ends from allData so bin edges stay
+        // anchored. Skip the partner encoding (x2/y2) — it shares the
+        // x/y scale and doesn't need its own domain.
+        if (mark === 'rect') {
+          // @ts-expect-error: encoding is statically known
+          const encoding: string = mapping.encoding;
+          if (encoding === 'x2' || encoding === 'y2') continue;
+          const partnerEncoding = encoding === 'x' ? 'x2' : encoding === 'y' ? 'y2' : null;
+          const partner = partnerEncoding
+            ? (mappingList as Array<{ encoding: string; field?: string }>).find(
+                (m) => m.encoding === partnerEncoding,
+              )
+            : undefined;
+          const partnerField = partner?.field;
+          const valuesPrimary = data
+            // @ts-expect-error: dynamic field access
+            .map((d) => Number(d[field]))
+            .filter((v: number) => isFinite(v));
+          const valuesPartner = partnerField
+            ? data
+                // @ts-expect-error: dynamic field access
+                .map((d) => Number(d[partnerField]))
+                .filter((v: number) => isFinite(v))
+            : [];
+          const combined = [...valuesPrimary, ...valuesPartner];
+          if (combined.length === 0) continue;
+          let rectMin = Math.min(...combined);
+          const rectMax = Math.max(...combined);
+          // y on rect (histogram count) should include zero so bars
+          // don't float off the baseline.
+          if (encoding === 'y') rectMin = Math.min(rectMin, 0);
+          // @ts-expect-error: mapping.domain assignment
+          mapping.domain = [rectMin, rectMax];
+          continue;
+        }
         // In layered specs, sibling layers share a scale with any bar
         // or rect layer using this field — overriding that scale
         // pushes the zero baseline off-screen.
