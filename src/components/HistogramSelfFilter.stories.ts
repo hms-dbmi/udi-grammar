@@ -2,8 +2,7 @@
 // Use these to verify that bin edges stay fixed while only per-bin counts
 // change as the user drags the brush. Each variant exercises one axis of
 // the histogram spec (default vs explicit bin count, nice toggle,
-// domainWhenFiltered y-axis behavior, string filter in the pipeline,
-// inline bin()/bins() expression form).
+// domainWhenFiltered y-axis behavior, static string filter in the pipeline).
 import TestIntervalFilterHooks from './TestIntervalFilterHooks.vue';
 
 export default {
@@ -313,42 +312,3 @@ export const SelfFilterHistogramWithStringFilter = {
   },
 };
 
-// Inline bin()/bins() expression form via a raw groupby. This mirrors the
-// "Default" story in Histogram.stories.ts and is the low-level alternative
-// to binby. NOTE: inline expressions are evaluated per-query against the
-// current (filtered) column, so bin edges WILL shift as the brush drags.
-// Included intentionally so reviewers can contrast it with the stable
-// binby variants above and choose binby for interactive histograms.
-export const SelfFilterHistogramInlineBinExpression = {
-  args: {
-    testType: 'linked',
-    selections: [weightSelection],
-    spec: {
-      source: donorsSource,
-      transformation: [
-        { filter: { name: 'weight-select' } },
-        {
-          groupby: {
-            start: `d => op.bin(d['weight_value'], ...op.bins(d['weight_value'], 10), 0)`,
-            end: `d => op.bin(d['weight_value'], ...op.bins(d['weight_value'], 10), 1)`,
-          },
-        },
-        { rollup: { count: { op: 'count' } } },
-      ],
-      representation: {
-        mark: 'rect',
-        mapping: [
-          {
-            encoding: 'x',
-            field: 'start',
-            type: 'quantitative',
-            title: 'weight_value',
-          },
-          { encoding: 'x2', field: 'end', type: 'quantitative' },
-          { encoding: 'y', field: 'count', type: 'quantitative' },
-        ],
-        select: weightBrush,
-      },
-    },
-  },
-};

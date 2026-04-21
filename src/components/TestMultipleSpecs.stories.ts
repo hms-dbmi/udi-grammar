@@ -3101,9 +3101,13 @@ export const ScaleOnFilterHistogram = {
             },
           },
           {
-            groupby: {
-              start: `bin(d['body_mass_g'], ...bins(d['body_mass_g'], 10), 0)`,
-              end: `bin(d['body_mass_g'], ...bins(d['body_mass_g'], 10), 1)`,
+            binby: {
+              field: 'body_mass_g',
+              bins: 10,
+              output: {
+                bin_start: 'start',
+                bin_end: 'end',
+              },
             },
           },
           {

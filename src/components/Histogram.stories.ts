@@ -18,7 +18,6 @@ export default {
   // },
 };
 
-// Mostly works (null doesn't), I don't like it.
 export const Default = {
   args: {
     spec: {
@@ -28,9 +27,13 @@ export const Default = {
       },
       transformation: [
         {
-          groupby: {
-            start: `bin(d['weight_value'], ...bins(d['weight_value'], 10), 0)`,
-            end: `bin(d['weight_value'], ...bins(d['weight_value'], 10), 1)`,
+          binby: {
+            field: 'weight_value',
+            bins: 10,
+            output: {
+              bin_start: 'start',
+              bin_end: 'end',
+            },
           },
         },
         {
