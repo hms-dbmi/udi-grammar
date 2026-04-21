@@ -517,16 +517,23 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
         pointSelect.value = layer.select;
       }
     }
-    // For rect histograms (x/x2 or y/y2 pair), inset the second anchor by a
-    // pixel so adjacent bars don't visually touch. Mirrors the default bin
+    // For rect histograms (x/x2 or y/y2 pair), inset both anchors by a pixel
+    // so adjacent bars have a symmetric 2px gap rather than touching or being
+    // trimmed from one side only. Mirrors (and doubles) the default bin
     // spacing that vega-lite's `bar + bin: true` applies for free — rect
     // + explicit binby doesn't get it otherwise.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const markConfig: any = { type: layer.mark, tooltip: true };
     if (layer.mark === 'rect') {
       const encodings = new Set(mapping.map((m) => m.encoding));
-      if (encodings.has('x') && encodings.has('x2')) markConfig.x2Offset = -1;
-      if (encodings.has('y') && encodings.has('y2')) markConfig.y2Offset = -1;
+      if (encodings.has('x') && encodings.has('x2')) {
+        markConfig.xOffset = 1;
+        markConfig.x2Offset = -1;
+      }
+      if (encodings.has('y') && encodings.has('y2')) {
+        markConfig.yOffset = 1;
+        markConfig.y2Offset = -1;
+      }
     }
     const outputLayer: {
       mark: { type: VisualizationLayer['mark']; tooltip: boolean };
