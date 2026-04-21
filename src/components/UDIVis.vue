@@ -339,6 +339,40 @@ function setDefaultDomains(
   }
 }
 
+// Pin axis tick values to the union of the two paired bin-boundary fields
+// (e.g. x=start, x2=end for a histogram) so vega-lite's default "nice" step
+// can't land ticks mid-bar. Reads from transformedDataFull so ticks reflect
+// all bins, not just the filtered subset. No-op if data isn't ready or the
+// fields aren't numeric.
+function alignAxisToBinBoundaries(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  vegaEncoding: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapping: any[],
+  primary: 'x' | 'y',
+  partner: 'x2' | 'y2',
+): void {
+  const fullData = transformedDataFull.value;
+  if (!fullData || fullData.length === 0) return;
+  const primaryMap = mapping.find((m) => m.encoding === primary);
+  const partnerMap = mapping.find((m) => m.encoding === partner);
+  if (!primaryMap?.field || !partnerMap?.field) return;
+  const boundaries = new Set<number>();
+  for (const row of fullData) {
+    const a = Number((row as Record<string, unknown>)[primaryMap.field]);
+    const b = Number((row as Record<string, unknown>)[partnerMap.field]);
+    if (Number.isFinite(a)) boundaries.add(a);
+    if (Number.isFinite(b)) boundaries.add(b);
+  }
+  if (boundaries.size === 0) return;
+  const values = Array.from(boundaries).sort((a, b) => a - b);
+  if (vegaEncoding[primary].axis == null) {
+    vegaEncoding[primary].axis = {};
+  }
+  vegaEncoding[primary].axis.values = values;
+  vegaEncoding[primary].axis.labelOverlap = 'parity';
+}
+
 function isVegaLiteCompatible(spec: ParsedUDIGrammar): boolean {
   return !spec.representation.map((x) => x.mark).includes('row');
 }
@@ -522,17 +556,29 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     // trimmed from one side only. Mirrors (and doubles) the default bin
     // spacing that vega-lite's `bar + bin: true` applies for free — rect
     // + explicit binby doesn't get it otherwise.
+    // Also pin axis ticks to every bin boundary so tick marks line up with
+    // bar edges instead of vega-lite's default "nice" step (which lands in
+    // the middle of bars at coarse steps or oversamples at fine steps).
+    // labelOverlap: 'parity' lets vega-lite drop crowded labels while
+    // keeping all boundary ticks visible.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const markConfig: any = { type: layer.mark, tooltip: true };
     if (layer.mark === 'rect') {
-      const encodings = new Set(mapping.map((m) => m.encoding));
-      if (encodings.has('x') && encodings.has('x2')) {
+      const hasXPair =
+        mapping.some((m) => m.encoding === 'x') &&
+        mapping.some((m) => m.encoding === 'x2');
+      const hasYPair =
+        mapping.some((m) => m.encoding === 'y') &&
+        mapping.some((m) => m.encoding === 'y2');
+      if (hasXPair) {
         markConfig.xOffset = 1;
         markConfig.x2Offset = -1;
+        alignAxisToBinBoundaries(vegaEncoding, mapping, 'x', 'x2');
       }
-      if (encodings.has('y') && encodings.has('y2')) {
+      if (hasYPair) {
         markConfig.yOffset = 1;
         markConfig.y2Offset = -1;
+        alignAxisToBinBoundaries(vegaEncoding, mapping, 'y', 'y2');
       }
     }
     const outputLayer: {
