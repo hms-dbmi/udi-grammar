@@ -365,7 +365,27 @@ function alignAxisToBinBoundaries(
     if (Number.isFinite(b)) boundaries.add(b);
   }
   if (boundaries.size === 0) return;
-  const values = Array.from(boundaries).sort((a, b) => a - b);
+  const observed = Array.from(boundaries).sort((a, b) => a - b);
+  // Fill in boundaries for empty bins: rows for empty bins are absent from
+  // the rollup output, so consecutive-boundary gaps in `observed` that are
+  // larger than the smallest gap represent skipped bins. Infer the bin
+  // width from the smallest positive gap (bins are uniform) and emit a
+  // tick at every multiple-of-step inside the full range.
+  let step = Infinity;
+  for (let i = 1; i < observed.length; i++) {
+    const diff = observed[i]! - observed[i - 1]!;
+    if (diff > 0 && diff < step) step = diff;
+  }
+  let values = observed;
+  if (Number.isFinite(step) && step > 0 && observed.length >= 2) {
+    const first = observed[0]!;
+    const last = observed[observed.length - 1]!;
+    const filled: number[] = [];
+    // Accumulate by step count to avoid float drift from repeated +step.
+    const n = Math.round((last - first) / step);
+    for (let i = 0; i <= n; i++) filled.push(first + i * step);
+    values = filled;
+  }
   if (vegaEncoding[primary].axis == null) {
     vegaEncoding[primary].axis = {};
   }
