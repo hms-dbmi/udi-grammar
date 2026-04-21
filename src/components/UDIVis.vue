@@ -3,7 +3,11 @@ import { ref, computed, watch, onMounted, defineEmits, useSlots } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
-import type { DataSelection, UDIGrammar, VisualizationLayer } from './GrammarTypes';
+import type {
+  DataSelection,
+  UDIGrammar,
+  VisualizationLayer,
+} from './GrammarTypes';
 import type { DataSelections, RangeSelection } from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 const dataSourcesStore = useDataSourcesStore();
@@ -22,7 +26,14 @@ export interface ParserProps {
 // Expose data selections to parent component
 const emit = defineEmits<{
   (e: 'selectionChange', selection: DataSelections): void;
-  (e: 'dataReady', payload: { data: object[] | null; allData: object[] | null; isSubset: boolean }): void;
+  (
+    e: 'dataReady',
+    payload: {
+      data: object[] | null;
+      allData: object[] | null;
+      isSubset: boolean;
+    },
+  ): void;
 }>();
 
 const props = defineProps<ParserProps>();
@@ -52,7 +63,10 @@ async function render() {
   // Load data sources BEFORE binding selections — binding can change
   // selectionHash which triggers the [loading, selectionHash] watcher.
   // If data isn't loaded yet that watcher would hit empty dataSources.
-  await dataSourcesStore.initDataSources(parsedSpec.value.source, props.sourceResolver);
+  await dataSourcesStore.initDataSources(
+    parsedSpec.value.source,
+    props.sourceResolver,
+  );
   instanceReady.value = true;
   if (props.selections) {
     dataSourcesStore.bindExternalDataSelections(props.selections);
@@ -239,7 +253,8 @@ function setDefaultDomains(
           // @ts-expect-error: encoding is statically known
           const encoding: string = mapping.encoding;
           if (encoding === 'x2' || encoding === 'y2') continue;
-          const partnerEncoding = encoding === 'x' ? 'x2' : encoding === 'y' ? 'y2' : null;
+          const partnerEncoding =
+            encoding === 'x' ? 'x2' : encoding === 'y' ? 'y2' : null;
           const partner = partnerEncoding
             ? (mappingList as Array<{ encoding: string; field?: string }>).find(
                 (m) => m.encoding === partnerEncoding,
@@ -479,10 +494,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       );
       if (selectParam.select.type === 'interval') {
         signalKeys.value = [layer.select.name];
-        if (
-          layer.select.how.type === 'interval' &&
-          layer.select.how.field
-        ) {
+        if (layer.select.how.type === 'interval' && layer.select.how.field) {
           const axes = layer.select.how.on.split('');
           const overrideField = layer.select.how.field;
           const fieldRemap: Record<string, string> = {};
@@ -505,6 +517,17 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
         pointSelect.value = layer.select;
       }
     }
+    // For rect histograms (x/x2 or y/y2 pair), inset the second anchor by a
+    // pixel so adjacent bars don't visually touch. Mirrors the default bin
+    // spacing that vega-lite's `bar + bin: true` applies for free — rect
+    // + explicit binby doesn't get it otherwise.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const markConfig: any = { type: layer.mark, tooltip: true };
+    if (layer.mark === 'rect') {
+      const encodings = new Set(mapping.map((m) => m.encoding));
+      if (encodings.has('x') && encodings.has('x2')) markConfig.x2Offset = -1;
+      if (encodings.has('y') && encodings.has('y2')) markConfig.y2Offset = -1;
+    }
     const outputLayer: {
       mark: { type: VisualizationLayer['mark']; tooltip: boolean };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -512,7 +535,7 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       params?: (typeof selectParam)[];
     } = {
       // tooltip: true shows a tooltip with all encoded field values on hover
-      mark: { type: layer.mark, tooltip: true },
+      mark: markConfig,
       encoding: vegaEncoding,
     };
     if (selectParam && selectParam.select.type === 'interval') {
