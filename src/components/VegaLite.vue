@@ -375,3 +375,12 @@ watch(() => props.selections, updateVegaChartSelections, { deep: true });
   color: red;
 }
 </style>
+
+<style>
+/* Ensure Vega tooltips render above containers with high z-index (e.g. MUI dialogs at 1300).
+   vega-tooltip portals the tooltip to <body> with a default z-index of 1000, which loses
+   to higher-z-index ancestors of the chart's mounting container. */
+#vg-tooltip-element {
+  z-index: 2147483647;
+}
+</style>
