@@ -1540,9 +1540,9 @@ ag-grid-community@33.2.4:
   dependencies:
     ag-charts-types "11.2.4"
 
-ag-grid-vue3@^33.2.4:
+ag-grid-vue3@33.2.4:
   version "33.2.4"
-  resolved "https://registry.npmjs.org/ag-grid-vue3/-/ag-grid-vue3-33.2.4.tgz"
+  resolved "https://registry.yarnpkg.com/ag-grid-vue3/-/ag-grid-vue3-33.2.4.tgz#8e4af7765886b881042b7b52124e19f5ade656cf"
   integrity sha512-U5m4A9sc+jpoENwwl/AZ7r0053tbRvI39nRh55pYMJt6rrnotgUyJVHZfqJ6cExcSM3tqeW+vg1tMXGqoR4PNA==
   dependencies:
     ag-grid-community "33.2.4"
@@ -3884,10 +3884,10 @@ path-scurry@^1.11.1:
     lru-cache "^10.2.0"
     minipass "^5.0.0 || ^6.0.2 || ^7.0.0"
 
-path-to-regexp@0.1.12, path-to-regexp@6.3.0:
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-6.3.0.tgz#2b6a26a337737a8e1416f9272ed0766b1c0389f4"
-  integrity sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==
+path-to-regexp@0.1.12:
+  version "0.1.12"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.1.12.tgz#d5e1a12e478a976d432ef3c58d534b9923164bb7"
+  integrity sha512-RA1GjUVMnvYFxuqovrEqZoxxW5NUZqbwKtYz/Tt7nXerk0LbLblQmrsgdeOxV5SFHf0UDggjS/bSeOZwt1pmEQ==
 
 pathe@^2.0.1, pathe@^2.0.3:
   version "2.0.3"

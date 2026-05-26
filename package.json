@@ -74,7 +74,6 @@
   "resolutions": {
     "flatted": "3.4.2",
     "node-forge": "1.4.0",
-    "path-to-regexp": "6.3.0",
     "**/anymatch/picomatch": "2.3.2",
     "**/readdirp/picomatch": "2.3.2",
     "**/micromatch/picomatch": "2.3.2",
