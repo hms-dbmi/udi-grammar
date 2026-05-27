@@ -40,6 +40,16 @@ export declare function loadDataPackage(
   options?: LoadDataPackageOptions,
 ): Promise<void>;
 
+/**
+ * Fire `callback` whenever any selection in the shared DataSourcesStore
+ * changes — brushes from <udi-vis> signals, programmatic bindings, or
+ * clearAllSelections(). Returns an unsubscribe function.
+ */
+export declare function subscribeToSelections(callback: () => void): () => void;
+
+/** Wipe every active selection in the shared DataSourcesStore. */
+export declare function clearAllSelections(): void;
+
 export type {
   UDIGrammar,
   DataSelections,

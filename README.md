@@ -232,10 +232,12 @@ const result = await queryData(
 // result?.displayData → [{ count: 1234 }]
 ```
 
-`displayDataOnly: true` is a performance opt-in: when set, the second
-pipeline pass that materializes the unfiltered table for `allData` is
-skipped (and `allData` aliases `displayData`). Pass it for count/rollup
-queries that only read `displayData`.
+`displayDataOnly` controls whether the result includes a materialized
+unfiltered `allData` table. When omitted, it defaults to `true` for
+specs whose transformation ends with a rollup (the unfiltered aggregate
+is rarely consumed) and `false` otherwise. For non-rollup specs that
+only read `displayData` (e.g. exports), set it to `true` explicitly to
+skip the expensive second pass.
 
 The function is also exported from `udi-toolkit/ce` for non-React
 consumers.
@@ -289,6 +291,48 @@ interface DataFieldDomain {
 `loadDataPackage` falls back to a main-thread compute path if Worker
 construction throws (e.g. restrictive CSP). The same function and
 types are exported from `udi-toolkit/ce` for non-React consumers.
+
+### Reacting to selections without re-rendering (`subscribeToSelections`)
+
+All selections — both Vega brushes (written directly by `<UDIVis>`'s
+signal handlers) and external filters bound via `queryData`'s
+`selections` argument — live in a single shared Pinia `DataSourcesStore`.
+Brush events fire at up to 60 Hz; mirroring them into a React store just
+to trigger an effect causes pointless re-renders. `subscribeToSelections`
+exposes the Pinia change feed directly:
+
+```ts
+import { subscribeToSelections, clearAllSelections } from 'udi-toolkit/react';
+
+useEffect(() => {
+  let unsubscribe: (() => void) | null = null;
+  let cancelled = false;
+  subscribeToSelections(() => {
+    // fires on every selection change — brush ticks AND programmatic updates
+    triggerMyQueryPump();
+  }).then((u) => {
+    if (cancelled) u();
+    else unsubscribe = u;
+  });
+  return () => {
+    cancelled = true;
+    unsubscribe?.();
+  };
+}, []);
+```
+
+The returned unsubscribe is wrapped in a promise because `ce-entry` (and
+the shared Pinia singleton) lazy-load on first udi-toolkit call; the
+callback fires synchronously once subscribed.
+
+`clearAllSelections()` wipes every active selection — useful for
+"reset session" flows so stale bookkeeping entries from closed
+visualizations don't accumulate across resets. Brushes themselves are
+already cleared by Vega when a chart unmounts.
+
+Both functions are also exported from `udi-toolkit/ce` for non-React
+consumers — they return a synchronous unsubscribe / `void` there since
+ce-entry is already imported.
 
 ### Building the library
 

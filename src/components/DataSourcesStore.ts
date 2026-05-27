@@ -140,6 +140,18 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     updateDataSelection(selectionName, null);
   }
 
+  /**
+   * Wipe every active selection. Used by consumers' "reset session"
+   * flows so stale entries from closed visualizations don't accumulate
+   * across resets. Bumps selectionHash exactly once so downstream
+   * watchers fire a single change notification.
+   */
+  function clearAllSelections(): void {
+    if (Object.keys(dataSelections.value).length === 0) return;
+    dataSelections.value = {};
+    selectionHash.value = '{}';
+  }
+
   function getDataSelection(
     selectionName: string,
   ): RangeSelection | PointSelection | null {
@@ -416,7 +428,17 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   } | null {
     if (loading.value) return null;
 
-    const displayDataOnly = options?.displayDataOnly === true;
+    // Auto-default displayDataOnly=true when the transformation ends with
+    // a rollup. The second pipeline pass (skipNamedFilters: true) on a
+    // rollup spec produces a 1-row aggregate that callers rarely consume
+    // — the unfiltered total is usually available via cheaper channels
+    // (e.g. data package metadata). Explicit `displayDataOnly: false`
+    // still opts back in for callers that want the unfiltered rollup.
+    const transformations = dataTransformations ?? [];
+    const endsWithRollup =
+      transformations.length > 0 &&
+      'rollup' in (transformations[transformations.length - 1] as object);
+    const displayDataOnly = options?.displayDataOnly ?? endsWithRollup;
     const cacheKey = `${tablesVersion}|${selectionHash.value}|${displayDataOnly ? 'd' : 'a'}|${[...keys].sort().join('\0')}|${JSON.stringify(dataTransformations ?? null)}`;
     const cached = getDataObjectCache.get(cacheKey);
     if (cached) {
@@ -843,6 +865,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     getDataSelection,
     updateDataSelection,
     clearDataSelection,
+    clearAllSelections,
     dataSelections,
     bindExternalDataSelections,
   };

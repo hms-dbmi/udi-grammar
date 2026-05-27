@@ -2,6 +2,14 @@
 import { ref, computed, watch, onMounted, defineEmits, useSlots } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
+
+// The template root is a fragment (v-if/v-else templates), so Vue can't
+// auto-inherit `class`/`style`/etc. onto a single child. When mounted as
+// a custom element via defineCustomElement, those attributes already
+// live on the `<udi-vis>` host — CSS targeting works as expected. Opt
+// out of inheritance to silence the "extraneous non-props attributes"
+// warning.
+defineOptions({ inheritAttrs: false });
 import { type ParsedUDIGrammar, parseSpecification } from './Parser';
 import type {
   DataSelection,

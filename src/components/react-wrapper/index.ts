@@ -6,6 +6,7 @@ export { queryData } from './queryData';
 export type { QueryDataSpec, QueryDataResult, QueryDataOptions } from '../ce-entry';
 export { loadDataPackage } from './loadDataPackage';
 export type { SourceSpec, LoadDataPackageOptions } from '../loadDataPackage';
+export { subscribeToSelections, clearAllSelections } from './selections';
 export type {
   DataFieldDomain,
   IntervalDomain,
