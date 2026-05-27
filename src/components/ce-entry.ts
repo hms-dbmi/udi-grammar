@@ -3,6 +3,16 @@ import { defineCustomElement } from 'vue';
 import UDIVisComp from './UDIVis.vue';
 import type { UDIGrammar, DataSource, DataTransformation } from './GrammarTypes';
 import { useDataSourcesStore, type DataSelections } from './DataSourcesStore';
+import {
+  loadDataPackage as loadDataPackageImpl,
+  type SourceSpec,
+  type LoadDataPackageOptions,
+} from './loadDataPackage';
+import type {
+  DataFieldDomain,
+  IntervalDomain,
+  CategoricalDomain,
+} from './domainTypes';
 
 // Shared Pinia instance for all <udi-vis> elements on the page.
 // This enables cross-chart filtering: all instances share the same
@@ -34,6 +44,16 @@ export interface QueryDataResult {
   isSubset: boolean;
 }
 
+export interface QueryDataOptions {
+  /** Maps entity names → canonical URLs, overriding URLs embedded in the spec. */
+  sourceResolver?: Record<string, string>;
+  /** Skip materializing the full unfiltered table for `allData`. When true,
+   *  `allData` shares its reference with `displayData`. Use this when the
+   *  caller only reads `displayData` (e.g. count chips, rollup queries) —
+   *  the second pipeline pass is the most expensive part of getDataObject. */
+  displayDataOnly?: boolean;
+}
+
 /**
  * Run a data query against the shared DataSourcesStore.
  *
@@ -42,18 +62,19 @@ export interface QueryDataResult {
  *
  * @param spec  A grammar-like object with `source` and optional `transformation`.
  * @param selections  Optional external selections to bind before querying.
+ * @param options  Optional per-call options (sourceResolver, displayDataOnly).
  * @returns The transformed data, or `null` if sources are still loading.
  */
 export async function queryData(
   spec: QueryDataSpec,
   selections?: DataSelections,
-  sourceResolver?: Record<string, string>,
+  options?: QueryDataOptions,
 ): Promise<QueryDataResult | null> {
   const store = useDataSourcesStore(pinia);
 
   const sources: DataSource[] = Array.isArray(spec.source) ? spec.source : [spec.source];
 
-  await store.initDataSources(sources, sourceResolver);
+  await store.initDataSources(sources, options?.sourceResolver);
 
   if (selections) {
     store.bindExternalDataSelections(selections);
@@ -62,6 +83,7 @@ export async function queryData(
   const result = store.getDataObject(
     sources.map((s) => s.name),
     spec.transformation,
+    { displayDataOnly: options?.displayDataOnly === true },
   );
 
   if (!result) return null;
@@ -73,5 +95,24 @@ export async function queryData(
   };
 }
 
+/**
+ * Fetch a set of CSVs exactly once, seed the shared DataSourcesStore so
+ * any <udi-vis> / queryData call reuses the parsed tables, and stream
+ * per-entity domains back via callbacks.
+ */
+export function loadDataPackage(
+  sources: SourceSpec[],
+  options?: LoadDataPackageOptions,
+): Promise<void> {
+  return loadDataPackageImpl(pinia, sources, options);
+}
+
 export { UDIVisElement };
 export type { UDIGrammar, DataSelections };
+export type {
+  SourceSpec,
+  LoadDataPackageOptions,
+  DataFieldDomain,
+  IntervalDomain,
+  CategoricalDomain,
+};

@@ -301,6 +301,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
   const loading = ref<boolean>(true);
   const selectionHash = ref<string>('');
+  /** Bumped whenever a source's parsed table is replaced, invalidating the
+   *  getDataObject memoization. Plain counter (not a Vue ref) since it's
+   *  only read inside getDataObject — no reactivity needed. */
+  let tablesVersion = 0;
 
   async function initDataSources(
     sources: DataSource[],
@@ -350,6 +354,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       }
       const dest: ColumnTable = await loadCSV(dataSource.source, { delimiter });
       dataSources.value[dataSource.name] = { source: dataSource, dest };
+      tablesVersion++;
     })();
 
     pendingLoads.set(key, promise);
@@ -358,6 +363,21 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     } finally {
       pendingLoads.delete(key);
     }
+  }
+
+  /**
+   * Install a pre-parsed table into the cache so later initDataSource()
+   * calls for the same (name, url) become no-ops. Used by loadDataPackage
+   * to avoid double-fetching CSVs that the caller already has in hand.
+   */
+  function seedDataSource(
+    name: string,
+    url: string,
+    table: ColumnTable,
+  ): void {
+    const source: DataSource = { name, source: url };
+    dataSources.value[name] = { source, dest: table };
+    tablesVersion++;
   }
 
   function getDataSource(key: string): DataInterface | null {
@@ -369,15 +389,42 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     return dataSources.value[key] ?? null;
   }
 
+  // Memoizes getDataObject results across repeat queries with the same
+  // (sources, transformations, selections, table version) tuple. Live
+  // filter brushing fires the same query shape many times per second
+  // with only the selection payload changing; selectionHash is part of
+  // the key, so brand-new selections still recompute. The cap is small
+  // because the dominant access pattern is "user toggles between a
+  // handful of filter combinations," not "user explores 100s of unique
+  // filter states per second."
+  const MAX_CACHE_ENTRIES = 64;
+  type GetDataObjectResult = {
+    displayData: object[];
+    allData: object[];
+    isDisplayDataSubset: boolean;
+  };
+  const getDataObjectCache = new Map<string, GetDataObjectResult>();
+
   function getDataObject(
     keys: string[],
     dataTransformations?: DataTransformation[],
+    options?: { displayDataOnly?: boolean },
   ): {
     displayData: object[]; // only the data that should be displayed
     allData: object[]; // all data (needed for full domains)
     isDisplayDataSubset: boolean; // true if the returned data is a subset of the full data
   } | null {
     if (loading.value) return null;
+
+    const displayDataOnly = options?.displayDataOnly === true;
+    const cacheKey = `${tablesVersion}|${selectionHash.value}|${displayDataOnly ? 'd' : 'a'}|${[...keys].sort().join('\0')}|${JSON.stringify(dataTransformations ?? null)}`;
+    const cached = getDataObjectCache.get(cacheKey);
+    if (cached) {
+      // LRU-ish touch: re-insert to mark as most-recently-used.
+      getDataObjectCache.delete(cacheKey);
+      getDataObjectCache.set(cacheKey, cached);
+      return cached;
+    }
 
     // make copy of tables from data sources
     const getNamedTables = () => {
@@ -409,7 +456,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     const displayData = dataTable.objects();
 
     let allData = displayData;
-    if (containsNamedFilter) {
+    if (containsNamedFilter && !displayDataOnly) {
       const { data: fullData } = PerformDataTransformations(
         getNamedTables(),
         dataTransformations ?? [],
@@ -418,11 +465,18 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       allData = fullData.objects();
     }
 
-    return {
+    const result: GetDataObjectResult = {
       displayData,
       allData,
       isDisplayDataSubset: containsNamedFilter,
     };
+    getDataObjectCache.set(cacheKey, result);
+    if (getDataObjectCache.size > MAX_CACHE_ENTRIES) {
+      // Map iteration order is insertion order — drop the oldest.
+      const oldest = getDataObjectCache.keys().next().value;
+      if (oldest !== undefined) getDataObjectCache.delete(oldest);
+    }
+    return result;
   }
 
   function PerformDataTransformations(
@@ -783,6 +837,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     loading,
     selectionHash,
     initDataSources,
+    seedDataSource,
     getDataObject,
     watchDataSelection,
     getDataSelection,

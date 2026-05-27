@@ -38,7 +38,7 @@ export default defineConfig({
     tsConfigPaths(),
     dts({
       tsconfigPath: 'tsconfig.lib.json',
-      exclude: ['react-wrapper/**', 'ce-entry.ts', 'vite.config.ce.ts', 'vite.config.react.ts'],
+      exclude: ['react-wrapper/**', 'vite.config.ce.ts', 'vite.config.react.ts'],
     }),
   ],
 });
