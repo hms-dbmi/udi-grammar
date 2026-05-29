@@ -1,4 +1,8 @@
-import type { QueryDataSpec, QueryDataResult } from '../ce-entry';
+import type {
+  QueryDataSpec,
+  QueryDataResult,
+  QueryDataOptions,
+} from '../ce-entry';
 import type { DataSelections } from '../DataSourcesStore';
 
 /**
@@ -9,7 +13,8 @@ import type { DataSelections } from '../DataSourcesStore';
 export async function queryData(
   spec: QueryDataSpec,
   selections?: DataSelections,
+  options?: QueryDataOptions,
 ): Promise<QueryDataResult | null> {
   const { queryData: impl } = await import('../ce-entry');
-  return impl(spec, selections);
+  return impl(spec, selections, options);
 }

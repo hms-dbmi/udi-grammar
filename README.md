@@ -209,6 +209,131 @@ function App() {
 }
 ```
 
+### Headless data query (`queryData`)
+
+`queryData` runs a UDI Grammar spec through the same Arquero pipeline that
+`<UDIVis>` uses but returns the resulting rows instead of rendering a chart.
+Useful for filtered counts, exports, or any UI that needs the data but
+not the visualization. Results are memoized per
+`(sources, transformations, active selections)` tuple so repeat queries
+(e.g. brushing back to a previous range) serve from cache.
+
+```ts
+import { queryData } from 'udi-toolkit/react';
+
+const result = await queryData(
+  {
+    source: { name: 'donors', source: '/data/donors.csv' },
+    transformation: [{ rollup: { count: { op: 'count' } } }],
+  },
+  selections,
+  { displayDataOnly: true }, // skip materializing the full unfiltered table
+);
+// result?.displayData → [{ count: 1234 }]
+```
+
+`displayDataOnly` controls whether the result includes a materialized
+unfiltered `allData` table. When omitted, it defaults to `true` for
+specs whose transformation ends with a rollup (the unfiltered aggregate
+is rarely consumed) and `false` otherwise. For non-rollup specs that
+only read `displayData` (e.g. exports), set it to `true` explicitly to
+skip the expensive second pass.
+
+The function is also exported from `udi-toolkit/ce` for non-React
+consumers.
+
+### Pre-loading data and computing domains (`loadDataPackage`)
+
+`<UDIVis>` lazy-loads each CSV the first time a chart references it. If
+your app already knows the full set of datasets up front (e.g. a data
+package manifest), `loadDataPackage` fetches each URL once, parses it
+on the main thread (so the parsed table is cached for `<UDIVis>` to
+reuse — no re-fetch), and computes per-field domains in a dedicated
+Web Worker. Domains stream back per entity as they finish:
+
+```ts
+import { loadDataPackage } from 'udi-toolkit/react';
+import type { DataFieldDomain } from 'udi-toolkit/react';
+
+const allDomains: DataFieldDomain[] = [];
+
+await loadDataPackage(
+  [
+    { name: 'donors',   url: '/data/donors.csv'   },
+    { name: 'samples',  url: '/data/samples.csv'  },
+    { name: 'datasets', url: '/data/datasets.csv' },
+  ],
+  {
+    onEntityDomains: (entityName, domains) => {
+      allDomains.push(...domains);
+    },
+    onError: (entityName, message) => {
+      console.error(`Failed to load ${entityName}: ${message}`);
+    },
+  },
+);
+// At this point every <UDIVis> referencing one of these entities by
+// name will reuse the parsed table from the shared cache — no re-fetch.
+```
+
+Each `DataFieldDomain` has the shape:
+
+```ts
+interface DataFieldDomain {
+  entity: string;
+  field: string;
+  type: 'interval' | 'point';
+  domain: { min: number; max: number } | { values: string[] };
+  fieldDescription: string;
+}
+```
+
+`loadDataPackage` falls back to a main-thread compute path if Worker
+construction throws (e.g. restrictive CSP). The same function and
+types are exported from `udi-toolkit/ce` for non-React consumers.
+
+### Reacting to selections without re-rendering (`subscribeToSelections`)
+
+All selections — both Vega brushes (written directly by `<UDIVis>`'s
+signal handlers) and external filters bound via `queryData`'s
+`selections` argument — live in a single shared Pinia `DataSourcesStore`.
+Brush events fire at up to 60 Hz; mirroring them into a React store just
+to trigger an effect causes pointless re-renders. `subscribeToSelections`
+exposes the Pinia change feed directly:
+
+```ts
+import { subscribeToSelections, clearAllSelections } from 'udi-toolkit/react';
+
+useEffect(() => {
+  let unsubscribe: (() => void) | null = null;
+  let cancelled = false;
+  subscribeToSelections(() => {
+    // fires on every selection change — brush ticks AND programmatic updates
+    triggerMyQueryPump();
+  }).then((u) => {
+    if (cancelled) u();
+    else unsubscribe = u;
+  });
+  return () => {
+    cancelled = true;
+    unsubscribe?.();
+  };
+}, []);
+```
+
+The returned unsubscribe is wrapped in a promise because `ce-entry` (and
+the shared Pinia singleton) lazy-load on first udi-toolkit call; the
+callback fires synchronously once subscribed.
+
+`clearAllSelections()` wipes every active selection — useful for
+"reset session" flows so stale bookkeeping entries from closed
+visualizations don't accumulate across resets. Brushes themselves are
+already cleared by Vega when a chart unmounts.
+
+Both functions are also exported from `udi-toolkit/ce` for non-React
+consumers — they return a synchronous unsubscribe / `void` there since
+ce-entry is already imported.
+
 ### Building the library
 
 ```bash
