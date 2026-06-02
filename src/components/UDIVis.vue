@@ -29,6 +29,19 @@ export interface ParserProps {
   selections?: DataSelections;
   /** Map entity names to canonical data URLs, overriding whatever the spec contains. */
   sourceResolver?: Record<string, string>;
+  /**
+   * Make the chart fill its parent container (both width and height) and
+   * resize when the container changes. Sets Vega-Lite `width: 'container'`,
+   * `height: 'container'`, and `autosize: { type: 'fit', contains: 'padding' }`.
+   *
+   * Requires the parent to have a definite height (e.g. an explicit pixel
+   * value, `h-full` against a sized ancestor, or a flex/grid cell with
+   * `min-height: 0`). Without that, Vega-Lite resolves `height: 'container'`
+   * to 0 and the chart will not be visible.
+   *
+   * Default: false — chart renders at its natural height.
+   */
+  fillContainer?: boolean;
 }
 
 // Expose data selections to parent component
@@ -111,6 +124,14 @@ watch(
     }
   },
   { deep: true },
+);
+
+// Rebuild the Vega-Lite spec when `fillContainer` toggles. Without this
+// watcher, switching between natural-height and fill-container modes after
+// mount would keep the chart at its previous sizing.
+watch(
+  () => props.fillContainer,
+  () => buildVisualization(),
 );
 
 watch(selectionHash, () => {
@@ -441,9 +462,18 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
     // data: { url: './data/penguins.csv' },
     width: 'container',
-    // height: 'container',
     data: { name: 'udi_data', values: [] },
   };
+  if (props.fillContainer) {
+    // Make the chart resize to fit BOTH dimensions of its container. The
+    // `fit` autosize type instructs Vega-Lite to shrink the plot area so
+    // axes/title/legend fit inside the given width × height. `contains:
+    // padding` includes the chart's padding inside that envelope (default
+    // is `contains: content`, which adds padding around the rendered area
+    // and can make the chart overflow its container by a few pixels).
+    vegaSpec.height = 'container';
+    vegaSpec.autosize = { type: 'fit', contains: 'padding' };
+  }
 
   // add data. Don't reset transformError here — performDataTransformation
   // owns it, and resetting would swallow an error set earlier in this

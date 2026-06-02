@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import vegaEmbed from 'vega-embed';
 import { defineProps } from 'vue';
 import { watch } from 'vue';
@@ -205,8 +205,44 @@ function initVegaChart() {
     });
 }
 
+// Watch the chart's container element for size changes and re-run Vega's
+// `view.resize()` so `width: 'container'` / `height: 'container'` actually
+// follow the parent. Without this, vega-embed reads the container size at
+// initial mount only — later parent resizes (e.g. dragging a card to a
+// different col-span in a grid layout) leave the chart frozen at its
+// original width/height.
+let resizeObserver: ResizeObserver | null = null;
+let resizeRaf: number | null = null;
+
+function scheduleVegaResize() {
+  if (!vegaView.value) return;
+  // Coalesce multiple ResizeObserver entries within one frame — useful
+  // during a drag-resize where the parent fires resize events at ~60 Hz.
+  if (resizeRaf !== null) return;
+  resizeRaf = requestAnimationFrame(() => {
+    resizeRaf = null;
+    if (!vegaView.value) return;
+    void vegaView.value.resize().runAsync();
+  });
+}
+
 onMounted(() => {
   initVegaChart();
+  if (vegaContainer.value && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(() => scheduleVegaResize());
+    resizeObserver.observe(vegaContainer.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  if (resizeRaf !== null) {
+    cancelAnimationFrame(resizeRaf);
+    resizeRaf = null;
+  }
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+    resizeObserver = null;
+  }
 });
 
 // Update data in the existing Vega view, preserving brush/selection state.
