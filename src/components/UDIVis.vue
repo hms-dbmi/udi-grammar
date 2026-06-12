@@ -22,13 +22,22 @@ const dataSourcesStore = useDataSourcesStore();
 import { storeToRefs } from 'pinia';
 import { debounce } from 'lodash';
 
-const { loading, selectionHash } = storeToRefs(dataSourcesStore);
+const { loading, selectionHash, tablesVersion } = storeToRefs(dataSourcesStore);
 
 export interface ParserProps {
   spec: UDIGrammar;
   selections?: DataSelections;
   /** Map entity names to canonical data URLs, overriding whatever the spec contains. */
   sourceResolver?: Record<string, string>;
+  /**
+   * Make the chart fill its parent container (both width and height) and
+   * resize when the container changes. Sets Vega-Lite `width: 'container'`,
+   * `height: 'container'`, and `autosize: { type: 'fit', contains: 'padding' }`.
+   *
+   * Requires the parent to have a definite height. Default: false (chart
+   * renders at its natural height).
+   */
+  fillContainer?: boolean;
 }
 
 // Expose data selections to parent component
@@ -113,6 +122,13 @@ watch(
   { deep: true },
 );
 
+// Rebuild the Vega-Lite spec when `fillContainer` toggles so the
+// height/autosize entries get added or removed accordingly.
+watch(
+  () => props.fillContainer,
+  () => buildVisualization(),
+);
+
 watch(selectionHash, () => {
   // console.log('UDI-VIS: SelectionHash changed');
   const currentDataSelections = dataSourcesStore.dataSelections;
@@ -130,7 +146,14 @@ const debouncedBuildVisualization = debounce(
   debounceValue.value,
 );
 
-watch([loading, selectionHash], () => {
+// Also watch `tablesVersion` — bumped every time a source's parsed table
+// is installed in the store. Catches the case where loading.value has
+// already flipped false (because another instance's cached-source call
+// raced ahead) but THIS instance's required source has only just arrived.
+// Without this, getDataObject would return null on first buildVisualization
+// and there'd be no trigger for the retry, leaving the chart stuck on
+// "Loading..." until the user toggles table-view.
+watch([loading, selectionHash, tablesVersion], () => {
   // Don't react to store-wide loading changes until this instance's own
   // data sources have been loaded (see instanceReady above).
   if (!instanceReady.value) return;
@@ -441,9 +464,15 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
     // data: { url: './data/penguins.csv' },
     width: 'container',
-    // height: 'container',
     data: { name: 'udi_data', values: [] },
   };
+  if (props.fillContainer) {
+    // Make the chart resize to fit BOTH dimensions of its container. The
+    // `fit` autosize type instructs Vega-Lite to shrink the plot area so
+    // axes/title/legend fit inside the given width × height.
+    vegaSpec.height = 'container';
+    vegaSpec.autosize = { type: 'fit', contains: 'padding' };
+  }
 
   // add data. Don't reset transformError here — performDataTransformation
   // owns it, and resetting would swallow an error set earlier in this

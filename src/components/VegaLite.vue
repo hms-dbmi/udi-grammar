@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import vegaEmbed from 'vega-embed';
 import { defineProps } from 'vue';
 import { watch } from 'vue';
@@ -205,8 +205,63 @@ function initVegaChart() {
     });
 }
 
+// Track the chart's container element and re-run Vega's layout pass when
+// the container size changes. vega-embed reads `width: 'container'` /
+// `height: 'container'` from `containerSize()` ONLY at signal init time —
+// later parent resizes (e.g. dragging a card to a different col/row span)
+// don't re-evaluate that signal. We have to (a) observe the container, and
+// (b) write the new pixel width/height into Vega's `width`/`height` signals
+// directly. Both pieces are required: without the explicit signal writes
+// `view.resize().runAsync()` re-uses the frozen init-time dimensions and
+// the chart appears stuck at its original size.
+let resizeObserver: ResizeObserver | null = null;
+let resizeRaf: number | null = null;
+
+function scheduleVegaResize() {
+  if (!vegaView.value || !vegaContainer.value) return;
+  // Coalesce bursts of resize events (e.g. ~60 Hz during a drag-resize)
+  // into one update per frame.
+  if (resizeRaf !== null) return;
+  resizeRaf = requestAnimationFrame(() => {
+    resizeRaf = null;
+    const view = vegaView.value;
+    const el = vegaContainer.value;
+    if (!view || !el) return;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    // Detached / display:none containers report 0 — skip rather than
+    // collapsing the chart to a point.
+    if (w <= 0 || h <= 0) return;
+    try {
+      const signals = view.getState().signals ?? {};
+      if ('width' in signals) view.signal('width', w);
+      if ('height' in signals) view.signal('height', h);
+    } catch {
+      // Spec doesn't expose width/height signals — fall through; resize()
+      // alone still re-runs the layout, which is correct for natural-size
+      // specs whose dimensions don't depend on the container.
+    }
+    void view.resize().runAsync();
+  });
+}
+
 onMounted(() => {
   initVegaChart();
+  if (vegaContainer.value && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(() => scheduleVegaResize());
+    resizeObserver.observe(vegaContainer.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  if (resizeRaf !== null) {
+    cancelAnimationFrame(resizeRaf);
+    resizeRaf = null;
+  }
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+    resizeObserver = null;
+  }
 });
 
 // Update data in the existing Vega view, preserving brush/selection state.

@@ -7,6 +7,11 @@ export interface UDIVisProps {
   selections?: DataSelections;
   /** Map entity names to canonical data URLs, overriding whatever the spec contains. */
   sourceResolver?: Record<string, string>;
+  /**
+   * Make the chart fill its parent (both width and height) and respond to
+   * container resizes. Requires the parent to have a definite height.
+   */
+  fillContainer?: boolean;
   onSelectionChange?: (selections: DataSelections) => void;
   onDataReady?: (payload: { data: object[] | null; allData: object[] | null; isSubset: boolean }) => void;
   className?: string;
@@ -25,13 +30,21 @@ async function ensureCERegistered() {
   ceRegistered = true;
 }
 
-export function UDIVis({ spec, selections, sourceResolver, onSelectionChange, onDataReady, className, style }: UDIVisProps) {
+export function UDIVis({ spec, selections, sourceResolver, fillContainer, onSelectionChange, onDataReady, className, style }: UDIVisProps) {
   const elRef: React.RefObject<HTMLElement | null> = React.useRef<HTMLElement>(null);
 
   // Register the custom element on first render
   React.useEffect(() => {
     ensureCERegistered();
   }, []);
+
+  // Set fillContainer BEFORE spec so the Vue component's first render()
+  // already has the prop available.
+  React.useLayoutEffect(() => {
+    if (elRef.current) {
+      (elRef.current as any).fillContainer = fillContainer;
+    }
+  }, [fillContainer]);
 
   // Set complex object props via JS properties (not HTML attributes).
   // useLayoutEffect ensures the property is set synchronously after the DOM
