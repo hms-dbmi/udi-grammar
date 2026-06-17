@@ -16,6 +16,7 @@ import type {
   UDIGrammar,
   VisualizationLayer,
 } from './GrammarTypes';
+import type { UDIPalette } from './Palette';
 import type { DataSelections, RangeSelection } from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 const dataSourcesStore = useDataSourcesStore();
@@ -38,6 +39,14 @@ export interface ParserProps {
    * renders at its natural height).
    */
   fillContainer?: boolean;
+  /**
+   * Consumer-supplied default color palette for charts and tables. Sets the
+   * categorical colors, ordinal colors, single mark color, and continuous
+   * (numeric) color ramp. A spec-level per-encoding `range` still overrides
+   * it. Passed as a separate prop — not part of the spec — so a function-
+   * valued ramp survives (the spec is JSON-cloned internally).
+   */
+  palette?: UDIPalette;
 }
 
 // Expose data selections to parent component
@@ -692,10 +701,15 @@ const slots = useSlots();
         :signal-field-map="signalFieldMap"
         :point-select="pointSelect"
         :selections="props.selections"
+        :palette="props.palette"
       />
     </template>
     <template v-else>
-      <TableComponent :data="transformedData" :spec="parsedSpec" />
+      <TableComponent
+        :data="transformedData"
+        :spec="parsedSpec"
+        :palette="props.palette"
+      />
     </template>
   </template>
   <template v-else>

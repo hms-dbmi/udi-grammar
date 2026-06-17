@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { UDIGrammar } from '../GrammarTypes';
+import type { UDIPalette } from '../Palette';
 import type { DataSelections } from '../DataSourcesStore';
 
 export interface UDIVisProps {
@@ -12,6 +13,12 @@ export interface UDIVisProps {
    * container resizes. Requires the parent to have a definite height.
    */
   fillContainer?: boolean;
+  /**
+   * Consumer-supplied default color palette for charts and tables. May include
+   * a continuous color function for numeric scales — set as a JS property on
+   * the custom element, so functions pass through intact.
+   */
+  palette?: UDIPalette;
   onSelectionChange?: (selections: DataSelections) => void;
   onDataReady?: (payload: { data: object[] | null; allData: object[] | null; isSubset: boolean }) => void;
   className?: string;
@@ -30,7 +37,7 @@ async function ensureCERegistered() {
   ceRegistered = true;
 }
 
-export function UDIVis({ spec, selections, sourceResolver, fillContainer, onSelectionChange, onDataReady, className, style }: UDIVisProps) {
+export function UDIVis({ spec, selections, sourceResolver, fillContainer, palette, onSelectionChange, onDataReady, className, style }: UDIVisProps) {
   const elRef: React.RefObject<HTMLElement | null> = React.useRef<HTMLElement>(null);
 
   // Register the custom element on first render
@@ -74,6 +81,14 @@ export function UDIVis({ spec, selections, sourceResolver, fillContainer, onSele
       (elRef.current as any).selections = selections;
     }
   }, [selections]);
+
+  // Palette can carry a function (continuous color), so it must be set as a JS
+  // property — HTML attributes only carry strings.
+  React.useLayoutEffect(() => {
+    if (elRef.current) {
+      (elRef.current as any).palette = palette;
+    }
+  }, [palette]);
 
   // Listen for selection-change custom event.
   // Vue CE wraps emit args in an array: detail = [arg0, arg1, ...].

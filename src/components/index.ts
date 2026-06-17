@@ -21,6 +21,10 @@ const UDIToolkit = {
 };
 export { UDIToolkit, UDIVis, TableComponent, VegaLite };
 
+// Color palette API
+export { DEFAULT_PALETTE } from './Palette';
+export type { UDIPalette, ContinuousColor, DiscreteColor } from './Palette';
+
 // Grammar spec types
 export type {
   UDIGrammar,

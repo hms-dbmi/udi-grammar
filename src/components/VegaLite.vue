@@ -14,6 +14,9 @@ import type { VisualizationSpec } from 'vega-embed';
 import { changeset } from 'vega';
 const dataSourcesStore = useDataSourcesStore();
 import { isEmpty } from 'lodash';
+import type { UDIPalette } from './Palette';
+import { DEFAULT_PALETTE, toVegaRange, toVegaRamp } from './Palette';
+import { registerRampScheme } from './paletteScheme';
 
 // our type is more specific than the one from vega-embed
 interface VegaSpecShim {
@@ -34,9 +37,34 @@ interface VegaLiteProps {
   signalFieldMap?: Record<string, Record<string, string>>;
   pointSelect?: PointSelect | null;
   selections?: DataSelections | null;
+  /** Consumer-supplied color palette; falls back to DEFAULT_PALETTE per channel. */
+  palette?: UDIPalette;
 }
 
 const props = defineProps<VegaLiteProps>();
+
+// Build the vega-embed `config` object from the palette prop, falling back to
+// DEFAULT_PALETTE per channel. A spec-level per-encoding `range` still wins —
+// this only sets the scale defaults.
+function buildVegaConfig(): Record<string, unknown> {
+  const palette = props.palette ?? {};
+  const markColor = palette.mark ?? DEFAULT_PALETTE.mark;
+  const category = palette.category ?? DEFAULT_PALETTE.category;
+  const ordinal = palette.ordinal ?? DEFAULT_PALETTE.ordinal;
+  const ramp = palette.ramp ?? DEFAULT_PALETTE.ramp;
+
+  const range: Record<string, unknown> = {};
+  if (category != null) range.category = toVegaRange(category);
+  if (ordinal != null) range.ordinal = toVegaRange(ordinal);
+  if (ramp != null) range.ramp = toVegaRamp(ramp, registerRampScheme);
+
+  const config: Record<string, unknown> = {
+    point: { shape: 'circle', filled: true },
+    range,
+  };
+  if (markColor != null) config.mark = { color: markColor };
+  return config;
+}
 
 const vegaContainer = ref();
 const vegaView = ref<View | null>(null);
@@ -82,25 +110,7 @@ function initVegaChart() {
   // console.log('initializing vega chart with spec:', specObject);
   vegaEmbed(vegaContainer.value, specObject as VisualizationSpec, {
     actions: props.hideActions ? false : true,
-    config: {
-      mark: { color: '#E6A01A' },
-      point: { shape: 'circle', filled: true },
-      range: {
-        category: [
-          '#E6A01A',
-          '#16A987',
-          '#0673B0',
-          '#9EC8DD',
-          '#204E62',
-          '#BF97E4',
-          '#D95838',
-          '#6FDCC3',
-          '#787874',
-        ],
-        // ordinal: { scheme: 'greens' },
-        ramp: { scheme: 'oranges' },
-      },
-    },
+    config: buildVegaConfig(),
   })
     .then((result) => {
       errorMessage.value = null;
@@ -323,6 +333,22 @@ async function updateVegaChart() {
 }
 
 watch(() => props.spec, updateVegaChart);
+
+// The palette only feeds the embed-time `config`, so a change requires a full
+// re-embed (not just a data update). Finalize the existing view first so its
+// dataflow / listeners don't leak. Palette is a consumer-level config that
+// rarely changes, so re-embedding (and dropping any active brush) is fine.
+watch(
+  () => props.palette,
+  () => {
+    if (vegaView.value) {
+      vegaView.value.finalize();
+      vegaView.value = null;
+    }
+    initVegaChart();
+  },
+  { deep: true },
+);
 
 async function updateVegaChartSelections() {
   // console.log('UDI-VIS: vegaChartSelections triggered', props.selections);

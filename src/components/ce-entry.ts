@@ -140,7 +140,9 @@ export function clearAllSelections(): void {
 }
 
 export { UDIVisElement };
+export { DEFAULT_PALETTE } from './Palette';
 export type { UDIGrammar, DataSelections };
+export type { UDIPalette, ContinuousColor, DiscreteColor } from './Palette';
 export type {
   SourceSpec,
   LoadDataPackageOptions,

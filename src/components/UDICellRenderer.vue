@@ -10,12 +10,16 @@ import {
   scaleBand,
 } from 'd3-scale';
 import { defaultRange, type ExtendedRowMapping } from './TableUtil';
+import type { UDIPalette } from './Palette';
+import { toTableRampInterpolator, toTableCategoryColors } from './Palette';
 
 // Define props
 
 export interface UDICellRendererParams<TData, TValue, TContext>
   extends ICellRendererParams<TData, TValue, TContext> {
   udiColumnMapping: ExtendedRowMapping[];
+  /** Consumer-supplied color palette, forwarded from TableComponent. */
+  palette?: UDIPalette;
 }
 
 export interface UDICellRendererProps {
@@ -161,17 +165,23 @@ function getStyle(layer: string, mark: RowMarkOptions): CSSProperties | null {
 
     switch (mapping.encoding) {
       case 'color': {
+        const palette = props.params.palette;
         let colorScale;
         if (mapping.type === 'quantitative') {
-          colorScale = scaleSequential<string, string>(
-            defaultRange.quantitativeColor,
-          )
+          // A consumer-supplied continuous ramp (function or color array) wins;
+          // a bare scheme-name string isn't mappable here, so fall back.
+          const interpolator =
+            toTableRampInterpolator(palette?.ramp) ??
+            defaultRange.quantitativeColor;
+          colorScale = scaleSequential<string, string>(interpolator)
             .domain(numberDomain)
             .unknown(defaultRange.unknownColor);
         } else {
-          colorScale = scaleOrdinal<string, string>(defaultRange.nominalColor)
+          const nominalColors =
+            toTableCategoryColors(palette?.category) ?? defaultRange.nominalColor;
+          colorScale = scaleOrdinal<string, string>(nominalColors)
             .domain(stringDomain)
-            .range(stringRange ?? defaultRange.nominalColor)
+            .range(stringRange ?? nominalColors)
             .unknown(defaultRange.unknownColor);
         }
         const color = colorScale(data);

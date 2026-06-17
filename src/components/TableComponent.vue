@@ -18,6 +18,7 @@ import type {
   NumberDomain,
   StringDomain,
 } from './GrammarTypes';
+import type { UDIPalette } from './Palette';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -25,6 +26,8 @@ interface TableComponentProps {
   spec: ParsedUDIGrammar | null;
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   data: Record<string, any>[] | null;
+  /** Consumer-supplied color palette, forwarded to each cell renderer. */
+  palette?: UDIPalette;
 }
 
 const props = defineProps<TableComponentProps>();
@@ -252,6 +255,8 @@ const colDefs = computed<ColDef[]>(() => {
       cellRendererParams: {
         // pass the representation to the cell renderer
         udiColumnMapping: groupedMapping[key],
+        // forward the consumer palette so cell colors match the charts
+        palette: props.palette,
       },
       /* eslint-disable  @typescript-eslint/no-explicit-any */
       valueGetter: (params: any) => {
