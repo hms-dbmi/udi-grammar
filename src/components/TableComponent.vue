@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, defineProps } from 'vue';
+import { computed, defineProps, inject } from 'vue';
 import { cloneDeep } from 'lodash';
+import { UDI_PALETTE_KEY } from './paletteInjectKey';
 import type { ColDef } from 'ag-grid-community';
 import { type ParsedUDIGrammar } from './Parser';
 import type { ExtendedRowMapping } from './TableUtil';
@@ -31,6 +32,11 @@ interface TableComponentProps {
 }
 
 const props = defineProps<TableComponentProps>();
+
+// Palette fallback chain: own prop → UDIToolkitProvider's injected palette →
+// undefined (cell renderers handle the DEFAULT_PALETTE fallback themselves).
+const injectedPalette = inject(UDI_PALETTE_KEY, null);
+const effectivePalette = computed(() => props.palette ?? injectedPalette?.value);
 
 const representations = computed<RowLayer[] | null>(() => {
   if (!props.spec) return null;
@@ -256,7 +262,7 @@ const colDefs = computed<ColDef[]>(() => {
         // pass the representation to the cell renderer
         udiColumnMapping: groupedMapping[key],
         // forward the consumer palette so cell colors match the charts
-        palette: props.palette,
+        palette: effectivePalette.value,
       },
       /* eslint-disable  @typescript-eslint/no-explicit-any */
       valueGetter: (params: any) => {

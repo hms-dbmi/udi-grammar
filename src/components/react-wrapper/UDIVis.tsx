@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { UDIGrammar } from '../GrammarTypes';
 import type { UDIPalette } from '../Palette';
 import type { DataSelections } from '../DataSourcesStore';
+import { UDIToolkitContext } from './UDIToolkitProvider';
 
 export interface UDIVisProps {
   spec: UDIGrammar;
@@ -39,6 +40,13 @@ async function ensureCERegistered() {
 
 export function UDIVis({ spec, selections, sourceResolver, fillContainer, palette, onSelectionChange, onDataReady, className, style }: UDIVisProps) {
   const elRef: React.RefObject<HTMLElement | null> = React.useRef<HTMLElement>(null);
+
+  // Palette fallback chain: own prop → UDIToolkitProvider's context palette →
+  // undefined (the custom element then falls back to DEFAULT_PALETTE per
+  // channel in VegaLite.vue / table cell renderers). Default context value
+  // is `{ palette: undefined }` so this is a no-op when no provider exists.
+  const contextPalette = React.useContext(UDIToolkitContext).palette;
+  const effectivePalette = palette ?? contextPalette;
 
   // Register the custom element on first render
   React.useEffect(() => {
@@ -83,12 +91,14 @@ export function UDIVis({ spec, selections, sourceResolver, fillContainer, palett
   }, [selections]);
 
   // Palette can carry a function (continuous color), so it must be set as a JS
-  // property — HTML attributes only carry strings.
+  // property — HTML attributes only carry strings. `effectivePalette` resolves
+  // own-prop → context-provider → undefined; downstream channel-level fallback
+  // to DEFAULT_PALETTE happens inside VegaLite.vue.
   React.useLayoutEffect(() => {
     if (elRef.current) {
-      (elRef.current as any).palette = palette;
+      (elRef.current as any).palette = effectivePalette;
     }
-  }, [palette]);
+  }, [effectivePalette]);
 
   // Listen for selection-change custom event.
   // Vue CE wraps emit args in an array: detail = [arg0, arg1, ...].

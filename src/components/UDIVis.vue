@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, defineEmits, useSlots } from 'vue';
+import { ref, computed, watch, onMounted, defineEmits, useSlots, inject } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
+import { UDI_PALETTE_KEY } from './paletteInjectKey';
 
 // The template root is a fragment (v-if/v-else templates), so Vue can't
 // auto-inherit `class`/`style`/etc. onto a single child. When mounted as
@@ -63,6 +64,13 @@ const emit = defineEmits<{
 }>();
 
 const props = defineProps<ParserProps>();
+
+// Palette fallback chain: own prop → UDIToolkitProvider's injected palette →
+// undefined (VegaLite/TableComponent fall back to DEFAULT_PALETTE per channel
+// internally). The injected value is a Ref so prop swaps at the provider
+// propagate without a manual re-render here.
+const injectedPalette = inject(UDI_PALETTE_KEY, null);
+const effectivePalette = computed(() => props.palette ?? injectedPalette?.value);
 
 const parsedSpec = ref<ParsedUDIGrammar | null>(null);
 // Per-instance flag: true once this instance's own data sources have been
@@ -701,14 +709,14 @@ const slots = useSlots();
         :signal-field-map="signalFieldMap"
         :point-select="pointSelect"
         :selections="props.selections"
-        :palette="props.palette"
+        :palette="effectivePalette"
       />
     </template>
     <template v-else>
       <TableComponent
         :data="transformedData"
         :spec="parsedSpec"
-        :palette="props.palette"
+        :palette="effectivePalette"
       />
     </template>
   </template>

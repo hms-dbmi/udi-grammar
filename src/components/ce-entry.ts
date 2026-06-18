@@ -139,6 +139,24 @@ export function clearAllSelections(): void {
   store.clearAllSelections();
 }
 
+/**
+ * Returns a snapshot of the current selection state. The snapshot's object
+ * identity is stable across calls until `selectionHash` flips — required by
+ * React's `useSyncExternalStore`, which would otherwise see a new reference
+ * on every render and tear infinitely. Pair with `subscribeToSelections` to
+ * build a reactive read in a host framework.
+ */
+let cachedSelectionsHash: string | null = null;
+let cachedSelectionsSnapshot: DataSelections = {};
+export function getDataSelections(): DataSelections {
+  const store = useDataSourcesStore(pinia);
+  if (store.selectionHash !== cachedSelectionsHash) {
+    cachedSelectionsHash = store.selectionHash;
+    cachedSelectionsSnapshot = { ...store.dataSelections };
+  }
+  return cachedSelectionsSnapshot;
+}
+
 export { UDIVisElement };
 export { DEFAULT_PALETTE } from './Palette';
 export type { UDIGrammar, DataSelections };

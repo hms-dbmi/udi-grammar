@@ -1,5 +1,26 @@
 export { UDIVis } from './UDIVis';
 export type { UDIVisProps } from './UDIVis';
+export { UDIToolkitProvider, UDIToolkitContext } from './UDIToolkitProvider';
+export type {
+  UDIToolkitProviderProps,
+  UDIToolkitContextValue,
+  DataPackageConfig,
+  DataPackageLoadPhase,
+  DataPackageStatus,
+} from './UDIToolkitProvider';
+export {
+  usePalette,
+  useDataPackageStatus,
+  useSelections,
+  useQueryData,
+  useClearAllSelections,
+} from './hooks';
+export type {
+  UseQueryDataResult,
+  UseQueryDataBaseOptions,
+  UseQueryDataSingleOptions,
+  UseQueryDataMapOptions,
+} from './hooks';
 export type { UDIGrammar } from '../GrammarTypes';
 // Types only — re-exporting the DEFAULT_PALETTE *value* here would statically
 // pull Palette.ts (and its non-externalized d3-scale import) into the react
@@ -12,7 +33,7 @@ export { queryData } from './queryData';
 export type { QueryDataSpec, QueryDataResult, QueryDataOptions } from '../ce-entry';
 export { loadDataPackage } from './loadDataPackage';
 export type { SourceSpec, LoadDataPackageOptions } from '../loadDataPackage';
-export { subscribeToSelections, clearAllSelections } from './selections';
+export { subscribeToSelections, clearAllSelections, getDataSelections } from './selections';
 export type {
   DataFieldDomain,
   IntervalDomain,
