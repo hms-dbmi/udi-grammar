@@ -60,9 +60,16 @@ export type VegaRange = string[] | { scheme: string };
 /**
  * Resolve a discrete color spec to a Vega `config.range.*` value. Arrays pass
  * through; a string is treated as a named scheme.
+ *
+ * Arrays are copied via `Array.from` rather than returned directly: when a
+ * consumer (Storybook stories, the React wrapper) supplies the palette via a
+ * reactive arg, the array reaching us is a Vue Proxy. vega-lite later runs
+ * `structuredClone` on its internal config and fails on the proxy with
+ * `DataCloneError: [object Array] could not be cloned`. A plain copy
+ * sidesteps the issue without disturbing the caller's data.
  */
 export function toVegaRange(color: DiscreteColor): VegaRange {
-  return Array.isArray(color) ? color : { scheme: color };
+  return Array.isArray(color) ? Array.from(color) : { scheme: color };
 }
 
 /**
@@ -71,6 +78,8 @@ export function toVegaRange(color: DiscreteColor): VegaRange {
  * A function cannot be expressed in Vega-Lite JSON config, so it is registered
  * with Vega's scheme registry via `registerScheme` (which returns the name to
  * reference). Arrays are interpolated by Vega; strings are scheme names.
+ * (Same Vue-proxy / structuredClone caveat as `toVegaRange` — array branch
+ * returns a plain copy.)
  */
 export function toVegaRamp(
   color: ContinuousColor,
@@ -80,7 +89,7 @@ export function toVegaRamp(
     return { scheme: registerScheme(color) };
   }
   if (Array.isArray(color)) {
-    return color;
+    return Array.from(color);
   }
   return { scheme: color };
 }

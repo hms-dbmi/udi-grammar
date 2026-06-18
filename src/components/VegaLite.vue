@@ -104,6 +104,13 @@ function initVegaChart() {
   const { success, specObject } = parseSpec();
   if (!success || !specObject) return;
 
+  // Capture whether the spec opted into container sizing on each axis;
+  // see the note above scheduleVegaResize for why we can't unconditionally
+  // write both signals on resize.
+  const specMaybeSized = specObject as { width?: unknown; height?: unknown };
+  widthIsContainer = specMaybeSized.width === 'container';
+  heightIsContainer = specMaybeSized.height === 'container';
+
   if (specObject.data && specObject.data.values) {
     delete specObject.data.values;
   }
@@ -224,11 +231,31 @@ function initVegaChart() {
 // directly. Both pieces are required: without the explicit signal writes
 // `view.resize().runAsync()` re-uses the frozen init-time dimensions and
 // the chart appears stuck at its original size.
+//
+// Critically, we ONLY write the signal for an axis that the spec marked
+// as `'container'`. Writing the height signal for a spec that uses
+// natural (data-driven) height — e.g. a vertical bar chart with
+// `width: 'container'` but no `height` set — combined with Vega-Lite's
+// default `autosize: 'pad'` (which treats `height` as the data-area
+// size, with axis padding added on top) creates a runaway feedback
+// loop: the chart renders taller than the container, the container
+// grows to fit the rendered SVG, ResizeObserver fires, we write the
+// new (larger) height back into the signal, the chart renders even
+// taller, and so on. The dashboard never hit this because its cards
+// have a fixed flex-bounded height; the Editor and ~half of Storybook
+// stories trip over it because their containers have content-driven
+// height.
 let resizeObserver: ResizeObserver | null = null;
 let resizeRaf: number | null = null;
+let widthIsContainer = false;
+let heightIsContainer = false;
 
 function scheduleVegaResize() {
   if (!vegaView.value || !vegaContainer.value) return;
+  // If the spec doesn't ask for container sizing on either axis, there's
+  // nothing for us to write — and view.resize() alone is a no-op when
+  // no dimensions changed. Skip entirely.
+  if (!widthIsContainer && !heightIsContainer) return;
   // Coalesce bursts of resize events (e.g. ~60 Hz during a drag-resize)
   // into one update per frame.
   if (resizeRaf !== null) return;
@@ -244,8 +271,8 @@ function scheduleVegaResize() {
     if (w <= 0 || h <= 0) return;
     try {
       const signals = view.getState().signals ?? {};
-      if ('width' in signals) view.signal('width', w);
-      if ('height' in signals) view.signal('height', h);
+      if (widthIsContainer && 'width' in signals) view.signal('width', w);
+      if (heightIsContainer && 'height' in signals) view.signal('height', h);
     } catch {
       // Spec doesn't expose width/height signals — fall through; resize()
       // alone still re-runs the layout, which is correct for natural-size
