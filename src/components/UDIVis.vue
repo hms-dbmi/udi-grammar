@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, defineEmits, useSlots, inject } from 'vue';
+// `defineEmits` is a compile-time macro in <script setup> — importing it
+// from 'vue' shadows the macro and trips TS 6 with "Import declaration
+// conflicts with local declaration of 'defineEmits'" because Vue's
+// generated types ALSO declare it ambient. Drop the import; the macro is
+// in scope automatically.
+import { ref, computed, watch, onMounted, useSlots, inject } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
 import { UDI_PALETTE_KEY } from './paletteInjectKey';
@@ -28,9 +33,13 @@ const { loading, selectionHash, tablesVersion } = storeToRefs(dataSourcesStore);
 
 export interface ParserProps {
   spec: UDIGrammar;
-  selections?: DataSelections;
+  // Optional props use `?: T | undefined` so callers under
+  // `exactOptionalPropertyTypes: true` (e.g. host apps with strict
+  // tsconfigs) can pass an explicit undefined without the compiler
+  // rejecting it. Vue treats both forms the same at runtime.
+  selections?: DataSelections | undefined;
   /** Map entity names to canonical data URLs, overriding whatever the spec contains. */
-  sourceResolver?: Record<string, string>;
+  sourceResolver?: Record<string, string> | undefined;
   /**
    * Make the chart fill its parent container (both width and height) and
    * resize when the container changes. Sets Vega-Lite `width: 'container'`,
@@ -39,7 +48,7 @@ export interface ParserProps {
    * Requires the parent to have a definite height. Default: false (chart
    * renders at its natural height).
    */
-  fillContainer?: boolean;
+  fillContainer?: boolean | undefined;
   /**
    * Consumer-supplied default color palette for charts and tables. Sets the
    * categorical colors, ordinal colors, single mark color, and continuous
@@ -47,7 +56,7 @@ export interface ParserProps {
    * it. Passed as a separate prop — not part of the spec — so a function-
    * valued ramp survives (the spec is JSON-cloned internally).
    */
-  palette?: UDIPalette;
+  palette?: UDIPalette | undefined;
 }
 
 // Expose data selections to parent component
@@ -298,7 +307,9 @@ function setDefaultDomains(
         // anchored. Skip the partner encoding (x2/y2) — it shares the
         // x/y scale and doesn't need its own domain.
         if (mark === 'rect') {
-          // @ts-expect-error: encoding is statically known
+          // TS 6 can infer `encoding` here without the previous
+          // `@ts-expect-error: encoding is statically known` escape; the
+          // unused directive was tripping TS2578 under the upgrade.
           const encoding: string = mapping.encoding;
           if (encoding === 'x2' || encoding === 'y2') continue;
           const partnerEncoding =
@@ -595,8 +606,15 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       //   // selectParam.select['encodings'] = 'sex';
       // }
 
+      // `DataSelection` doesn't carry a `source` field — the spec author
+      // doesn't bind a selection to a specific data source directly. We
+      // associate it with the spec's primary source (the first entry of
+      // `spec.source`, which is guaranteed by `parseSpecification` to be
+      // an array). Previously this read `layer.select.source` which was
+      // always `undefined` at runtime; using the spec's source gives the
+      // store a meaningful key for selection bookkeeping.
       dataSourcesStore.watchDataSelection(
-        layer.select.source,
+        spec.source[0]?.name ?? '',
         layer.select.name,
         layer.select.how.type, // TODO: set point if needed
       );

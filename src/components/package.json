@@ -1,6 +1,6 @@
 {
   "name": "udi-toolkit",
-  "version": "0.0.63",
+  "version": "0.0.66",
   "description": "Universal Discovery Interface Toolkit",
   "author": "dev-lan <devinscottlange@gmail.com>",
   "type": "module",
@@ -100,7 +100,7 @@
     "eslint-plugin-vue": "^10.0.0",
     "globals": "^15.12.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.8.2",
+    "typescript": "^6.0.3",
     "vite": "^6.4.1",
     "vite-plugin-checker": "^0.8.0",
     "vite-plugin-dts": "^4.5.3",

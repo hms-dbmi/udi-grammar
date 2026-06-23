@@ -19,6 +19,14 @@ export default [
       'src/components/index.ts',
       'src/components/dist',
       'src/components/node_modules',
+      // The React-wrapper subpath has its own tsconfig (tsconfig.react.json)
+      // that the Quasar root tsconfig doesn't reference. The
+      // typescript-eslint project service therefore can't discover these
+      // files in any registered project, surfacing them as
+      // "Parsing error: file was not found by the project service".
+      // They're already type-checked via the `build:react` flow, so
+      // skipping them here is the right separation of concerns.
+      'src/components/react-wrapper',
     ],
   },
 
@@ -63,6 +71,7 @@ export default [
       // are also extendable here. But we don't recommend using them directly.
     ],
   }),
+
 
   {
     languageOptions: {

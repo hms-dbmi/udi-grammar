@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { computed, defineProps, inject } from 'vue';
+// `defineProps` is a compile-time macro in <script setup>; importing it
+// shadows the macro and trips TS 6's "Import declaration conflicts with
+// local declaration" diagnostic. The macro is in scope automatically.
+import { computed, inject } from 'vue';
 import { cloneDeep } from 'lodash';
 import { UDI_PALETTE_KEY } from './paletteInjectKey';
 import type { ColDef } from 'ag-grid-community';
@@ -27,8 +30,14 @@ interface TableComponentProps {
   spec: ParsedUDIGrammar | null;
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   data: Record<string, any>[] | null;
-  /** Consumer-supplied color palette, forwarded to each cell renderer. */
-  palette?: UDIPalette;
+  /**
+   * Consumer-supplied color palette, forwarded to each cell renderer.
+   * Explicit `| undefined` is needed because callers under
+   * `exactOptionalPropertyTypes: true` (the Quasar dev typecheck) pass
+   * `effectivePalette` which is `UDIPalette | undefined` — `palette?:
+   * UDIPalette` alone would reject the explicit undefined.
+   */
+  palette?: UDIPalette | undefined;
 }
 
 const props = defineProps<TableComponentProps>();

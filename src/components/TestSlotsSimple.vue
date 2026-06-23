@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { span } from 'vega';
+// `span` was an unused import from vega left over from a removed
+// implementation. Dropping it silences the @typescript-eslint/no-unused-vars
+// warning.
 import { type ParsedUDIGrammar } from './Parser';
 import UDIVis from 'src/components/UDIVis.vue';
 

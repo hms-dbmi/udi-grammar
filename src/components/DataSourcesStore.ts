@@ -239,7 +239,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       // the target table (e.g. a brush on one dataset applied to another).
       if (relevantFilter) {
         const cols = new Set(inTable.columnNames());
-        const selectionFields = Object.keys(dataSelection.selection!);
+        // The `if (!dataSelection || !dataSelection.selection)` guard
+        // earlier in the function already narrowed `.selection` to non-
+        // null here — no `!` assertion needed.
+        const selectionFields = Object.keys(dataSelection.selection);
         if (selectionFields.some((f) => !cols.has(f))) {
           return null;
         }

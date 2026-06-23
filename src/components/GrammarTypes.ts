@@ -19,6 +19,34 @@ export interface UDIGrammar {
    * If not specificed the default is a table witha all fields.
    */
   representation?: Representation | Representations;
+
+  /**
+   * Optional spec-level rendering knobs. Lives outside `representation` so
+   * the same flags apply across the (potentially layered) visualization
+   * even when the spec author swaps marks.
+   */
+  config?: UDIGrammarConfig;
+}
+
+/**
+ * Top-level rendering knobs on a UDI grammar spec. Both fields are
+ * consumed by UDIVis / VegaLite — see references for the runtime
+ * behavior of each.
+ */
+export interface UDIGrammarConfig {
+  /**
+   * Debounce (ms) applied to the `buildVisualization` pipeline. Useful
+   * when a chart re-renders frequently in response to brush ticks; the
+   * debounce coalesces bursts before re-running the (potentially
+   * expensive) transformation pass. Default 0 (no debounce).
+   */
+  debounce?: number;
+  /**
+   * When true, vega-embed's "actions" menu (the small "..." in the
+   * chart's corner that exposes "Open in editor", "View source", "Save
+   * as PNG/SVG") is hidden. Default false.
+   */
+  hideActions?: boolean;
 }
 
 /**

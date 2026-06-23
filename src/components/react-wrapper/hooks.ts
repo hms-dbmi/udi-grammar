@@ -271,11 +271,15 @@ export function useQueryData(
       running = false;
     };
 
-    // Reset loading status on fresh enable / spec change.
+    // Reset loading status on fresh enable / spec change. Iterating with
+    // `Object.entries` (instead of `Object.keys`) lets the local `entry`
+    // be narrowed once — under `noUncheckedIndexedAccess` a `prev[k]`
+    // read would otherwise widen back to `UseQueryDataResult | undefined`
+    // on each access.
     setResults((prev) => {
       const next: Record<string, UseQueryDataResult> = {};
-      for (const k of Object.keys(prev)) {
-        next[k] = prev[k].isLoading ? prev[k] : { ...prev[k], isLoading: true };
+      for (const [k, entry] of Object.entries(prev)) {
+        next[k] = entry.isLoading ? entry : { ...entry, isLoading: true };
       }
       return next;
     });

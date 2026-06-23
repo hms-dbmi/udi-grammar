@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import type { ParsedUDIGrammar } from './Parser';
 import type { DataSelections } from './DataSourcesStore';
 import TestMultipleSpecs from './TestMultipleSpecs.vue';
@@ -36,14 +36,24 @@ for (const selection of props.selections ?? []) {
   });
 }
 
-const udiVisSelections = computed(() => {
-  const visSelections = {};
+// Shape of a point selection entry the toolkit's DataSourcesStore expects
+// when `selections` is forwarded externally — same union sibling as the
+// interval variant in TestIntervalFilterHooks.
+interface VisPointSelection {
+  type: 'point';
+  dataSourceKey: string;
+  selection: Record<string, string[]>;
+}
+
+const udiVisSelections = computed<Record<string, VisPointSelection>>(() => {
+  const visSelections: Record<string, VisPointSelection> = {};
   if (!props.selections) return visSelections;
   for (let i = 0; i < props.selections.length; i++) {
     const selection = props.selections[i];
     const pointFilter = pointFilters.value[i];
     if (!selection || !pointFilter) continue;
-    if (!(selection.selectionName in visSelections)) {
+    const existing = visSelections[selection.selectionName];
+    if (!existing) {
       visSelections[selection.selectionName] = {
         type: 'point',
         dataSourceKey: selection.entity,
@@ -52,33 +62,27 @@ const udiVisSelections = computed(() => {
         },
       };
     } else {
-      visSelections[selection.selectionName].selection[selection.field] = pointFilter.selectedValues;
+      existing.selection[selection.field] = pointFilter.selectedValues;
     }
   }
   return visSelections;
 });
 
 function handleSelectionChange(selection: DataSelections) {
-  // console.log('handle selection change: ', selection);
   for (const pointFilter of pointFilters.value) {
-    const selectionName = pointFilter.selectionName;
-    if (!selection[selectionName] || !selection[selectionName].selection) {
+    const active = selection[pointFilter.selectionName];
+    if (!active || !active.selection) {
       pointFilter.selectedValues = [];
       continue;
     }
-    const updatedValues =
-      selection[selectionName].selection[
-        props.selections?.find((s) => s.field === pointFilter.field)?.field ??
-          'UNKNOWN_FIELD'
-      ];
+    // Point-selection payloads are `Record<string, string[]>` at runtime;
+    // the store types them as a union with the interval shape.
+    const payload = active.selection as Record<string, string[]>;
+    const updatedValues = payload[pointFilter.field];
     if (updatedValues) {
       pointFilter.selectedValues = updatedValues;
     }
   }
-}
-
-function checked(possibleValue: string, pointFilter: PointFilter): boolean {
-  return pointFilter.selectedValues.includes(possibleValue);
 }
 </script>
 
@@ -86,7 +90,7 @@ function checked(possibleValue: string, pointFilter: PointFilter): boolean {
   <template v-if="props.testType === 'read'">
     <h2>Read Test</h2>
     <template v-for="(pointFilter, index) in pointFilters" :key="index">
-      <div>{{ props.selections[index].field }}</div>
+      <div>{{ pointFilter.field }}</div>
       <ul>
         <li v-for="value in pointFilter.selectedValues" :key="value">
           {{ value }}
@@ -100,10 +104,23 @@ function checked(possibleValue: string, pointFilter: PointFilter): boolean {
   <template v-if="props.testType === 'write'">
     <h2>Write Test</h2>
     <template v-for="(pointFilter, index) in pointFilters" :key="index">
-      <div>{{ props.selections[index].field }}</div>
+      <div>{{ pointFilter.field }}</div>
       <ul>
-        <li v-for="possibleValue in pointFilter.allPossibleValues" :key="possibleValue">
-          <input type="checkbox" v-model="pointFilter.selectedValues" :value="possibleValue"> {{ possibleValue }}</input>
+        <li
+          v-for="possibleValue in pointFilter.allPossibleValues"
+          :key="possibleValue"
+        >
+          <label>
+            <!-- `<input>` is self-closing in HTML5; the previous markup
+                 wrapped the label text *inside* the input which Vue's
+                 template parser flagged as an invalid end tag. -->
+            <input
+              type="checkbox"
+              v-model="pointFilter.selectedValues"
+              :value="possibleValue"
+            />
+            {{ possibleValue }}
+          </label>
         </li>
       </ul>
       <hr />
@@ -112,20 +129,33 @@ function checked(possibleValue: string, pointFilter: PointFilter): boolean {
     <UDIVis :spec="spec" :selections="udiVisSelections"></UDIVis>
   </template>
 
-
   <template v-if="props.testType === 'linked'">
-    <h2>Write Test</h2>
+    <h2>Linked Test</h2>
     <template v-for="(pointFilter, index) in pointFilters" :key="index">
-      <div>{{ props.selections[index].field }}</div>
+      <div>{{ pointFilter.field }}</div>
       <ul>
-        <li v-for="possibleValue in pointFilter.allPossibleValues" :key="possibleValue">
-          <input type="checkbox" v-model="pointFilter.selectedValues" :value="possibleValue"> {{ possibleValue }}</input>
+        <li
+          v-for="possibleValue in pointFilter.allPossibleValues"
+          :key="possibleValue"
+        >
+          <label>
+            <input
+              type="checkbox"
+              v-model="pointFilter.selectedValues"
+              :value="possibleValue"
+            />
+            {{ possibleValue }}
+          </label>
         </li>
       </ul>
       <hr />
       <hr />
     </template>
-    <UDIVis :spec="spec" :selections="udiVisSelections" @selection-change="handleSelectionChange"></UDIVis>
+    <UDIVis
+      :spec="spec"
+      :selections="udiVisSelections"
+      @selection-change="handleSelectionChange"
+    ></UDIVis>
   </template>
   <TestMultipleSpecs v-if="additionalSpecs" :specs="additionalSpecs" />
 </template>

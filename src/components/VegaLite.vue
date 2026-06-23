@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import vegaEmbed from 'vega-embed';
-import { defineProps } from 'vue';
+// `defineProps` is a compile-time macro in <script setup> — importing it
+// shadows the macro and trips TS 6's "Import declaration conflicts with
+// local declaration" diagnostic. The macro is in scope automatically.
 import { watch } from 'vue';
 import type {
   ActiveDataSelection,
@@ -25,20 +27,29 @@ interface VegaSpecShim {
   };
 }
 
+// Shape callers actually hand us — a UDI grammar `DataSelection` for a
+// point selection. `fields` is optional in that grammar; the click
+// handler treats "no fields" as a no-op rather than throwing.
 interface PointSelect {
   name: string;
-  fields: string[] | string;
+  fields?: string[] | string;
 }
 
 interface VegaLiteProps {
   spec: string;
-  hideActions?: boolean;
-  signalKeys?: string[];
-  signalFieldMap?: Record<string, Record<string, string>>;
-  pointSelect?: PointSelect | null;
-  selections?: DataSelections | null;
+  // All optional props use `?: T | undefined` (rather than the cleaner
+  // `?: T`) so callers under `exactOptionalPropertyTypes: true` — the
+  // Quasar dev typecheck has this enabled — can pass an explicit
+  // `undefined` (e.g. `:hide-actions="props.spec.config?.hideActions"`)
+  // without the compiler complaining. Vue treats both forms the same at
+  // runtime; this is purely a TS-encoding compatibility detail.
+  hideActions?: boolean | undefined;
+  signalKeys?: string[] | undefined;
+  signalFieldMap?: Record<string, Record<string, string>> | undefined;
+  pointSelect?: PointSelect | null | undefined;
+  selections?: DataSelections | null | undefined;
   /** Consumer-supplied color palette; falls back to DEFAULT_PALETTE per channel. */
-  palette?: UDIPalette;
+  palette?: UDIPalette | undefined;
 }
 
 const props = defineProps<VegaLiteProps>();
@@ -187,27 +198,35 @@ function initVegaChart() {
         }
       }
       if (props.pointSelect) {
+        // Capture the prop into a local so its narrowing survives into the
+        // click closure — TS otherwise widens `props.pointSelect` back to
+        // `PointSelect | null | undefined` inside the callback because props
+        // could in principle change between subscription and click.
+        const point = props.pointSelect;
         // if the signal is a point selection we I couldn't get signals
         // to work with dynamic data, so click events it is!
         view.addEventListener('click', function (event, item) {
-          let fields = props.pointSelect.fields;
-          if (typeof fields === 'string') {
-            fields = [fields];
-          }
-          // @ts-expect-error: I check it's existence right below
-          const datum = item.datum;
+          // Normalize the optional `fields` (string | string[] | undefined)
+          // to an iterable list of strings. No fields → no selection to
+          // build; bail.
+          const raw = point.fields;
+          const fields: string[] =
+            raw == null ? [] : typeof raw === 'string' ? [raw] : raw;
+          if (fields.length === 0) return;
+          const datum = (item as { datum?: Record<string, unknown> })?.datum;
           if (!datum) {
-            dataSourcesStore.clearDataSelection(props.pointSelect.name);
+            dataSourcesStore.clearDataSelection(point.name);
           } else {
-            const pointSelection = {};
+            // Coerce the (unknown) datum field values to string — that's
+            // what `PointSelection` is declared as in DataSourcesStore.
+            // CSV-derived data flows through Arquero as primitives; the
+            // String() coercion preserves number/boolean keys verbatim
+            // and is safe even when the underlying column is mixed-type.
+            const pointSelection: Record<string, string[]> = {};
             for (const f of fields) {
-              // @ts-expect-error: ignore errror
-              pointSelection[f] = [datum[f]];
+              pointSelection[f] = [String(datum[f])];
             }
-            dataSourcesStore.updateDataSelection(
-              props.pointSelect.name,
-              pointSelection,
-            );
+            dataSourcesStore.updateDataSelection(point.name, pointSelection);
           }
         });
       }
@@ -423,6 +442,14 @@ function updateVegaChartSelection(
     const channel = (
       signalTuple as Array<{ channel: string; field: string }>
     ).find((t) => t.field === vegaField)?.channel;
+    // Vega-Lite only emits `_tuple_fields` entries for the x/y channels of
+    // an interval selection, so this narrowing is safe at runtime. The
+    // optional-chain on `.find()?.channel` still leaves `channel` as
+    // `string | undefined` at the type level, so guard explicitly: if we
+    // didn't find a matching tuple field there's no signal to update for
+    // this entry and we move on. Mirrors the `as 'x' | 'y'` narrowing
+    // already used at the top of this file for the symmetric read path.
+    if (channel !== 'x' && channel !== 'y') continue;
     const signalKeyFull = `${signalKeyStart}_${channel}`;
     let testNew = range;
     testNew = toPixelRange(testNew, channel);
