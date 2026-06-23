@@ -48,6 +48,10 @@ export default defineConfig((/* ctx */) => {
             './../src/components/dist',
             './../src/components/node_modules',
             './../src/components/index.ts',
+            // React entry: .tsx built separately via tsconfig.react.json (jsx
+            // enabled). The Vue app's vue-tsc has no jsx, so typechecking it
+            // here errors with "'--jsx' is not set".
+            './../src/components/react-wrapper',
           ];
         },
       },
