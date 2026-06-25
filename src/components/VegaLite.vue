@@ -15,7 +15,7 @@ import type { View } from 'vega';
 import type { VisualizationSpec } from 'vega-embed';
 import { changeset } from 'vega';
 const dataSourcesStore = useDataSourcesStore();
-import { isEmpty } from 'lodash';
+import { isEmpty, debounce } from 'lodash';
 import type { UDIPalette } from './Palette';
 import { DEFAULT_PALETTE, toVegaRange, toVegaRamp } from './Palette';
 import { registerRampScheme } from './paletteScheme';
@@ -115,9 +115,8 @@ function initVegaChart() {
   const { success, specObject } = parseSpec();
   if (!success || !specObject) return;
 
-  // Capture whether the spec opted into container sizing on each axis;
-  // see the note above scheduleVegaResize for why we can't unconditionally
-  // write both signals on resize.
+  // Capture whether the spec opted into container sizing on each axis; the
+  // ResizeObserver only re-embeds on resize when one of these is true.
   const specMaybeSized = specObject as { width?: unknown; height?: unknown };
   widthIsContainer = specMaybeSized.width === 'container';
   heightIsContainer = specMaybeSized.height === 'container';
@@ -232,6 +231,10 @@ function initVegaChart() {
       }
 
       updateVegaChart();
+      // Restore any active brush after a re-embed (resize / palette change);
+      // a fresh view starts with no selection rect even though Pinia still
+      // holds the selection. No-op on initial mount when there's none.
+      updateVegaChartSelections();
     })
     .catch((error) => {
       console.error('Error rendering chart', error);
@@ -241,79 +244,57 @@ function initVegaChart() {
     });
 }
 
-// Track the chart's container element and re-run Vega's layout pass when
-// the container size changes. vega-embed reads `width: 'container'` /
-// `height: 'container'` from `containerSize()` ONLY at signal init time —
-// later parent resizes (e.g. dragging a card to a different col/row span)
-// don't re-evaluate that signal. We have to (a) observe the container, and
-// (b) write the new pixel width/height into Vega's `width`/`height` signals
-// directly. Both pieces are required: without the explicit signal writes
-// `view.resize().runAsync()` re-uses the frozen init-time dimensions and
-// the chart appears stuck at its original size.
+// Re-embed (not just resize) when the container changes size. Vega-Lite bakes
+// each axis's tick COUNT from the width at compile time; view.resize() only
+// repositions those baked ticks, so at a new width they crowd and overlap and
+// never match a fresh load. Recompiling the spec for the new container size is
+// the only way to get correct ticks. Debounced trailing so a drag-resize
+// re-renders once on settle instead of flickering every frame.
 //
-// Critically, we ONLY write the signal for an axis that the spec marked
-// as `'container'`. Writing the height signal for a spec that uses
-// natural (data-driven) height — e.g. a vertical bar chart with
-// `width: 'container'` but no `height` set — combined with Vega-Lite's
-// default `autosize: 'pad'` (which treats `height` as the data-area
-// size, with axis padding added on top) creates a runaway feedback
-// loop: the chart renders taller than the container, the container
-// grows to fit the rendered SVG, ResizeObserver fires, we write the
-// new (larger) height back into the signal, the chart renders even
-// taller, and so on. The dashboard never hit this because its cards
-// have a fixed flex-bounded height; the Editor and ~half of Storybook
-// stories trip over it because their containers have content-driven
-// height.
+// Only react when the spec uses container sizing on some axis; a fixed-size
+// chart doesn't care about its container's size. `lastW/lastH` skip the
+// ResizeObserver's initial fire and any no-op callbacks (and, with fit-x, the
+// chart fits its container exactly so a re-embed never changes the container
+// size — no feedback loop).
 let resizeObserver: ResizeObserver | null = null;
-let resizeRaf: number | null = null;
 let widthIsContainer = false;
 let heightIsContainer = false;
+let lastW = 0;
+let lastH = 0;
 
-function scheduleVegaResize() {
-  if (!vegaView.value || !vegaContainer.value) return;
-  // If the spec doesn't ask for container sizing on either axis, there's
-  // nothing for us to write — and view.resize() alone is a no-op when
-  // no dimensions changed. Skip entirely.
-  if (!widthIsContainer && !heightIsContainer) return;
-  // Coalesce bursts of resize events (e.g. ~60 Hz during a drag-resize)
-  // into one update per frame.
-  if (resizeRaf !== null) return;
-  resizeRaf = requestAnimationFrame(() => {
-    resizeRaf = null;
-    const view = vegaView.value;
-    const el = vegaContainer.value;
-    if (!view || !el) return;
-    const w = el.offsetWidth;
-    const h = el.offsetHeight;
-    // Detached / display:none containers report 0 — skip rather than
-    // collapsing the chart to a point.
-    if (w <= 0 || h <= 0) return;
-    try {
-      const signals = view.getState().signals ?? {};
-      if (widthIsContainer && 'width' in signals) view.signal('width', w);
-      if (heightIsContainer && 'height' in signals) view.signal('height', h);
-    } catch {
-      // Spec doesn't expose width/height signals — fall through; resize()
-      // alone still re-runs the layout, which is correct for natural-size
-      // specs whose dimensions don't depend on the container.
-    }
-    void view.resize().runAsync();
-  });
-}
+const reembedForResize = debounce(() => {
+  if (!vegaView.value) return;
+  // The live brush rect lives on the Vega view and is dropped by finalize();
+  // the active selection itself lives in Pinia (props.selections) and is
+  // re-applied by initVegaChart below, so cross-filtering survives the resize.
+  vegaView.value.finalize();
+  vegaView.value = null;
+  initVegaChart();
+}, 150);
 
 onMounted(() => {
   initVegaChart();
   if (vegaContainer.value && typeof ResizeObserver !== 'undefined') {
-    resizeObserver = new ResizeObserver(() => scheduleVegaResize());
+    lastW = vegaContainer.value.offsetWidth;
+    lastH = vegaContainer.value.offsetHeight;
+    resizeObserver = new ResizeObserver(() => {
+      if (!widthIsContainer && !heightIsContainer) return;
+      const el = vegaContainer.value;
+      if (!el) return;
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      if (w <= 0 || h <= 0) return; // detached / display:none
+      if (w === lastW && h === lastH) return; // initial fire / no real change
+      lastW = w;
+      lastH = h;
+      reembedForResize();
+    });
     resizeObserver.observe(vegaContainer.value);
   }
 });
 
 onBeforeUnmount(() => {
-  if (resizeRaf !== null) {
-    cancelAnimationFrame(resizeRaf);
-    resizeRaf = null;
-  }
+  reembedForResize.cancel();
   if (resizeObserver) {
     resizeObserver.disconnect();
     resizeObserver = null;

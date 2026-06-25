@@ -492,6 +492,13 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
     // data: { url: './data/penguins.csv' },
     width: 'container',
+    // fit-x makes the `width` signal mean the TOTAL width (axes included),
+    // so scheduleVegaResize writing offsetWidth into it lines up exactly with
+    // the container. Without this, Vega-Lite defaults to autosize 'pad' where
+    // `width` is only the data area and axis padding is added outside it — the
+    // signal write then overshoots, the SVG overflows the container, and tick
+    // labels lay out for the wrong width (irregular spacing + flicker on resize).
+    autosize: { type: 'fit-x', contains: 'padding' },
     data: { name: 'udi_data', values: [] },
   };
   if (props.fillContainer) {
