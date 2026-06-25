@@ -92,7 +92,7 @@ export const PerInstanceOverride = {
       <UDIToolkitProvider :palette="args.palette">
         <div style="display:flex; flex-direction:column; gap:24px;">
           <UDIVis :spec="barSpec" />
-          <UDIVis :spec="heatmapSpec" :palette="args.override" />
+          <UDIVis :spec="barSpec" :palette="args.override" />
         </div>
       </UDIToolkitProvider>
     `,
