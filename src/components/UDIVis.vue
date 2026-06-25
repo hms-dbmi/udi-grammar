@@ -742,6 +742,7 @@ const slots = useSlots();
         :data="transformedData"
         :spec="parsedSpec"
         :palette="effectivePalette"
+        :fill-container="props.fillContainer"
       />
     </template>
   </template>

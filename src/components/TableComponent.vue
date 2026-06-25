@@ -38,6 +38,9 @@ interface TableComponentProps {
    * UDIPalette` alone would reject the explicit undefined.
    */
   palette?: UDIPalette | undefined;
+  /** Fill the parent's height instead of the default fixed height. Mirrors
+   *  UDIVis's `fillContainer`; requires the parent to have a definite height. */
+  fillContainer?: boolean | undefined;
 }
 
 const props = defineProps<TableComponentProps>();
@@ -307,7 +310,7 @@ const colDefs = computed<ColDef[]>(() => {
   <ag-grid-vue
     :rowData="props.data"
     :columnDefs="colDefs"
-    style="height: 500px"
+    :style="props.fillContainer ? { height: '100%' } : { height: '500px' }"
     :rowHeight="20"
   >
   </ag-grid-vue>
