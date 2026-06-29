@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import vegaEmbed from 'vega-embed';
-import { defineProps } from 'vue';
+// `defineProps` is a compile-time macro in <script setup> — importing it
+// shadows the macro and trips TS 6's "Import declaration conflicts with
+// local declaration" diagnostic. The macro is in scope automatically.
 import { watch } from 'vue';
 import type {
   ActiveDataSelection,
@@ -13,7 +15,10 @@ import type { View } from 'vega';
 import type { VisualizationSpec } from 'vega-embed';
 import { changeset } from 'vega';
 const dataSourcesStore = useDataSourcesStore();
-import { isEmpty } from 'lodash';
+import { isEmpty, debounce } from 'lodash';
+import type { UDIPalette } from './Palette';
+import { DEFAULT_PALETTE, toVegaRange, toVegaRamp } from './Palette';
+import { registerRampScheme } from './paletteScheme';
 
 // our type is more specific than the one from vega-embed
 interface VegaSpecShim {
@@ -22,21 +27,55 @@ interface VegaSpecShim {
   };
 }
 
+// Shape callers actually hand us — a UDI grammar `DataSelection` for a
+// point selection. `fields` is optional in that grammar; the click
+// handler treats "no fields" as a no-op rather than throwing.
 interface PointSelect {
   name: string;
-  fields: string[] | string;
+  fields?: string[] | string;
 }
 
 interface VegaLiteProps {
   spec: string;
-  hideActions?: boolean;
-  signalKeys?: string[];
-  signalFieldMap?: Record<string, Record<string, string>>;
-  pointSelect?: PointSelect | null;
-  selections?: DataSelections | null;
+  // All optional props use `?: T | undefined` (rather than the cleaner
+  // `?: T`) so callers under `exactOptionalPropertyTypes: true` — the
+  // Quasar dev typecheck has this enabled — can pass an explicit
+  // `undefined` (e.g. `:hide-actions="props.spec.config?.hideActions"`)
+  // without the compiler complaining. Vue treats both forms the same at
+  // runtime; this is purely a TS-encoding compatibility detail.
+  hideActions?: boolean | undefined;
+  signalKeys?: string[] | undefined;
+  signalFieldMap?: Record<string, Record<string, string>> | undefined;
+  pointSelect?: PointSelect | null | undefined;
+  selections?: DataSelections | null | undefined;
+  /** Consumer-supplied color palette; falls back to DEFAULT_PALETTE per channel. */
+  palette?: UDIPalette | undefined;
 }
 
 const props = defineProps<VegaLiteProps>();
+
+// Build the vega-embed `config` object from the palette prop, falling back to
+// DEFAULT_PALETTE per channel. A spec-level per-encoding `range` still wins —
+// this only sets the scale defaults.
+function buildVegaConfig(): Record<string, unknown> {
+  const palette = props.palette ?? {};
+  const markColor = palette.mark ?? DEFAULT_PALETTE.mark;
+  const category = palette.category ?? DEFAULT_PALETTE.category;
+  const ordinal = palette.ordinal ?? DEFAULT_PALETTE.ordinal;
+  const ramp = palette.ramp ?? DEFAULT_PALETTE.ramp;
+
+  const range: Record<string, unknown> = {};
+  if (category != null) range.category = toVegaRange(category);
+  if (ordinal != null) range.ordinal = toVegaRange(ordinal);
+  if (ramp != null) range.ramp = toVegaRamp(ramp, registerRampScheme);
+
+  const config: Record<string, unknown> = {
+    point: { shape: 'circle', filled: true },
+    range,
+  };
+  if (markColor != null) config.mark = { color: markColor };
+  return config;
+}
 
 const vegaContainer = ref();
 const vegaView = ref<View | null>(null);
@@ -76,31 +115,19 @@ function initVegaChart() {
   const { success, specObject } = parseSpec();
   if (!success || !specObject) return;
 
+  // Capture whether the spec opted into container sizing on each axis; the
+  // ResizeObserver only re-embeds on resize when one of these is true.
+  const specMaybeSized = specObject as { width?: unknown; height?: unknown };
+  widthIsContainer = specMaybeSized.width === 'container';
+  heightIsContainer = specMaybeSized.height === 'container';
+
   if (specObject.data && specObject.data.values) {
     delete specObject.data.values;
   }
   // console.log('initializing vega chart with spec:', specObject);
   vegaEmbed(vegaContainer.value, specObject as VisualizationSpec, {
     actions: props.hideActions ? false : true,
-    config: {
-      mark: { color: '#E6A01A' },
-      point: { shape: 'circle', filled: true },
-      range: {
-        category: [
-          '#E6A01A',
-          '#16A987',
-          '#0673B0',
-          '#9EC8DD',
-          '#204E62',
-          '#BF97E4',
-          '#D95838',
-          '#6FDCC3',
-          '#787874',
-        ],
-        // ordinal: { scheme: 'greens' },
-        ramp: { scheme: 'oranges' },
-      },
-    },
+    config: buildVegaConfig(),
   })
     .then((result) => {
       errorMessage.value = null;
@@ -170,32 +197,44 @@ function initVegaChart() {
         }
       }
       if (props.pointSelect) {
+        // Capture the prop into a local so its narrowing survives into the
+        // click closure — TS otherwise widens `props.pointSelect` back to
+        // `PointSelect | null | undefined` inside the callback because props
+        // could in principle change between subscription and click.
+        const point = props.pointSelect;
         // if the signal is a point selection we I couldn't get signals
         // to work with dynamic data, so click events it is!
         view.addEventListener('click', function (event, item) {
-          let fields = props.pointSelect.fields;
-          if (typeof fields === 'string') {
-            fields = [fields];
-          }
-          // @ts-expect-error: I check it's existence right below
-          const datum = item.datum;
+          // Normalize the optional `fields` (string | string[] | undefined)
+          // to an iterable list of strings. No fields → no selection to
+          // build; bail.
+          const raw = point.fields;
+          const fields: string[] =
+            raw == null ? [] : typeof raw === 'string' ? [raw] : raw;
+          if (fields.length === 0) return;
+          const datum = (item as { datum?: Record<string, unknown> })?.datum;
           if (!datum) {
-            dataSourcesStore.clearDataSelection(props.pointSelect.name);
+            dataSourcesStore.clearDataSelection(point.name);
           } else {
-            const pointSelection = {};
+            // Coerce the (unknown) datum field values to string — that's
+            // what `PointSelection` is declared as in DataSourcesStore.
+            // CSV-derived data flows through Arquero as primitives; the
+            // String() coercion preserves number/boolean keys verbatim
+            // and is safe even when the underlying column is mixed-type.
+            const pointSelection: Record<string, string[]> = {};
             for (const f of fields) {
-              // @ts-expect-error: ignore errror
-              pointSelection[f] = [datum[f]];
+              pointSelection[f] = [String(datum[f])];
             }
-            dataSourcesStore.updateDataSelection(
-              props.pointSelect.name,
-              pointSelection,
-            );
+            dataSourcesStore.updateDataSelection(point.name, pointSelection);
           }
         });
       }
 
       updateVegaChart();
+      // Restore any active brush after a re-embed (resize / palette change);
+      // a fresh view starts with no selection rect even though Pinia still
+      // holds the selection. No-op on initial mount when there's none.
+      updateVegaChartSelections();
     })
     .catch((error) => {
       console.error('Error rendering chart', error);
@@ -205,8 +244,61 @@ function initVegaChart() {
     });
 }
 
+// Re-embed (not just resize) when the container changes size. Vega-Lite bakes
+// each axis's tick COUNT from the width at compile time; view.resize() only
+// repositions those baked ticks, so at a new width they crowd and overlap and
+// never match a fresh load. Recompiling the spec for the new container size is
+// the only way to get correct ticks. Debounced trailing so a drag-resize
+// re-renders once on settle instead of flickering every frame.
+//
+// Only react when the spec uses container sizing on some axis; a fixed-size
+// chart doesn't care about its container's size. `lastW/lastH` skip the
+// ResizeObserver's initial fire and any no-op callbacks (and, with fit-x, the
+// chart fits its container exactly so a re-embed never changes the container
+// size — no feedback loop).
+let resizeObserver: ResizeObserver | null = null;
+let widthIsContainer = false;
+let heightIsContainer = false;
+let lastW = 0;
+let lastH = 0;
+
+const reembedForResize = debounce(() => {
+  if (!vegaView.value) return;
+  // The live brush rect lives on the Vega view and is dropped by finalize();
+  // the active selection itself lives in Pinia (props.selections) and is
+  // re-applied by initVegaChart below, so cross-filtering survives the resize.
+  vegaView.value.finalize();
+  vegaView.value = null;
+  initVegaChart();
+}, 150);
+
 onMounted(() => {
   initVegaChart();
+  if (vegaContainer.value && typeof ResizeObserver !== 'undefined') {
+    lastW = vegaContainer.value.offsetWidth;
+    lastH = vegaContainer.value.offsetHeight;
+    resizeObserver = new ResizeObserver(() => {
+      if (!widthIsContainer && !heightIsContainer) return;
+      const el = vegaContainer.value;
+      if (!el) return;
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      if (w <= 0 || h <= 0) return; // detached / display:none
+      if (w === lastW && h === lastH) return; // initial fire / no real change
+      lastW = w;
+      lastH = h;
+      reembedForResize();
+    });
+    resizeObserver.observe(vegaContainer.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  reembedForResize.cancel();
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+    resizeObserver = null;
+  }
 });
 
 // Update data in the existing Vega view, preserving brush/selection state.
@@ -269,6 +361,22 @@ async function updateVegaChart() {
 
 watch(() => props.spec, updateVegaChart);
 
+// The palette only feeds the embed-time `config`, so a change requires a full
+// re-embed (not just a data update). Finalize the existing view first so its
+// dataflow / listeners don't leak. Palette is a consumer-level config that
+// rarely changes, so re-embedding (and dropping any active brush) is fine.
+watch(
+  () => props.palette,
+  () => {
+    if (vegaView.value) {
+      vegaView.value.finalize();
+      vegaView.value = null;
+    }
+    initVegaChart();
+  },
+  { deep: true },
+);
+
 async function updateVegaChartSelections() {
   // console.log('UDI-VIS: vegaChartSelections triggered', props.selections);
   // console.log('vega-lite selections changed');
@@ -315,6 +423,14 @@ function updateVegaChartSelection(
     const channel = (
       signalTuple as Array<{ channel: string; field: string }>
     ).find((t) => t.field === vegaField)?.channel;
+    // Vega-Lite only emits `_tuple_fields` entries for the x/y channels of
+    // an interval selection, so this narrowing is safe at runtime. The
+    // optional-chain on `.find()?.channel` still leaves `channel` as
+    // `string | undefined` at the type level, so guard explicitly: if we
+    // didn't find a matching tuple field there's no signal to update for
+    // this entry and we move on. Mirrors the `as 'x' | 'y'` narrowing
+    // already used at the top of this file for the symmetric read path.
+    if (channel !== 'x' && channel !== 'y') continue;
     const signalKeyFull = `${signalKeyStart}_${channel}`;
     let testNew = range;
     testNew = toPixelRange(testNew, channel);

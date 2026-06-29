@@ -5,8 +5,23 @@
     "emitDeclarationOnly": true,
     "outDir": "dist",
     "skipLibCheck": true,
-    "moduleResolution": "nodenext",
-    "baseUrl": "."
+    // Bundler module resolution (matching tsconfig.react.json and how Vite
+    // actually resolves the source). The previous `nodenext` setting
+    // worked in TS 5 by virtue of looser pairing rules, but TS 6 enforces
+    // that `nodenext` requires `.js` extensions on every relative import
+    // — which the codebase doesn't use.
+    "module": "esnext",
+    "moduleResolution": "bundler"
+    // `baseUrl` was here purely as a no-op default; deprecated in TS 6.
   },
-  "exclude": ["*.stories.ts", "react-wrapper/**/*", "vite.config.ce.ts", "vite.config.react.ts"]
+  "exclude": [
+    "*.stories.ts",
+    "react-wrapper/**/*",
+    "vite.config.ce.ts",
+    "vite.config.react.ts",
+    // TS 6 picks up emitted dist/*.d.ts as inputs by default; without
+    // excluding it, every typecheck run errors with TS5055 (cannot overwrite
+    // input file). TS 5 happened not to globbing this path.
+    "dist/**/*"
+  ]
 }

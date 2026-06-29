@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { computed, defineProps } from 'vue';
+// `defineProps` is a compile-time macro in <script setup>; importing it
+// shadows the macro and trips TS 6's "Import declaration conflicts with
+// local declaration" diagnostic. The macro is in scope automatically.
+import { computed, inject } from 'vue';
 import { cloneDeep } from 'lodash';
+import { UDI_PALETTE_KEY } from './paletteInjectKey';
 import type { ColDef } from 'ag-grid-community';
 import { type ParsedUDIGrammar } from './Parser';
 import type { ExtendedRowMapping } from './TableUtil';
@@ -18,6 +22,7 @@ import type {
   NumberDomain,
   StringDomain,
 } from './GrammarTypes';
+import type { UDIPalette } from './Palette';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -25,9 +30,25 @@ interface TableComponentProps {
   spec: ParsedUDIGrammar | null;
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   data: Record<string, any>[] | null;
+  /**
+   * Consumer-supplied color palette, forwarded to each cell renderer.
+   * Explicit `| undefined` is needed because callers under
+   * `exactOptionalPropertyTypes: true` (the Quasar dev typecheck) pass
+   * `effectivePalette` which is `UDIPalette | undefined` — `palette?:
+   * UDIPalette` alone would reject the explicit undefined.
+   */
+  palette?: UDIPalette | undefined;
+  /** Fill the parent's height instead of the default fixed height. Mirrors
+   *  UDIVis's `fillContainer`; requires the parent to have a definite height. */
+  fillContainer?: boolean | undefined;
 }
 
 const props = defineProps<TableComponentProps>();
+
+// Palette fallback chain: own prop → UDIToolkitProvider's injected palette →
+// undefined (cell renderers handle the DEFAULT_PALETTE fallback themselves).
+const injectedPalette = inject(UDI_PALETTE_KEY, null);
+const effectivePalette = computed(() => props.palette ?? injectedPalette?.value);
 
 const representations = computed<RowLayer[] | null>(() => {
   if (!props.spec) return null;
@@ -252,6 +273,8 @@ const colDefs = computed<ColDef[]>(() => {
       cellRendererParams: {
         // pass the representation to the cell renderer
         udiColumnMapping: groupedMapping[key],
+        // forward the consumer palette so cell colors match the charts
+        palette: effectivePalette.value,
       },
       /* eslint-disable  @typescript-eslint/no-explicit-any */
       valueGetter: (params: any) => {
@@ -287,7 +310,7 @@ const colDefs = computed<ColDef[]>(() => {
   <ag-grid-vue
     :rowData="props.data"
     :columnDefs="colDefs"
-    style="height: 500px"
+    :style="props.fillContainer ? { height: '100%' } : { height: '500px' }"
     :rowHeight="20"
   >
   </ag-grid-vue>

@@ -156,5 +156,12 @@ const encodedUrl = computed(() => {
 <style scoped>
 .flex-grow-1 {
   flex-grow: 1;
+  /* The splitter is a flex item with the default min-width:auto. The chart pane
+     contains a Vega view sized to `width:'container'` with autosize 'pad', so the
+     SVG renders a few px wider than the pane each frame; min-width:auto then lets
+     the splitter grow to that content, the ResizeObserver re-measures wider, and
+     it ratchets outward forever. min-width:0 lets q-page shrink the splitter back
+     to the viewport, breaking the loop. */
+  min-width: 0;
 }
 </style>

@@ -950,4 +950,39 @@ export const Lollipop = {
   },
 };
 
+/**
+ * `fillContainer` makes the table fill its parent's height (scrolling
+ * internally) instead of the default fixed 500px. Both UDIVis instances below
+ * sit in the same 220px-tall box: the left one fills it, the right one keeps
+ * its 500px height and overflows the box.
+ */
+export const FillContainer = {
+  render: () => ({
+    components: { UDIVis },
+    setup() {
+      const spec = {
+        source: { name: 'penguins', source: './data/penguins.csv' },
+        representation: {
+          mark: 'row',
+          mapping: [
+            { mark: 'text', field: 'species', encoding: 'text', type: 'nominal' },
+            { mark: 'bar', field: 'body_mass_g', encoding: 'x', type: 'quantitative' },
+          ],
+        },
+      };
+      return { spec };
+    },
+    template: `
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <div style="height:220px; width:300px; border:2px solid #16A987; overflow:hidden;">
+          <UDIVis :spec="spec" :fill-container="true" />
+        </div>
+        <div style="height:220px; width:300px; border:2px dashed #D95838;">
+          <UDIVis :spec="spec" />
+        </div>
+      </div>
+    `,
+  }),
+};
+
 // TODO:  geometry, select, and more x2,y2, point nominal shape, could maybe map size to more things, e.g. line/bar width

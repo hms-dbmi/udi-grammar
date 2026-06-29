@@ -36,12 +36,17 @@ export interface SourceSpec {
 }
 
 export interface LoadDataPackageOptions {
+  // Each field uses `?: T | undefined` (rather than `?: T`) so callers
+  // under `exactOptionalPropertyTypes: true` can spread an explicit
+  // `undefined` (`fetchOptions: cfg.fetchOptions`) without TS rejecting
+  // it. The behavior is identical at runtime — the loader checks each
+  // field with optional chaining.
   /** Forwarded to fetch() for each CSV request. */
-  fetchOptions?: RequestInit;
+  fetchOptions?: RequestInit | undefined;
   /** Called once per entity when its domains have been computed. */
-  onEntityDomains?: (entityName: string, domains: DataFieldDomain[]) => void;
+  onEntityDomains?: ((entityName: string, domains: DataFieldDomain[]) => void) | undefined;
   /** Called when an individual source fails (others continue). */
-  onError?: (entityName: string, message: string) => void;
+  onError?: ((entityName: string, message: string) => void) | undefined;
 }
 
 function inferDelimiter(spec: SourceSpec): string {

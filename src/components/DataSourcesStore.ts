@@ -239,7 +239,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       // the target table (e.g. a brush on one dataset applied to another).
       if (relevantFilter) {
         const cols = new Set(inTable.columnNames());
-        const selectionFields = Object.keys(dataSelection.selection!);
+        // The `if (!dataSelection || !dataSelection.selection)` guard
+        // earlier in the function already narrowed `.selection` to non-
+        // null here — no `!` assertion needed.
+        const selectionFields = Object.keys(dataSelection.selection);
         if (selectionFields.some((f) => !cols.has(f))) {
           return null;
         }
@@ -313,10 +316,13 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
 
   const loading = ref<boolean>(true);
   const selectionHash = ref<string>('');
-  /** Bumped whenever a source's parsed table is replaced, invalidating the
-   *  getDataObject memoization. Plain counter (not a Vue ref) since it's
-   *  only read inside getDataObject — no reactivity needed. */
-  let tablesVersion = 0;
+  /** Bumped whenever a source's parsed table is replaced. Reactive (Vue
+   *  ref) so consumers can watch it for "a new source is now available"
+   *  events — `loading` alone misses the second-of-two concurrent fetches
+   *  (a synchronous `loading.value = false` from a cached-source instance
+   *  can overwrite an in-flight `loading.value = true`, killing the
+   *  transition signal). The cache-key path also reads it. */
+  const tablesVersion = ref(0);
 
   async function initDataSources(
     sources: DataSource[],
@@ -366,7 +372,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       }
       const dest: ColumnTable = await loadCSV(dataSource.source, { delimiter });
       dataSources.value[dataSource.name] = { source: dataSource, dest };
-      tablesVersion++;
+      tablesVersion.value++;
     })();
 
     pendingLoads.set(key, promise);
@@ -389,14 +395,16 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   ): void {
     const source: DataSource = { name, source: url };
     dataSources.value[name] = { source, dest: table };
-    tablesVersion++;
+    tablesVersion.value++;
   }
 
   function getDataSource(key: string): DataInterface | null {
-    if (loading.value) {
-      console.warn('Data sources are still loading');
-      return null;
-    }
+    // Previously bailed on `loading.value` to surface a "still loading"
+    // signal — but the global flag flips false the instant ANY concurrent
+    // initDataSources call finishes (even one for unrelated sources), so
+    // it was both noisy and unreliable. A source's parsed table is
+    // installed atomically in dataSources.value once its fetch resolves,
+    // so the presence check below is the authoritative readiness signal.
     if (!(key in dataSources.value)) return null;
     return dataSources.value[key] ?? null;
   }
@@ -426,7 +434,10 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     allData: object[]; // all data (needed for full domains)
     isDisplayDataSubset: boolean; // true if the returned data is a subset of the full data
   } | null {
-    if (loading.value) return null;
+    // No global `loading` gate here — see getDataSource for the rationale.
+    // A request can succeed as soon as its OWN keys are in dataSources,
+    // regardless of unrelated concurrent fetches. The `namedTables.size`
+    // check below catches the "this request's keys aren't ready yet" case.
 
     // Auto-default displayDataOnly=true when the transformation ends with
     // a rollup. The second pipeline pass (skipNamedFilters: true) on a
@@ -439,7 +450,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
       transformations.length > 0 &&
       'rollup' in (transformations[transformations.length - 1] as object);
     const displayDataOnly = options?.displayDataOnly ?? endsWithRollup;
-    const cacheKey = `${tablesVersion}|${selectionHash.value}|${displayDataOnly ? 'd' : 'a'}|${[...keys].sort().join('\0')}|${JSON.stringify(dataTransformations ?? null)}`;
+    const cacheKey = `${tablesVersion.value}|${selectionHash.value}|${displayDataOnly ? 'd' : 'a'}|${[...keys].sort().join('\0')}|${JSON.stringify(dataTransformations ?? null)}`;
     const cached = getDataObjectCache.get(cacheKey);
     if (cached) {
       // LRU-ish touch: re-insert to mark as most-recently-used.
@@ -463,10 +474,11 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
     };
 
     const namedTables = getNamedTables();
-    // All requested sources may not be loaded yet (e.g. another UDIVis
-    // instance sharing this store triggered the watcher).  Return null
-    // so the caller treats it like "still loading" instead of crashing.
-    if (namedTables.size === 0) return null;
+    // Return null if ANY requested source isn't loaded yet — the caller
+    // (UDIVis) will retry when tablesVersion bumps. Previously this only
+    // checked size === 0, which let partial-data transformations run when
+    // some-but-not-all sources had arrived.
+    if (namedTables.size !== keys.length) return null;
 
     const { data: dataTable, containsNamedFilter } = PerformDataTransformations(
       namedTables,
@@ -857,6 +869,7 @@ export const useDataSourcesStore = defineStore('DataSourcesStore', () => {
   return {
     dataSources,
     loading,
+    tablesVersion,
     selectionHash,
     initDataSources,
     seedDataSource,

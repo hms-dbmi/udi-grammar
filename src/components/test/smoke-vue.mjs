@@ -7,11 +7,11 @@ import { UDIToolkit, UDIVis, TableComponent, VegaLite } from '../dist/index.js';
 import { check } from './check.mjs';
 const errors = [];
 
-check('UDIToolkit', UDIToolkit);
-check('UDIToolkit.install', UDIToolkit?.install);
-check('UDIVis', UDIVis);
-check('TableComponent', TableComponent);
-check('VegaLite', VegaLite);
+check(errors,'UDIToolkit', UDIToolkit);
+check(errors,'UDIToolkit.install', UDIToolkit?.install);
+check(errors,'UDIVis', UDIVis);
+check(errors,'TableComponent', TableComponent);
+check(errors,'VegaLite', VegaLite);
 
 if (errors.length) {
   console.error('Vue build smoke test FAILED:');

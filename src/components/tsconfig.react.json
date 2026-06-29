@@ -8,7 +8,8 @@
     "moduleResolution": "bundler",
     "module": "esnext",
     "target": "es2022",
-    "baseUrl": ".",
+    // `baseUrl` removed — deprecated in TS 6, and we only had the no-op
+    // default here. `paths` would still work tsconfig-relative if added.
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "esModuleInterop": true,

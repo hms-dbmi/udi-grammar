@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, defineEmits, useSlots } from 'vue';
+// `defineEmits` is a compile-time macro in <script setup> — importing it
+// from 'vue' shadows the macro and trips TS 6 with "Import declaration
+// conflicts with local declaration of 'defineEmits'" because Vue's
+// generated types ALSO declare it ambient. Drop the import; the macro is
+// in scope automatically.
+import { ref, computed, watch, onMounted, useSlots, inject } from 'vue';
 import VegaLite from './VegaLite.vue';
 import TableComponent from './TableComponent.vue';
+import { UDI_PALETTE_KEY } from './paletteInjectKey';
 
 // The template root is a fragment (v-if/v-else templates), so Vue can't
 // auto-inherit `class`/`style`/etc. onto a single child. When mounted as
@@ -16,19 +22,41 @@ import type {
   UDIGrammar,
   VisualizationLayer,
 } from './GrammarTypes';
+import type { UDIPalette } from './Palette';
 import type { DataSelections, RangeSelection } from './DataSourcesStore';
 import { useDataSourcesStore } from './DataSourcesStore';
 const dataSourcesStore = useDataSourcesStore();
 import { storeToRefs } from 'pinia';
 import { debounce } from 'lodash';
 
-const { loading, selectionHash } = storeToRefs(dataSourcesStore);
+const { loading, selectionHash, tablesVersion } = storeToRefs(dataSourcesStore);
 
 export interface ParserProps {
   spec: UDIGrammar;
-  selections?: DataSelections;
+  // Optional props use `?: T | undefined` so callers under
+  // `exactOptionalPropertyTypes: true` (e.g. host apps with strict
+  // tsconfigs) can pass an explicit undefined without the compiler
+  // rejecting it. Vue treats both forms the same at runtime.
+  selections?: DataSelections | undefined;
   /** Map entity names to canonical data URLs, overriding whatever the spec contains. */
-  sourceResolver?: Record<string, string>;
+  sourceResolver?: Record<string, string> | undefined;
+  /**
+   * Make the chart fill its parent container (both width and height) and
+   * resize when the container changes. Sets Vega-Lite `width: 'container'`,
+   * `height: 'container'`, and `autosize: { type: 'fit', contains: 'padding' }`.
+   *
+   * Requires the parent to have a definite height. Default: false (chart
+   * renders at its natural height).
+   */
+  fillContainer?: boolean | undefined;
+  /**
+   * Consumer-supplied default color palette for charts and tables. Sets the
+   * categorical colors, ordinal colors, single mark color, and continuous
+   * (numeric) color ramp. A spec-level per-encoding `range` still overrides
+   * it. Passed as a separate prop — not part of the spec — so a function-
+   * valued ramp survives (the spec is JSON-cloned internally).
+   */
+  palette?: UDIPalette | undefined;
 }
 
 // Expose data selections to parent component
@@ -45,6 +73,13 @@ const emit = defineEmits<{
 }>();
 
 const props = defineProps<ParserProps>();
+
+// Palette fallback chain: own prop → UDIToolkitProvider's injected palette →
+// undefined (VegaLite/TableComponent fall back to DEFAULT_PALETTE per channel
+// internally). The injected value is a Ref so prop swaps at the provider
+// propagate without a manual re-render here.
+const injectedPalette = inject(UDI_PALETTE_KEY, null);
+const effectivePalette = computed(() => props.palette ?? injectedPalette?.value);
 
 const parsedSpec = ref<ParsedUDIGrammar | null>(null);
 // Per-instance flag: true once this instance's own data sources have been
@@ -113,6 +148,13 @@ watch(
   { deep: true },
 );
 
+// Rebuild the Vega-Lite spec when `fillContainer` toggles so the
+// height/autosize entries get added or removed accordingly.
+watch(
+  () => props.fillContainer,
+  () => buildVisualization(),
+);
+
 watch(selectionHash, () => {
   // console.log('UDI-VIS: SelectionHash changed');
   const currentDataSelections = dataSourcesStore.dataSelections;
@@ -130,7 +172,14 @@ const debouncedBuildVisualization = debounce(
   debounceValue.value,
 );
 
-watch([loading, selectionHash], () => {
+// Also watch `tablesVersion` — bumped every time a source's parsed table
+// is installed in the store. Catches the case where loading.value has
+// already flipped false (because another instance's cached-source call
+// raced ahead) but THIS instance's required source has only just arrived.
+// Without this, getDataObject would return null on first buildVisualization
+// and there'd be no trigger for the retry, leaving the chart stuck on
+// "Loading..." until the user toggles table-view.
+watch([loading, selectionHash, tablesVersion], () => {
   // Don't react to store-wide loading changes until this instance's own
   // data sources have been loaded (see instanceReady above).
   if (!instanceReady.value) return;
@@ -258,7 +307,9 @@ function setDefaultDomains(
         // anchored. Skip the partner encoding (x2/y2) — it shares the
         // x/y scale and doesn't need its own domain.
         if (mark === 'rect') {
-          // @ts-expect-error: encoding is statically known
+          // TS 6 can infer `encoding` here without the previous
+          // `@ts-expect-error: encoding is statically known` escape; the
+          // unused directive was tripping TS2578 under the upgrade.
           const encoding: string = mapping.encoding;
           if (encoding === 'x2' || encoding === 'y2') continue;
           const partnerEncoding =
@@ -441,9 +492,22 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
     $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
     // data: { url: './data/penguins.csv' },
     width: 'container',
-    // height: 'container',
+    // fit-x makes the `width` signal mean the TOTAL width (axes included),
+    // so scheduleVegaResize writing offsetWidth into it lines up exactly with
+    // the container. Without this, Vega-Lite defaults to autosize 'pad' where
+    // `width` is only the data area and axis padding is added outside it — the
+    // signal write then overshoots, the SVG overflows the container, and tick
+    // labels lay out for the wrong width (irregular spacing + flicker on resize).
+    autosize: { type: 'fit-x', contains: 'padding' },
     data: { name: 'udi_data', values: [] },
   };
+  if (props.fillContainer) {
+    // Make the chart resize to fit BOTH dimensions of its container. The
+    // `fit` autosize type instructs Vega-Lite to shrink the plot area so
+    // axes/title/legend fit inside the given width × height.
+    vegaSpec.height = 'container';
+    vegaSpec.autosize = { type: 'fit', contains: 'padding' };
+  }
 
   // add data. Don't reset transformError here — performDataTransformation
   // owns it, and resetting would swallow an error set earlier in this
@@ -549,8 +613,15 @@ function convertToVegaSpec(spec: ParsedUDIGrammar): string {
       //   // selectParam.select['encodings'] = 'sex';
       // }
 
+      // `DataSelection` doesn't carry a `source` field — the spec author
+      // doesn't bind a selection to a specific data source directly. We
+      // associate it with the spec's primary source (the first entry of
+      // `spec.source`, which is guaranteed by `parseSpecification` to be
+      // an array). Previously this read `layer.select.source` which was
+      // always `undefined` at runtime; using the spec's source gives the
+      // store a meaningful key for selection bookkeeping.
       dataSourcesStore.watchDataSelection(
-        layer.select.source,
+        spec.source[0]?.name ?? '',
         layer.select.name,
         layer.select.how.type, // TODO: set point if needed
       );
@@ -663,10 +734,16 @@ const slots = useSlots();
         :signal-field-map="signalFieldMap"
         :point-select="pointSelect"
         :selections="props.selections"
+        :palette="effectivePalette"
       />
     </template>
     <template v-else>
-      <TableComponent :data="transformedData" :spec="parsedSpec" />
+      <TableComponent
+        :data="transformedData"
+        :spec="parsedSpec"
+        :palette="effectivePalette"
+        :fill-container="props.fillContainer"
+      />
     </template>
   </template>
   <template v-else>

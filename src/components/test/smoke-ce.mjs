@@ -12,7 +12,7 @@ import { check } from './check.mjs';
 
 const errors = [];
 
-check('UDIVisElement', UDIVisElement);
+check(errors, 'UDIVisElement', UDIVisElement);
 
 if (typeof UDIVisElement !== 'function') {
   errors.push(`UDIVisElement should be a function/class, got ${typeof UDIVisElement}`);

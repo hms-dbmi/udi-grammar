@@ -12,11 +12,16 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      // React is external — consumers have it.
-      // Heavy viz deps are external — same as the CE build.
-      // Vue and Pinia are bundled (via ce-entry → UDIVis.vue chain).
+      // React is external — consumers have it. Also externalize the JSX
+      // runtime subpaths so vite/rolldown doesn't try to bundle them
+      // (UDIToolkitProvider.tsx uses JSX, which the `react-jsx` transform
+      // emits as `import { jsx } from 'react/jsx-runtime'`). Heavy viz
+      // deps are external — same as the CE build. Vue and Pinia are
+      // bundled (via ce-entry → UDIVis.vue chain).
       external: [
         'react',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
         'arquero',
         'vega',
         'vega-embed',

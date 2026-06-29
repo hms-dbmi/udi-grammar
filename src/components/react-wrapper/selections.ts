@@ -3,9 +3,12 @@
  * / loadDataPackage) and delegate to the shared Pinia DataSourcesStore.
  */
 
-let cachedImpl: typeof import('../ce-entry') | null = null;
+import type * as CEEntry from '../ce-entry';
+import type { DataSelections } from '../DataSourcesStore';
 
-async function getImpl(): Promise<typeof import('../ce-entry')> {
+let cachedImpl: typeof CEEntry | null = null;
+
+async function getImpl(): Promise<typeof CEEntry> {
   if (!cachedImpl) {
     cachedImpl = await import('../ce-entry');
   }
@@ -32,4 +35,18 @@ export async function subscribeToSelections(
 export async function clearAllSelections(): Promise<void> {
   const impl = await getImpl();
   impl.clearAllSelections();
+}
+
+/**
+ * Snapshot of the current selection state. Resolves to a reference-stable
+ * object that only changes when `selectionHash` flips — safe to use as the
+ * `getSnapshot` half of a `useSyncExternalStore` pair.
+ *
+ * Lazy because the Pinia store loads on first call; once initialized, the
+ * underlying read is synchronous. Subsequent calls still return promises
+ * (the API surface stays uniform) and remain effectively instant.
+ */
+export async function getDataSelections(): Promise<DataSelections> {
+  const impl = await getImpl();
+  return impl.getDataSelections();
 }
