@@ -18,6 +18,11 @@ export default [
     ignores: [
       'src/components/index.ts',
       'src/components/dist',
+      // Hand-written declaration file whose types import from the gitignored
+      // ./dist build output. On a fresh clone (no toolkit build yet) those
+      // imports resolve to "any" error types, tripping no-redundant-type-
+      // constituents. Nothing to lint here — it's published build surface.
+      'src/components/ce.d.ts',
       'src/components/node_modules',
       // The React-wrapper subpath has its own tsconfig (tsconfig.react.json)
       // that the Quasar root tsconfig doesn't reference. The
