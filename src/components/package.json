@@ -1,6 +1,6 @@
 {
   "name": "udi-toolkit",
-  "version": "0.0.67",
+  "version": "0.0.68",
   "description": "Universal Discovery Interface Toolkit",
   "author": "dev-lan <devinscottlange@gmail.com>",
   "type": "module",
@@ -45,6 +45,7 @@
     "build:ce": "vite build --config vite.config.ce.ts",
     "build:react": "vite build --config vite.config.react.ts",
     "build:all": "npm run build && npm run build:ce && npm run build:react",
+    "prepublishOnly": "npm run build:all",
     "npm-publish": "npm publish --access public"
   },
   "dependencies": {
