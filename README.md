@@ -1,6 +1,6 @@
 > [!warning]
 > ## 🚚 This repository has moved!
-> Development now happens in the **[new-monorepo](https://github.com/hms-dbmi/udi-yac)** — specifically under [`packages/grammar`](https://github.com/hms-dbmi/udi-yac/tree/main/packages/grammar).
+> Development now happens in the **[udi-yac](https://github.com/hms-dbmi/udi-yac)** — specifically under [`packages/grammar`](https://github.com/hms-dbmi/udi-yac/tree/main/packages/grammar).
 >
 > This repo is archived and no longer maintained. Please open issues and PRs in the new location.
 
